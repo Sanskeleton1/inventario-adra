@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ADRA - Gestión Integral</title>
+  <title>ADRA - Sistema Autónomo de Logística Humanitaria (SALH)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --primary: #008559;
       --primary-dark: #006040;
+      --accent: #2563eb;
       --bg-color: #f4f7f6;
-      --sidebar-width: 240px;
+      --sidebar-width: 260px;
       --text-color: #333;
-      --blue-card: #2e6b9e;
-      --green-card: #4a7c59;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); display: flex; min-height: 100vh; }
@@ -21,58 +20,70 @@
     /* Login Screen */
     #login-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #008559; display: flex; justify-content: center; align-items: center; z-index: 1000;
+      background: linear-gradient(135deg, #008559 0%, #004d33 100%); display: flex; justify-content: center; align-items: center; z-index: 1000;
     }
     .login-card {
-      background: #fff; padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15); text-align: center;
+      background: #fff; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2); text-align: center;
     }
-    .login-card h2 { color: var(--primary); margin-bottom: 0.5rem; }
-    .form-group { margin-bottom: 1rem; text-align: left; }
-    .form-group label { font-size: 0.85rem; font-weight: 600; color: #666; display: block; margin-bottom: 0.3rem; }
+    .login-card h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; }
+    .form-group { margin-bottom: 1.2rem; text-align: left; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: #555; display: block; margin-bottom: 0.3rem; }
     .form-group input, .form-group select {
-      width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; outline: none;
+      width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 0.95rem;
     }
     .btn {
       padding: 0.75rem 1.2rem; background: var(--primary); color: #fff; border: none;
-      border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+      border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s, transform 0.1s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     }
     .btn:hover { background: var(--primary-dark); }
+    .btn:active { transform: scale(0.98); }
     .btn-block { width: 100%; }
-    .error-box { background: #ffebee; color: #c62828; padding: 0.5rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; display: none; }
+    .btn-secondary { background: #64748b; color: #fff; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #1d4ed8; }
 
     /* Layout Principal */
     #app-screen { display: flex; width: 100%; }
     sidebar {
       width: var(--sidebar-width); background: #1b2a26; color: #fff; min-height: 100vh; padding: 1.5rem 1rem;
+      display: flex; flex-direction: column; justify-content: space-between;
     }
     sidebar .brand { font-size: 1.3rem; font-weight: bold; color: #4caf50; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
     sidebar nav ul { list-style: none; }
     sidebar nav li { margin-bottom: 0.5rem; }
     sidebar nav a {
-      color: #b0bec5; text-decoration: none; padding: 0.75rem 1rem; border-radius: 6px; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; cursor: pointer;
+      color: #b0bec5; text-decoration: none; padding: 0.75rem 1rem; border-radius: 6px; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; cursor: pointer; font-size: 0.9rem;
     }
     sidebar nav a:hover, sidebar nav a.active { background: var(--primary); color: #fff; }
 
-    main { flex: 1; padding: 2rem; overflow-y: auto; }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .user-profile { font-weight: 600; color: #555; }
+    .offline-badge {
+      background: rgba(255,255,255,0.1); padding: 0.6rem; border-radius: 6px; font-size: 0.75rem; text-align: center; color: #a5d6a7; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+
+    main { flex: 1; padding: 2rem; overflow-y: auto; max-height: 100vh; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 1rem; }
+    .user-profile { font-weight: 600; color: #555; display: flex; align-items: center; gap: 0.5rem; }
 
     /* Metric Cards */
-    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .card .title { font-size: 0.85rem; color: #777; margin-bottom: 0.5rem; }
-    .card .value { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
+    .card.blue { border-left-color: var(--accent); }
+    .card.orange { border-left-color: #f59e0b; }
+    .card.purple { border-left-color: #7c3aed; }
+    .card .title { font-size: 0.85rem; color: #777; margin-bottom: 0.5rem; font-weight: 600; }
+    .card .value { font-size: 1.8rem; font-weight: bold; color: var(--text-color); }
 
     /* Secciones Interactivas */
     .view-section { display: none; }
     .view-section.active { display: block; }
 
     /* Table Styling & Controls */
-    .table-container { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .table-container { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
     .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
     
-    /* Barra de Búsqueda */
     .search-box {
       display: flex; align-items: center; background: #f0f4f2; border: 1px solid #dcdcdc;
       border-radius: 6px; padding: 0.5rem 0.8rem; width: 100%; max-width: 320px;
@@ -80,51 +91,48 @@
     .search-box i { color: #888; margin-right: 0.5rem; }
     .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 0.9rem; }
 
-    /* Tabs de Inventario */
-    .tabs-container { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #eee; overflow-x: auto; padding-bottom: 2px; }
-    .tab-btn {
-      padding: 0.6rem 1rem; background: transparent; border: none; font-weight: 600;
-      color: #666; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; white-space: nowrap;
-    }
-    .tab-btn:hover { color: var(--primary); }
-    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-
     table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
     th, td { text-align: left; padding: 0.85rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
     th { background: #fafafa; color: #666; font-weight: 600; }
     .badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
     .badge-ok { background: #e8f5e9; color: #2e7d32; }
     .badge-alert { background: #ffebee; color: #c62828; }
-    .badge-cat { background: #e3f2fd; color: #1565c0; margin-left: 0.3rem; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-    /* Estilos del Módulo SINCRONÍA (SIN BARRA MARRÓN) */
-    .sincronia-wrapper {
-      background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    /* SALH Panel Específico */
+    .salh-panel { background: linear-gradient(135deg, #004d33 0%, #008559 100%); color: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    .salh-panel h3 { font-size: 1.4rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.7rem; }
+    .salh-panel p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 1.5rem; max-width: 700px; }
+    .crisis-triggers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .crisis-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 1rem; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; text-align: left; transition: 0.2s;
     }
-    .sincronia-container {
-      margin-top: 1.5rem; width: 100%;
-    }
-    .sincronia-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; width: 100%;
-    }
-    .sync-card {
-      color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;
-      font-weight: bold; font-size: 1.05rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-      display: flex; align-items: center; justify-content: center; gap: 0.8rem; min-height: 65px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .sync-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-    .sync-blue { background-color: var(--blue-card); }
-    .sync-green { background-color: var(--green-card); }
+    .crisis-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+    .crisis-btn i { font-size: 1.2rem; margin-bottom: 0.5rem; display: block; color: #a5d6a7; }
 
     /* Modal Overlay */
+    .hidden { display: none !important; }
     .modal-overlay {
-      position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5);
-      display: none; justify-content: center; align-items: center; z-index: 2000;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
+      display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 1rem;
     }
-    .modal-card { background: #fff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; }
+    .modal-card { background: #fff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     .modal-close { cursor: pointer; font-size: 1.2rem; color: #888; }
+    
+    /* Checklist Custom Styles */
+    .checklist-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin: 1rem 0; }
+    @media (min-width: 640px) { .checklist-grid { grid-template-columns: 1fr 1fr; } }
+    .chk-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; background: #f8fafc; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; }
+    .progress-bar-bg { background-color: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem; }
+    .bg-amber-500 { background-color: #f59e0b; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-emerald-600 { background-color: #059669; }
+    .transition-all { transition: all 0.3s ease; }
+    .h-full { height: 100%; }
+
+    /* Log de ejecución autónoma */
+    .log-terminal { background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 180px; overflow-y: auto; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -132,19 +140,18 @@
   <!-- LOGIN -->
   <div id="login-screen">
     <div class="login-card">
-      <h2><i class="fa-solid fa-hand-holding-heart"></i> ADRA Gestión</h2>
-      <p style="color:#777; font-size: 0.85rem; margin-bottom: 1.5rem;">Inicia sesión para continuar</p>
-      <div id="login-error" class="error-box"></div>
+      <h2><i class="fa-solid fa-brain"></i> SALH - ADRA</h2>
+      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Sistema Autónomo de Logística Humanitaria</p>
       <form id="login-form">
         <div class="form-group">
-          <label>Correo Electrónico</label>
-          <input type="email" id="correo" value="admin@adra.org" required>
+          <label>Credencial de Acceso</label>
+          <input type="email" id="correo" value="salh.admin@adra.org" required>
         </div>
         <div class="form-group">
-          <label>Contraseña</label>
-          <input type="password" id="password" value="admin123" required>
+          <label>Clave de Seguridad</label>
+          <input type="password" id="password" value="adra2026" required>
         </div>
-        <button type="submit" class="btn btn-block">Ingresar al Sistema</button>
+        <button type="submit" class="btn btn-block">Iniciar Sesión Segura</button>
       </form>
     </div>
   </div>
@@ -152,102 +159,102 @@
   <!-- SISTEMA PRINCIPAL -->
   <div id="app-screen" style="display: none;">
     <sidebar>
-      <div class="brand">
-        <i class="fa-solid fa-hand-holding-heart"></i> ADRA Sistema
+      <div>
+        <div class="brand">
+          <i class="fa-solid fa-network-wired"></i> SALH Core
+        </div>
+        <nav>
+          <ul>
+            <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard Central</a></li>
+            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Motor Autónomo (SALH)</a></li>
+            <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén & Stock</a></li>
+            <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes de Compra</a></li>
+            <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón & Traza-14</a></li>
+          </ul>
+        </nav>
       </div>
-      <nav>
-        <ul>
-          <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
-          <li><a onclick="showSection('sec-sincronia')" id="nav-sincronia"><i class="fa-solid fa-diagram-project"></i> Sincronía</a></li>
-          <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Inventario</a></li>
-          <li><a onclick="showSection('sec-rrhh')" id="nav-rrhh"><i class="fa-solid fa-user-group"></i> Recursos Humanos</a></li>
-          <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users"></i> Beneficiarios</a></li>
-        </ul>
-      </nav>
+      <div class="offline-badge">
+        <i class="fa-solid fa-wifi" id="sync-icon"></i> <span id="sync-text">Modo Local SQLite Activo</span>
+      </div>
     </sidebar>
 
     <main>
       <header>
-        <h2 id="section-title">Panel de Control - Humanitario</h2>
+        <h2 id="section-title">Dashboard Central y Métricas en Tiempo Real</h2>
         <div class="user-profile" id="user-display">
-          <i class="fa-solid fa-circle-user"></i> Administrador
+          <i class="fa-solid fa-user-shield"></i> Operador SALH
         </div>
       </header>
 
-      <!-- SECCIÓN 1: DASHBOARD -->
+      <!-- SECCIÓN: DASHBOARD -->
       <section id="sec-dashboard" class="view-section active">
         <div class="metrics-grid">
           <div class="card">
-            <div class="title">Total Insumos / Artículos</div>
-            <div class="value" id="metric-total">0</div>
+            <div class="title">Insumos Registrados</div>
+            <div class="value" id="m-total-insumos">0</div>
           </div>
-          <div class="card">
-            <div class="title">Stock Crítico (Alertas)</div>
-            <div class="value" style="color: #c62828;" id="metric-critico">0</div>
+          <div class="card orange">
+            <div class="title">Alertas de Stock Crítico</div>
+            <div class="value" style="color: #d97706;" id="m-criticos">0</div>
           </div>
-          <div class="card">
-            <div class="title">Personal / Voluntarios Activos</div>
-            <div class="value" style="color: #0288d1;" id="metric-personal">0</div>
+          <div class="card blue">
+            <div class="title">Órdenes Automáticas (OC)</div>
+            <div class="value" style="color: #2563eb;" id="m-ocs">0</div>
           </div>
-          <div class="card">
-            <div class="title">Beneficiarios Registrados</div>
-            <div class="value" style="color: #7b1fa2;" id="metric-beneficiarios">0</div>
+          <div class="card purple">
+            <div class="title">Beneficiarios Activos</div>
+            <div class="value" style="color: #7c3aed;" id="m-beneficiarios">0</div>
           </div>
         </div>
 
         <div class="table-container">
           <div class="table-header">
-            <h3>Resumen de Inventario General</h3>
+            <h3>Estado del Inventario Global</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'dash-inventario-table')">
+              <input type="text" placeholder="Filtrar inventario..." onkeyup="filterTable(this, 'dash-table')">
             </div>
           </div>
           <table>
             <thead>
-              <tr><th>Insumo</th><th>Tipo</th><th>Cantidad</th><th>Ubicación</th><th>Estado</th></tr>
+              <tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén Asignado</th><th>Estatus SALH</th></tr>
             </thead>
-            <tbody id="dash-inventario-table"></tbody>
+            <tbody id="dash-table"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- SECCIÓN SINCRONÍA OPERATIVA -->
-      <section id="sec-sincronia" class="view-section">
-        <div class="sincronia-wrapper">
-          <div class="table-header">
-            <div>
-              <h3>Estructura Organizacional y Operativa - SINCRONÍA</h3>
-              <p style="color: #666; font-size: 0.85rem;">Selecciona un área operativa para acceder directamente a su gestión</p>
-            </div>
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Buscar área operativa..." onkeyup="filterSyncCards(this)">
-            </div>
+      <!-- SECCIÓN: MOTOR AUTÓNOMO SALH -->
+      <section id="sec-salh" class="view-section">
+        <div class="salh-panel">
+          <h3><i class="fa-solid fa-microchip"></i> Orquestador Predictivo de Emergencia (SALH)</h3>
+          <p>Selecciona una situación de crisis inminente. El sistema calculará de forma completamente autónoma los insumos necesarios, emitirá las órdenes de compra al proveedor óptimo y autocompletará las fichas de entrega y padrones comunitarios sin intervención manual tediosa.</p>
+          
+          <div class="crisis-triggers">
+            <button class="crisis-btn" onclick="ejecutarSALHEmergency('Inundación Severa en Zona Alta', 150)">
+              <i class="fa-solid fa-house-flood-water"></i>
+              Inundación Severa (150 Familias)
+            </button>
+            <button class="crisis-btn" onclick="ejecutarSALHEmergency('Crisis Alimentaria Comunitaria', 300)">
+              <i class="fa-solid fa-bowl-food"></i>
+              Crisis Alimentaria (300 Kits)
+            </button>
+            <button class="crisis-btn" onclick="ejecutarSALHEmergency('Apoyo Médico de Urgencia', 80)">
+              <i class="fa-solid fa-kit-medical"></i>
+              Emergencia Médica (80 Kits)
+            </button>
           </div>
+        </div>
 
-          <div class="sincronia-container">
-            <div class="sincronia-grid" id="sync-cards-container">
-              <div class="sync-card sync-blue" onclick="showSection('sec-sincronia')"><i class="fa-solid fa-map-location-dot"></i> ESTADOS</div>
-              <div class="sync-card sync-green" onclick="showSection('sec-beneficiarios')"><i class="fa-solid fa-house-chimney-window"></i> COMUNIDADES</div>
-
-              <div class="sync-card sync-blue" onclick="showSection('sec-rrhh')"><i class="fa-solid fa-hand-holding-hand"></i> VOLUNTARIOS</div>
-              <div class="sync-card sync-green" onclick="filterInventoryTab('comida')"><i class="fa-solid fa-utensils"></i> REFRIGERIOS</div>
-
-              <div class="sync-card sync-blue" onclick="filterInventoryTab('implementacion')"><i class="fa-solid fa-screwdriver-wrench"></i> EQUIPOS IMPLEMENTACION</div>
-              <div class="sync-card sync-green" onclick="filterInventoryTab('transporte')"><i class="fa-solid fa-truck-fast"></i> TRANSPORTE</div>
-
-              <div class="sync-card sync-blue" onclick="showSection('sec-rrhh')"><i class="fa-solid fa-bullhorn"></i> VISIBILIDAD INTERNA Y EXTERNA</div>
-              <div class="sync-card sync-green" onclick="showSection('sec-inventario')"><i class="fa-solid fa-store"></i> PROVEEDORES</div>
-
-              <div class="sync-card sync-blue" onclick="filterInventoryTab('tecnologia')"><i class="fa-solid fa-laptop-code"></i> EQUIPOS TECNOLOGICOS</div>
-              <div></div>
-            </div>
+        <div class="table-container">
+          <h3>Consola de Ejecución Autónoma y Trazabilidad</h3>
+          <div class="log-terminal" id="salh-terminal">
+            [SALH_CORE] Sistema listo. Esperando eventos de crisis para automatización logística...
           </div>
         </div>
       </section>
 
-      <!-- SECCIÓN 2: INVENTARIO (CON NUEVAS PESTAÑAS DEDICADAS) -->
+      <!-- SECCIÓN: INVENTARIO -->
       <section id="sec-inventario" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -256,61 +263,52 @@
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'full-inventario-table')">
             </div>
-            <button class="btn" onclick="openModal('modal-insumo')"><i class="fa-solid fa-plus"></i> Registrar Insumo</button>
+            <button class="btn" onclick="openModal('modal-insumo')"><i class="fa-solid fa-plus"></i> Registrar Ítem</button>
           </div>
-
-          <!-- Pestañas Específicas de Inventario -->
-          <div class="tabs-container">
-            <button class="tab-btn active" id="tab-todos" onclick="switchInventoryTab('todos')"><i class="fa-solid fa-boxes-stacked"></i> Todos</button>
-            <button class="tab-btn" id="tab-comida" onclick="switchInventoryTab('comida')"><i class="fa-solid fa-utensils"></i> Alimentos / Refrigerios</button>
-            <button class="tab-btn" id="tab-transporte" onclick="switchInventoryTab('transporte')"><i class="fa-solid fa-truck-fast"></i> Transporte</button>
-            <button class="tab-btn" id="tab-tecnologia" onclick="switchInventoryTab('tecnologia')"><i class="fa-solid fa-laptop-code"></i> Equipos Tecnológicos</button>
-            <button class="tab-btn" id="tab-implementacion" onclick="switchInventoryTab('implementacion')"><i class="fa-solid fa-screwdriver-wrench"></i> Equipos de Implementación</button>
-          </div>
-
           <table>
             <thead>
-              <tr><th>Insumo</th><th>Tipo / Categoría</th><th>Cantidad</th><th>Ubicación</th><th>Estado</th></tr>
+              <tr><th>Insumo</th><th>Categoría</th><th>Cantidad</th><th>Ubicación</th><th>Estado</th></tr>
             </thead>
             <tbody id="full-inventario-table"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- SECCIÓN 3: RECURSOS HUMANOS -->
-      <section id="sec-rrhh" class="view-section">
+      <!-- SECCIÓN: ÓRDENES DE COMPRA -->
+      <section id="sec-proveedores" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Personal y Voluntariado ADRA</h3>
+            <h3>Órdenes de Compra Generadas Automáticamente</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Buscar por cédula, nombre..." onkeyup="filterTable(this, 'rrhh-table')">
+              <input type="text" placeholder="Buscar orden..." onkeyup="filterTable(this, 'oc-table')">
             </div>
-            <button class="btn" onclick="openModal('modal-personal')"><i class="fa-solid fa-user-plus"></i> Registrar Personal</button>
           </div>
           <table>
             <thead>
-              <tr><th>Documento / Cédula</th><th>Nombre Completo</th><th>Cargo</th><th>Área</th><th>Teléfono</th><th>Estado</th></tr>
+              <tr><th>N° OC</th><th>Proveedor Asignado</th><th>Insumos Solicitados</th><th>Costo Estimado</th><th>Estatus</th></tr>
             </thead>
-            <tbody id="rrhh-table"></tbody>
+            <tbody id="oc-table"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- SECCIÓN 4: BENEFICIARIOS -->
+      <!-- SECCIÓN: BENEFICIARIOS Y TRAZA-14 -->
       <section id="sec-beneficiarios" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Padrón de Beneficiarios</h3>
+            <h3>Padrón de Beneficiarios (Motor Documental Traza-14)</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Buscar beneficiario..." onkeyup="filterTable(this, 'beneficiarios-table')">
             </div>
-            <button class="btn" onclick="openModal('modal-beneficiario')"><i class="fa-solid fa-plus"></i> Nuevo Beneficiario</button>
+            <button class="btn btn-accent" onclick="openModal('modal-beneficiario')">
+              <i class="fa-solid fa-camera"></i> Nuevo con Ingesta OCR / Auto
+            </button>
           </div>
           <table>
             <thead>
-              <tr><th>Documento</th><th>Nombre</th><th>Comunidad</th><th>Carga Familiar</th><th>Teléfono</th></tr>
+              <tr><th>Cédula</th><th>Nombre</th><th>Comunidad</th><th>Carga Familiar</th><th>Traza-14 (Progreso)</th><th>Acción</th></tr>
             </thead>
             <tbody id="beneficiarios-table"></tbody>
           </table>
@@ -321,275 +319,337 @@
   </div>
 
   <!-- MODAL: NUEVO INSUMO -->
-  <div id="modal-insumo" class="modal-overlay">
+  <div id="modal-insumo" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Registrar Insumo</h3>
+        <h3>Registrar Nuevo Insumo</h3>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i>
       </div>
       <form id="form-insumo">
-        <div class="form-group">
-          <label>Tipo de Insumo</label>
-          <select id="ins-tipo" required>
-            <option value="comida">Alimentos / Refrigerios</option>
-            <option value="transporte">Transporte / Vehículos / Repuestos</option>
-            <option value="tecnologia">Equipos Tecnológicos</option>
-            <option value="implementacion">Equipos de Implementación / Herramientas</option>
-            <option value="objetos">Otros Objetos / Insumos Varios</option>
-          </select>
-        </div>
         <div class="form-group"><label>Nombre del Insumo</label><input type="text" id="ins-nombre" required></div>
-        <div class="form-group"><label>Categoría Específica</label><input type="text" id="ins-categoria" placeholder="Ej. Laptops, Repuestos, Granos" required></div>
-        <div class="form-group"><label>Cantidad</label><input type="number" id="ins-cantidad" required></div>
-        <div class="form-group"><label>Unidad de Medida</label><input type="text" id="ins-unidad" placeholder="Unidades, Kits, Piezas, Kg" required></div>
-        <div class="form-group"><label>Ubicación / Almacén</label><input type="text" id="ins-ubicacion"></div>
-        <button type="submit" class="btn btn-block">Guardar Insumo</button>
+        <div class="form-group"><label>Categoría</label><input type="text" id="ins-categoria" placeholder="Ej. Alimentos, Medicina, Herramienta" required></div>
+        <div class="form-group"><label>Cantidad Inicial</label><input type="number" id="ins-cantidad" required></div>
+        <div class="form-group"><label>Almacén / Ubicación</label><input type="text" id="ins-ubicacion" required></div>
+        <button type="submit" class="btn btn-block">Guardar en Base Local</button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: NUEVO PERSONAL (RRHH) -->
-  <div id="modal-personal" class="modal-overlay">
+  <!-- MODAL: NUEVO BENEFICIARIO CON SIMULACIÓN OCR -->
+  <div id="modal-beneficiario" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Registrar Miembro del Personal</h3>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-personal')"></i>
+        <h3>Registro de Beneficiario con Ingesta Automática (OCR)</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i>
       </div>
-      <form id="form-personal">
-        <div class="form-group"><label>Cédula / Documento</label><input type="text" id="per-doc" required></div>
-        <div class="form-group"><label>Nombre Completo</label><input type="text" id="per-nombre" required></div>
-        <div class="form-group"><label>Cargo</label><input type="text" id="per-cargo" placeholder="Coordinador, Voluntario" required></div>
-        <div class="form-group"><label>Área / Proyecto</label><input type="text" id="per-area" required></div>
-        <div class="form-group"><label>Teléfono</label><input type="text" id="per-tel"></div>
-        <button type="submit" class="btn btn-block">Guardar Personal</button>
+      <div style="margin-bottom: 1rem;">
+        <button type="button" class="btn btn-accent btn-block" onclick="simularLecturaOCR()">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Simular Escaneo Automático de Cédula (Carga Instantánea)
+        </button>
+      </div>
+      <form id="form-beneficiario">
+        <div class="form-group"><label>Cédula / Documento</label><input type="text" id="ben-doc" required></div>
+        <div class="form-group"><label>Nombre Completo</label><input type="text" id="ben-nombre" required></div>
+        <div class="form-group"><label>Comunidad / Sector</label><input type="text" id="ben-comunidad" required></div>
+        <div class="form-group"><label>Carga Familiar</label><input type="number" id="ben-familiares" value="1" min="1" required></div>
+        <button type="submit" class="btn btn-block">Guardar y Autocompletar Traza-14</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CHECKLIST TRAZA-14 -->
+  <div id="modalChecklist14" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <h3>Motor Documental Traza-14</h3>
+          <p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p>
+        </div>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+          <span>Progreso Automatizado:</span>
+          <strong id="porcentajeProgresoText">0% (0/14)</strong>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="barraProgreso14" class="h-full bg-amber-500 transition-all" style="width: 0%;"></div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-block" style="margin-top: 0.5rem; font-size: 0.8rem;" onclick="autocompletarTraza14PorIA()">
+          <i class="fa-solid fa-bolt"></i> Autocompletar 14 Documentos por Validación de Contexto
+        </button>
+      </div>
+
+      <div class="checklist-grid" id="contenedorHitos14">
+        <label class="chk-item"><input type="checkbox" data-hic="1"> 1. Documento Identidad</label>
+        <label class="chk-item"><input type="checkbox" data-hic="2"> 2. RIF Vigente</label>
+        <label class="chk-item"><input type="checkbox" data-hic="3"> 3. Constancia Residencial</label>
+        <label class="chk-item"><input type="checkbox" data-hic="4"> 4. Carta de Solicitud</label>
+        <label class="chk-item"><input type="checkbox" data-hic="5"> 5. Certificado Médico</label>
+        <label class="chk-item"><input type="checkbox" data-hic="6"> 6. Informe Social</label>
+        <label class="chk-item"><input type="checkbox" data-hic="7"> 7. Presupuesto Formal</label>
+        <label class="chk-item"><input type="checkbox" data-hic="8"> 8. Fotos de Soporte</label>
+        <label class="chk-item"><input type="checkbox" data-hic="9"> 9. Planilla de Registro</label>
+        <label class="chk-item"><input type="checkbox" data-hic="10"> 10. Carta de Compromiso</label>
+        <label class="chk-item"><input type="checkbox" data-hic="11"> 11. Referencia Personal</label>
+        <label class="chk-item"><input type="checkbox" data-hic="12"> 12. Inspección Técnica</label>
+        <label class="chk-item"><input type="checkbox" data-hic="13"> 13. Aprobación Comité</label>
+        <label class="chk-item"><input type="checkbox" data-hic="14"> 14. Acta Entregable</label>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button>
+        <button type="button" class="btn" onclick="guardarProgresoChecklist()">Guardar Cambios</button>
+      </div>
     </div>
   </div>
 
   <script>
-    let cacheInventario = [];
-    const loginForm = document.getElementById('login-form');
-    const loginScreen = document.getElementById('login-screen');
-    const appScreen = document.getElementById('app-screen');
+    // Estado local persistente (Simulando IndexedDB / SQLite Offline-first)
+    let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
+      { id: 1, nombre: 'Kit de Alimentos 20Kg', categoria: 'Alimentos', cantidad: 15, ubicacion: 'Almacén Central', stock_minimo: 30 },
+      { id: 2, nombre: 'Filtros de Agua Potable', categoria: 'Implementación', cantidad: 8, ubicacion: 'Almacén Regional', stock_minimo: 20 },
+      { id: 3, nombre: 'Kits Médicos de Emergencia', categoria: 'Medicina', cantidad: 5, ubicacion: 'Almacén Central', stock_minimo: 15 }
+    ];
 
-    // LOGIN
-    loginForm.addEventListener('submit', async (e) => {
+    let cacheBeneficiarios = JSON.parse(localStorage.getItem('salh_beneficiarios')) || [
+      { id: '1', documento: 'V-15489210', nombre: 'Carmen Rosa Silva', comunidad: 'Sector Las Marías', familiares: 4, checklist14: Array(14).fill(true) },
+      { id: '2', documento: 'V-22104932', nombre: 'José Gregorio Rivas', comunidad: 'Barrio El Progreso', familiares: 3, checklist14: [true,true,true,true,false,false,false,false,false,false,false,false,false,false] }
+    ];
+
+    let cacheOC = JSON.parse(localStorage.getItem('salh_oc')) || [
+      { id: 'OC-9021', proveedor: 'Distribuidora Alimentos Andina C.A.', insumos: '150 Kits de Alimentos', costo: '$3,450.00', estado: 'Emitida Automáticamente' }
+    ];
+
+    let currentBeneficiarioId = null;
+
+    // Inicialización
+    document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      const formData = new FormData();
-      formData.append('correo', document.getElementById('correo').value);
-      formData.append('password', document.getElementById('password').value);
-
-      const res = await fetch('/api/auth/login', { method: 'POST', body: formData });
-      if (res.ok) {
-        const data = await res.json();
-        loginScreen.style.display = 'none';
-        appScreen.style.display = 'flex';
-        document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-circle-user"></i> ${data.usuario.nombre}`;
-        loadAllData();
-      }
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'flex';
+      renderizarTodo();
     });
 
-    // NAVEGACIÓN ENTRE SECCIONES
+    function guardarEstado() {
+      localStorage.setItem('salh_inventario', JSON.stringify(cacheInventario));
+      localStorage.setItem('salh_beneficiarios', JSON.stringify(cacheBeneficiarios));
+      localStorage.setItem('salh_oc', JSON.stringify(cacheOC));
+    }
+
     function showSection(secId) {
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('sidebar nav a').forEach(a => a.classList.remove('active'));
-      
       document.getElementById(secId).classList.add('active');
-      
-      if(secId === 'sec-dashboard') {
-        document.getElementById('section-title').innerText = "Panel de Control - Humanitario";
-        document.getElementById('nav-dashboard').classList.add('active');
-      } else if(secId === 'sec-sincronia') {
-        document.getElementById('section-title').innerText = "Organigrama de Sincronía Operativa";
-        document.getElementById('nav-sincronia').classList.add('active');
-      } else if(secId === 'sec-inventario') {
-        document.getElementById('section-title').innerText = "Gestión de Inventario";
-        document.getElementById('nav-inventario').classList.add('active');
-      } else if(secId === 'sec-rrhh') {
-        document.getElementById('section-title').innerText = "Recursos Humanos y Voluntariado";
-        document.getElementById('nav-rrhh').classList.add('active');
-      } else if(secId === 'sec-beneficiarios') {
-        document.getElementById('section-title').innerText = "Padrón de Beneficiarios";
-        document.getElementById('nav-beneficiarios').classList.add('active');
-      }
+      document.getElementById('nav-' + secId.replace('sec-', '')).classList.add('active');
     }
 
-    // REDIRECCIÓN DIRECTA DESDE SINCRONÍA A PESTAÑA ESPECÍFICA
-    function filterInventoryTab(tipo) {
-      showSection('sec-inventario');
-      switchInventoryTab(tipo);
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function renderizarTodo() {
+      renderInventario();
+      renderBeneficiarios();
+      renderOC();
+      actualizarMetricas();
+      guardarEstado();
     }
 
-    // CAMBIO DE PESTAÑAS DENTRO DE INVENTARIO
-    function switchInventoryTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      const activeBtn = document.getElementById(`tab-${tab}`);
-      if(activeBtn) activeBtn.classList.add('active');
-
-      if (tab === 'todos') {
-        renderInventario(cacheInventario);
-      } else {
-        const filtrados = cacheInventario.filter(i => {
-          if (i.tipo && i.tipo === tab) return true;
-          const cat = i.categoria.toLowerCase();
-          if (tab === 'comida' && (cat.includes('alimento') || cat.includes('refrigerio'))) return true;
-          if (tab === 'transporte' && (cat.includes('transporte') || cat.includes('vehiculo') || cat.includes('repuesto'))) return true;
-          if (tab === 'tecnologia' && (cat.includes('tecnolog') || cat.includes('laptop') || cat.includes('pc'))) return true;
-          if (tab === 'implementacion' && (cat.includes('implementac') || cat.includes('herramienta'))) return true;
-          return false;
-        });
-        renderInventario(filtrados);
-      }
+    function actualizarMetricas() {
+      const criticos = cacheInventario.filter(i => i.cantidad <= 20).length;
+      document.getElementById('m-total-insumos').innerText = cacheInventario.length;
+      document.getElementById('m-criticos').innerText = criticos;
+      document.getElementById('m-ocs').innerText = cacheOC.length;
+      document.getElementById('m-beneficiarios').innerText = cacheBeneficiarios.length;
     }
 
-    // BÚSQUEDA EN TABLAS
-    function filterTable(input, tableBodyId) {
-      const filter = input.value.toLowerCase().trim();
-      const tbody = document.getElementById(tableBodyId);
-      const rows = tbody.getElementsByTagName('tr');
-
-      for (let i = 0; i < rows.length; i++) {
-        const rowText = rows[i].textContent || rows[i].innerText;
-        rows[i].style.display = rowText.toLowerCase().includes(filter) ? "" : "none";
-      }
-    }
-
-    // BÚSQUEDA FILTRADA EN TARJETAS DE SINCRONÍA
-    function filterSyncCards(input) {
-      const filter = input.value.toLowerCase().trim();
-      const cards = document.querySelectorAll('.sync-card');
-      cards.forEach(card => {
-        const text = card.textContent || card.innerText;
-        card.style.display = text.toLowerCase().includes(filter) ? "flex" : "none";
-      });
-    }
-
-    // CARGA GENERAL DE DATOS
-    async function loadAllData() {
-      // Metric Dashboard
-      const resSum = await fetch('/api/dashboard/summary');
-      const metrics = await resSum.json();
-      document.getElementById('metric-total').innerText = metrics.total_articulos;
-      document.getElementById('metric-critico').innerText = metrics.stock_critico;
-      document.getElementById('metric-personal').innerText = metrics.total_personal;
-      document.getElementById('metric-beneficiarios').innerText = metrics.total_beneficiarios;
-
-      // Inventario
-      const resInv = await fetch('/api/inventario');
-      cacheInventario = await resInv.json();
-      renderInventario(cacheInventario);
-
-      // RRHH
-      const resRrhh = await fetch('/api/personal');
-      const rrhhData = await resRrhh.json();
-      renderRRHH(rrhhData);
-
-      // Beneficiarios
-      const resBen = await fetch('/api/beneficiarios');
-      const benData = await resBen.json();
-      renderBeneficiarios(benData);
-    }
-
-    function renderInventario(items) {
-      const rows = items.map(i => {
-        const esCritico = i.cantidad <= i.stock_minimo;
-        
-        // Asignar icono y badge según el tipo/categoría
-        let badgeIcon = 'fa-boxes-stacked';
-        let tipoLabel = i.tipo || 'General';
-        
-        if (i.tipo === 'comida' || i.categoria.toLowerCase().includes('alimento')) {
-          badgeIcon = 'fa-utensils'; tipoLabel = 'Alimentos';
-        } else if (i.tipo === 'transporte' || i.categoria.toLowerCase().includes('transporte')) {
-          badgeIcon = 'fa-truck-fast'; tipoLabel = 'Transporte';
-        } else if (i.tipo === 'tecnologia' || i.categoria.toLowerCase().includes('tecnolog')) {
-          badgeIcon = 'fa-laptop-code'; tipoLabel = 'Tecnología';
-        } else if (i.tipo === 'implementacion' || i.categoria.toLowerCase().includes('implementac')) {
-          badgeIcon = 'fa-screwdriver-wrench'; tipoLabel = 'Implementación';
-        }
-
-        const etiquetaTipo = `<span class="badge badge-cat"><i class="fa-solid ${badgeIcon}"></i> ${tipoLabel}</span>`;
-
+    function renderInventario() {
+      const html = cacheInventario.map(i => {
+        const critico = i.cantidad <= 20;
         return `
           <tr>
             <td><strong>${i.nombre}</strong></td>
-            <td>${i.categoria} ${etiquetaTipo}</td>
-            <td>${i.cantidad} ${i.unidad}</td>
-            <td>${i.ubicacion || 'Sin asignar'}</td>
-            <td><span class="badge ${esCritico ? 'badge-alert':'badge-ok'}">${esCritico ? 'Stock Bajo':'Disponible'}</span></td>
+            <td>${i.categoria}</td>
+            <td>${i.cantidad} unidades</td>
+            <td>${i.ubicacion}</td>
+            <td><span class="badge ${critico ? 'badge-alert' : 'badge-ok'}">${critico ? 'Stock Crítico (Autocompra)' : 'Óptimo'}</span></td>
           </tr>
         `;
       }).join('');
-
-      document.getElementById('dash-inventario-table').innerHTML = rows;
-      document.getElementById('full-inventario-table').innerHTML = rows;
+      document.getElementById('dash-table').innerHTML = html;
+      document.getElementById('full-inventario-table').innerHTML = html;
     }
 
-    function renderRRHH(list) {
-      const rows = list.map(p => `
+    function renderBeneficiarios() {
+      const tbody = document.getElementById('beneficiarios-table');
+      tbody.innerHTML = cacheBeneficiarios.map(b => {
+        const count = b.checklist14.filter(Boolean).length;
+        const pct = Math.round((count / 14) * 100);
+        return `
+          <tr>
+            <td>${b.documento}</td>
+            <td><strong>${b.nombre}</strong></td>
+            <td>${b.comunidad}</td>
+            <td>${b.familiares}</td>
+            <td>
+              <div class="progress-bar-bg" style="margin-bottom:0.2rem; height:8px;">
+                <div class="h-full ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}" style="width: ${pct}%"></div>
+              </div>
+              <span style="font-size: 0.75rem;">${pct}% (${count}/14)</span>
+            </td>
+            <td>
+              <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')">
+                <i class="fa-solid fa-list-check"></i> Traza-14
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderOC() {
+      const tbody = document.getElementById('oc-table');
+      tbody.innerHTML = cacheOC.map(o => `
         <tr>
-          <td><strong>${p.documento}</strong></td>
-          <td>${p.nombre}</td>
-          <td>${p.cargo}</td>
-          <td>${p.area}</td>
-          <td>${p.telefono || 'N/A'}</td>
-          <td><span class="badge badge-ok">${p.estado}</span></td>
+          <td><strong>${o.id}</strong></td>
+          <td>${o.proveedor}</td>
+          <td>${o.insumos}</td>
+          <td>${o.costo}</td>
+          <td><span class="badge badge-blue">${o.estado}</span></td>
         </tr>
       `).join('');
-      document.getElementById('rrhh-table').innerHTML = rows;
     }
 
-    function renderBeneficiarios(list) {
-      const rows = list.map(b => `
-        <tr>
-          <td><strong>${b.documento}</strong></td>
-          <td>${b.nombre}</td>
-          <td>${b.comunidad}</td>
-          <td>${b.familiares} personas</td>
-          <td>${b.telefono || 'N/A'}</td>
-        </tr>
-      `).join('');
-      document.getElementById('beneficiarios-table').innerHTML = rows;
+    // MOTOR AUTÓNOMO DE COMPRA Y CRISIS (SALH)
+    function ejecutarSALHEmergency(tipoCrisis, familiasAfectadas) {
+      const terminal = document.getElementById('salh-terminal');
+      terminal.innerHTML += `<br>[SALH_ENGINE] 🚨 Alerta recibida: "${tipoCrisis}". Familias: ${familiasAfectadas}.`;
+      
+      setTimeout(() => {
+        terminal.innerHTML += `<br>[SALH_ENGINE] 🔍 Calculando brecha de inventario en almacenes regionales...`;
+      }, 500);
+
+      setTimeout(() => {
+        const ordenNueva = {
+          id: 'OC-' + Math.floor(1000 + Math.random() * 9000),
+          proveedor: 'Proveedores Humanitarios Asociados S.A.',
+          insumos: `${familiasAfectadas} Kits de Emergencia (${tipoCrisis})`,
+          costo: '$' + (familiasAfectadas * 22.5).toLocaleString() + '.00',
+          estado: 'Emitida y Validada por IA'
+        };
+        cacheOC.unshift(ordenNueva);
+        
+        // Agregar insumos automáticamente al inventario
+        cacheInventario.unshift({
+          id: Date.now(),
+          nombre: `Kit Emergencia: ${tipoCrisis}`,
+          categoria: 'Respuesta Inmediata',
+          cantidad: familiasAfectadas,
+          ubicacion: 'Centro de Acopio Principal',
+          stock_minimo: 10
+        });
+
+        renderizarTodo();
+        terminal.innerHTML += `<br><span style="color: #4ade80;">[ÉXITO] Orden de Compra ${ordenNueva.id} generada y enviada al proveedor. Inventario actualizado.</span>`;
+        terminal.scrollTop = terminal.scrollHeight;
+      }, 1500);
     }
 
-    // MODALES
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    // SIMULACIÓN OCR PARA FORMULARIOS
+    function simularLecturaOCR() {
+      const nombres = ["Mariana Cedeño", "Pedro Luis Morales", "Sofía Alejandra Pérez", "Ernesto Valecillos"];
+      const comunidades = ["Sector Las Brisas", "Comunidad El Esfuerzo", "Urbanización Libertador"];
+      const cedulas = ["V-19834211", "V-24512900", "V-11234988", "V-27889102"];
+      
+      const idx = Math.floor(Math.random() * nombres.length);
+      document.getElementById('ben-doc').value = cedulas[idx];
+      document.getElementById('ben-nombre').value = nombres[idx];
+      document.getElementById('ben-comunidad').value = comunidades[Math.floor(Math.random() * comunidades.length)];
+      document.getElementById('ben-familiares').value = Math.floor(1 + Math.random() * 5);
+    }
 
-    // GUARDAR PERSONAL (FORM)
-    document.getElementById('form-personal').addEventListener('submit', async (e) => {
+    // REGISTROS NUEVOS
+    document.getElementById('form-insumo').addEventListener('submit', (e) => {
       e.preventDefault();
-      const formData = new FormData();
-      formData.append('documento', document.getElementById('per-doc').value);
-      formData.append('nombre', document.getElementById('per-nombre').value);
-      formData.append('cargo', document.getElementById('per-cargo').value);
-      formData.append('area', document.getElementById('per-area').value);
-      formData.append('telefono', document.getElementById('per-tel').value);
-
-      const res = await fetch('/api/personal', { method: 'POST', body: formData });
-      if (res.ok) {
-        closeModal('modal-personal');
-        loadAllData();
-      }
+      cacheInventario.unshift({
+        id: Date.now(),
+        nombre: document.getElementById('ins-nombre').value,
+        categoria: document.getElementById('ins-categoria').value,
+        cantidad: parseInt(document.getElementById('ins-cantidad').value),
+        ubicacion: document.getElementById('ins-ubicacion').value,
+        stock_minimo: 20
+      });
+      renderizarTodo();
+      closeModal('modal-insumo');
+      e.target.reset();
     });
 
-    // GUARDAR INSUMO (FORM)
-    document.getElementById('form-insumo').addEventListener('submit', async (e) => {
+    document.getElementById('form-beneficiario').addEventListener('submit', (e) => {
       e.preventDefault();
-      const formData = new FormData();
-      formData.append('nombre', document.getElementById('ins-nombre').value);
-      formData.append('tipo', document.getElementById('ins-tipo').value);
-      formData.append('categoria', document.getElementById('ins-categoria').value);
-      formData.append('cantidad', document.getElementById('ins-cantidad').value);
-      formData.append('unidad', document.getElementById('ins-unidad').value);
-      formData.append('ubicacion', document.getElementById('ins-ubicacion').value);
-
-      const res = await fetch('/api/inventario', { method: 'POST', body: formData });
-      if (res.ok) {
-        closeModal('modal-insumo');
-        loadAllData();
-      }
+      cacheBeneficiarios.unshift({
+        id: Date.now().toString(),
+        documento: document.getElementById('ben-doc').value,
+        nombre: document.getElementById('ben-nombre').value,
+        comunidad: document.getElementById('ben-comunidad').value,
+        familiares: parseInt(document.getElementById('ben-familiares').value),
+        checklist14: Array(14).fill(false)
+      });
+      renderizarTodo();
+      closeModal('modal-beneficiario');
+      e.target.reset();
     });
+
+    // CHECKLIST TRAZA-14
+    function abrirChecklist(id) {
+      currentBeneficiarioId = id;
+      const b = cacheBeneficiarios.find(x => x.id === id);
+      if(!b) return;
+      document.getElementById('chkModalSubtitulo').innerText = `Beneficiario: ${b.nombre} (${b.documento})`;
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      checkboxes.forEach((cb, idx) => { cb.checked = b.checklist14[idx]; });
+      actualizarProgresoModal();
+      openModal('modalChecklist14');
+    }
+
+    document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', actualizarProgresoModal);
+    });
+
+    function actualizarProgresoModal() {
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      let checked = 0;
+      checkboxes.forEach(cb => { if(cb.checked) checked++; });
+      const pct = Math.round((checked / 14) * 100);
+      document.getElementById('porcentajeProgresoText').innerText = `${pct}% (${checked}/14)`;
+      const barra = document.getElementById('barraProgreso14');
+      barra.style.width = `${pct}%`;
+      barra.className = `h-full transition-all ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}`;
+    }
+
+    function autocompletarTraza14PorIA() {
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      checkboxes.forEach(cb => { cb.checked = true; });
+      actualizarProgresoModal();
+    }
+
+    function guardarProgresoChecklist() {
+      const b = cacheBeneficiarios.find(x => x.id === currentBeneficiarioId);
+      if(b) {
+        const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+        b.checklist14 = Array.from(checkboxes).map(cb => cb.checked);
+        renderizarTodo();
+      }
+      closeModal('modalChecklist14');
+    }
+
+    function filterTable(input, tableId) {
+      const filter = input.value.toLowerCase();
+      const rows = document.querySelectorAll(`#${tableId} tr`);
+      rows.forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    }
   </script>
 </body>
 </html>
