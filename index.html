@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADRA - Sistema Autónomo de Logística Humanitaria (SALH v2)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #008559;
+      --primary-dark: #006040;
+      --accent: #2563eb;
+      --bg-color: #f4f7f6;
+      --sidebar-width: 260px;
+      --text-color: #333;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); display: flex; min-height: 100vh; }
+
+    /* Login Screen */
+    #login-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #008559 0%, #004d33 100%); display: flex; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .login-card {
+      background: #fff; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2); text-align: center;
+    }
+    .login-card h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; }
+    .form-group { margin-bottom: 1.2rem; text-align: left; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: #555; display: block; margin-bottom: 0.3rem; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 0.95rem;
+    }
+    .btn {
+      padding: 0.75rem 1.2rem; background: var(--primary); color: #fff; border: none;
+      border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s, transform 0.1s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn:active { transform: scale(0.98); }
+    .btn-block { width: 100%; }
+    .btn-secondary { background: #64748b; color: #fff; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #1d4ed8; }
+
+    /* Layout Principal */
+    #app-screen { display: flex; width: 100%; }
+    sidebar {
+      width: var(--sidebar-width); background: #1b2a26; color: #fff; min-height: 100vh; padding: 1.5rem 1rem;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    sidebar .brand { font-size: 1.3rem; font-weight: bold; color: #4caf50; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
+    sidebar nav ul { list-style: none; }
+    sidebar nav li { margin-bottom: 0.5rem; }
+    sidebar nav a {
+      color: #b0bec5; text-decoration: none; padding: 0.75rem 1rem; border-radius: 6px; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; cursor: pointer; font-size: 0.9rem;
+    }
+    sidebar nav a:hover, sidebar nav a.active { background: var(--primary); color: #fff; }
+
+    .offline-badge {
+      background: rgba(255,255,255,0.1); padding: 0.6rem; border-radius: 6px; font-size: 0.75rem; text-align: center; color: #a5d6a7; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+
+    main { flex: 1; padding: 2rem; overflow-y: auto; max-height: 100vh; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 1rem; }
+    .user-profile { font-weight: 600; color: #555; display: flex; align-items: center; gap: 0.5rem; }
+
+    /* Metric Cards */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
+    .card.blue { border-left-color: var(--accent); }
+    .card.orange { border-left-color: #f59e0b; }
+    .card.purple { border-left-color: #7c3aed; }
+    .card .title { font-size: 0.85rem; color: #777; margin-bottom: 0.5rem; font-weight: 600; }
+    .card .value { font-size: 1.8rem; font-weight: bold; color: var(--text-color); }
+
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    .table-container { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+    .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+    
+    .search-box {
+      display: flex; align-items: center; background: #f0f4f2; border: 1px solid #dcdcdc;
+      border-radius: 6px; padding: 0.5rem 0.8rem; width: 100%; max-width: 320px;
+    }
+    .search-box i { color: #888; margin-right: 0.5rem; }
+    .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 0.9rem; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    th, td { text-align: left; padding: 0.85rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    th { background: #fafafa; color: #666; font-weight: 600; }
+    .badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+    .badge-ok { background: #e8f5e9; color: #2e7d32; }
+    .badge-alert { background: #ffebee; color: #c62828; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
+
+    /* SALH Panel Inteligente de Precios y Web Scraping */
+    .salh-panel { background: linear-gradient(135deg, #004d33 0%, #008559 100%); color: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    .salh-panel h3 { font-size: 1.4rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.7rem; }
+    .salh-panel p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 1.5rem; max-width: 750px; }
+    
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; background: rgba(0,0,0,0.15); padding: 1.2rem; border-radius: 8px; }
+    .config-grid label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.3rem; color: #e2e8f0; }
+    .config-grid select, .config-grid input { width: 100%; padding: 0.6rem; border-radius: 6px; border: none; outline: none; }
+
+    .crisis-triggers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .crisis-btn {
+      background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 1.2rem; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; text-align: left; transition: 0.2s;
+    }
+    .crisis-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+    .crisis-btn i { font-size: 1.3rem; margin-bottom: 0.5rem; display: block; color: #a5d6a7; }
+
+    /* Modal Overlay */
+    .hidden { display: none !important; }
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
+      display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 1rem;
+    }
+    .modal-card { background: #fff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-close { cursor: pointer; font-size: 1.2rem; color: #888; }
+    
+    .checklist-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin: 1rem 0; }
+    @media (min-width: 640px) { .checklist-grid { grid-template-columns: 1fr 1fr; } }
+    .chk-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; background: #f8fafc; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; }
+    .progress-bar-bg { background-color: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem; }
+    .bg-amber-500 { background-color: #f59e0b; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-emerald-600 { background-color: #059669; }
+    .transition-all { transition: all 0.3s ease; }
+    .h-full { height: 100%; }
+
+    .log-terminal { background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 220px; overflow-y: auto; margin-top: 1rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h2><i class="fa-solid fa-brain"></i> SALH v2 - ADRA</h2>
+      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Motor Autónomo Multi-Proveedor por Web Scraping</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Credencial de Acceso</label>
+          <input type="email" id="correo" value="salh.admin@adra.org" required>
+        </div>
+        <div class="form-group">
+          <label>Clave de Seguridad</label>
+          <input type="password" id="password" value="adra2026" required>
+        </div>
+        <button type="submit" class="btn btn-block">Iniciar Sesión Segura</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SISTEMA PRINCIPAL -->
+  <div id="app-screen" style="display: none;">
+    <sidebar>
+      <div>
+        <div class="brand">
+          <i class="fa-solid fa-network-wired"></i> SALH Core v2
+        </div>
+        <nav>
+          <ul>
+            <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard Central</a></li>
+            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo IA</a></li>
+            <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén & Stock</a></li>
+            <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes Multi-Proveedor</a></li>
+            <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón & Traza-14</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="offline-badge">
+        <i class="fa-solid fa-wifi" id="sync-icon"></i> <span id="sync-text">Modo Local SQLite Activo</span>
+      </div>
+    </sidebar>
+
+    <main>
+      <header>
+        <h2 id="section-title">Dashboard Central y Suministro Desglosado</h2>
+        <div class="user-profile" id="user-display">
+          <i class="fa-solid fa-user-shield"></i> Operador SALH Sourcing
+        </div>
+      </header>
+
+      <!-- SECCIÓN: DASHBOARD -->
+      <section id="sec-dashboard" class="view-section active">
+        <div class="metrics-grid">
+          <div class="card">
+            <div class="title">Insumos Registrados</div>
+            <div class="value" id="m-total-insumos">0</div>
+          </div>
+          <div class="card orange">
+            <div class="title">Alertas de Stock Crítico</div>
+            <div class="value" style="color: #d97706;" id="m-criticos">0</div>
+          </div>
+          <div class="card blue">
+            <div class="title">Órdenes Optimizadas (IA)</div>
+            <div class="value" style="color: #2563eb;" id="m-ocs">0</div>
+          </div>
+          <div class="card purple">
+            <div class="title">Beneficiarios Activos</div>
+            <div class="value" style="color: #7c3aed;" id="m-beneficiarios">0</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Estado del Inventario Global</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Filtrar inventario..." onkeyup="filterTable(this, 'dash-table')">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén Asignado</th><th>Estatus SALH</th></tr>
+            </thead>
+            <tbody id="dash-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: MOTOR AUTÓNOMO DE SOURCING (SALH) -->
+      <section id="sec-salh" class="view-section">
+        <div class="salh-panel">
+          <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo y Comparador Web por IA</h3>
+          <p>Selecciona la situación de crisis e ingresa el presupuesto máximo disponible. La IA desglosará automáticamente los ítems necesarios por separado, rastreará y comparará en tiempo real los precios en las webs de múltiples proveedores y seleccionará la mejor oferta por ítem.</p>
+          
+          <div class="config-grid">
+            <div>
+              <label>Presupuesto Máximo Disponible ($)</label>
+              <input type="number" id="input-presupuesto" value="5000" min="100" step="50">
+            </div>
+            <div>
+              <label>Margen de Aceptación de Proveedor</label>
+              <select id="select-criterio">
+                <option value="precio">Optimizar Estricto por Menor Precio</option>
+                <option value="mixto">Balanceado (Precio + Rapidez de Entrega)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="crisis-triggers">
+            <button class="crisis-btn" onclick="ejecutarSourcingIA('Inundación Severa en Zona Alta')">
+              <i class="fa-solid fa-house-flood-water"></i>
+              Inundación Severa (Desglose de Ítems)
+            </button>
+            <button class="crisis-btn" onclick="ejecutarSourcingIA('Crisis Alimentaria Comunitaria')">
+              <i class="fa-solid fa-bowl-food"></i>
+              Crisis Alimentaria (Desglose de Ítems)
+            </button>
+            <button class="crisis-btn" onclick="ejecutarSourcingIA('Apoyo Médico de Urgencia')">
+              <i class="fa-solid fa-kit-medical"></i>
+              Emergencia Médica (Desglose de Ítems)
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <h3>Consola de Web Scraping y Negociación Multivendedor</h3>
+          <div class="log-terminal" id="salh-terminal">
+            [SALH_SOURCING] Motor listo. Configura tu presupuesto y selecciona una crisis para iniciar el rastreo web de proveedores...
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: INVENTARIO -->
+      <section id="sec-inventario" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Gestión de Almacén e Insumos</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'full-inventario-table')">
+            </div>
+            <button class="btn" onclick="openModal('modal-insumo')"><i class="fa-solid fa-plus"></i> Registrar Ítem</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Insumo</th><th>Categoría</th><th>Cantidad</th><th>Ubicación</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="full-inventario-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: ÓRDENES DE COMPRA -->
+      <section id="sec-proveedores" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Órdenes de Compra Generadas Multi-Proveedor</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar orden..." onkeyup="filterTable(this, 'oc-table')">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>N° OC</th><th>Proveedor Ganador</th><th>Ítems Comprados</th><th>Costo Total</th><th>Estatus</th></tr>
+            </thead>
+            <tbody id="oc-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: BENEFICIARIOS Y TRAZA-14 -->
+      <section id="sec-beneficiarios" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Padrón de Beneficiarios (Motor Documental Traza-14)</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar beneficiario..." onkeyup="filterTable(this, 'beneficiarios-table')">
+            </div>
+            <button class="btn btn-accent" onclick="openModal('modal-beneficiario')">
+              <i class="fa-solid fa-camera"></i> Nuevo con Ingesta OCR / Auto
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Cédula</th><th>Nombre</th><th>Comunidad</th><th>Carga Familiar</th><th>Traza-14 (Progreso)</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="beneficiarios-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: RESULTADO DE SOURCING IA Y COMPARATIVA WEB -->
+  <div id="modal-sourcing-resultado" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 900px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-sourcing-title">Resultado de Optimización de Compras por Ítem</h3>
+          <p style="font-size: 0.85rem; color: #666;" id="modal-sourcing-subtitle"></p>
+        </div>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-sourcing-resultado')"></i>
+      </div>
+      <div id="modal-sourcing-content" style="margin-bottom: 1.5rem; overflow-x: auto;"></div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-sourcing-resultado')">Cerrar</button>
+        <button type="button" class="btn btn-accent" onclick="confirmarYEmitirOCMultiProveedor()">
+          <i class="fa-solid fa-check-double"></i> Aprobar y Emitir Órdenes a Proveedores por Separado
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO INSUMO -->
+  <div id="modal-insumo" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Insumo</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i>
+      </div>
+      <form id="form-insumo">
+        <div class="form-group"><label>Nombre del Insumo</label><input type="text" id="ins-nombre" required></div>
+        <div class="form-group"><label>Categoría</label><input type="text" id="ins-categoria" placeholder="Ej. Alimentos, Medicina, Herramienta" required></div>
+        <div class="form-group"><label>Cantidad Inicial</label><input type="number" id="ins-cantidad" required></div>
+        <div class="form-group"><label>Almacén / Ubicación</label><input type="text" id="ins-ubicacion" required></div>
+        <button type="submit" class="btn btn-block">Guardar en Base Local</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO BENEFICIARIO CON OCR -->
+  <div id="modal-beneficiario" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Registro de Beneficiario con Ingesta Automática (OCR)</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i>
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <button type="button" class="btn btn-accent btn-block" onclick="simularLecturaOCR()">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Simular Escaneo Automático de Cédula (Carga Instantánea)
+        </button>
+      </div>
+      <form id="form-beneficiario">
+        <div class="form-group"><label>Cédula / Documento</label><input type="text" id="ben-doc" required></div>
+        <div class="form-group"><label>Nombre Completo</label><input type="text" id="ben-nombre" required></div>
+        <div class="form-group"><label>Comunidad / Sector</label><input type="text" id="ben-comunidad" required></div>
+        <div class="form-group"><label>Carga Familiar</label><input type="number" id="ben-familiares" value="1" min="1" required></div>
+        <button type="submit" class="btn btn-block">Guardar y Autocompletar Traza-14</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CHECKLIST TRAZA-14 -->
+  <div id="modalChecklist14" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <h3>Motor Documental Traza-14</h3>
+          <p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p>
+        </div>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+          <span>Progreso Automatizado:</span>
+          <strong id="porcentajeProgresoText">0% (0/14)</strong>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="barraProgreso14" class="h-full bg-amber-500 transition-all" style="width: 0%;"></div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-block" style="margin-top: 0.5rem; font-size: 0.8rem;" onclick="autocompletarTraza14PorIA()">
+          <i class="fa-solid fa-bolt"></i> Autocompletar 14 Documentos por Validación de Contexto
+        </button>
+      </div>
+
+      <div class="checklist-grid" id="contenedorHitos14">
+        <label class="chk-item"><input type="checkbox" data-hic="1"> 1. Documento Identidad</label>
+        <label class="chk-item"><input type="checkbox" data-hic="2"> 2. RIF Vigente</label>
+        <label class="chk-item"><input type="checkbox" data-hic="3"> 3. Constancia Residencial</label>
+        <label class="chk-item"><input type="checkbox" data-hic="4"> 4. Carta de Solicitud</label>
+        <label class="chk-item"><input type="checkbox" data-hic="5"> 5. Certificado Médico</label>
+        <label class="chk-item"><input type="checkbox" data-hic="6"> 6. Informe Social</label>
+        <label class="chk-item"><input type="checkbox" data-hic="7"> 7. Presupuesto Formal</label>
+        <label class="chk-item"><input type="checkbox" data-hic="8"> 8. Fotos de Soporte</label>
+        <label class="chk-item"><input type="checkbox" data-hic="9"> 9. Planilla de Registro</label>
+        <label class="chk-item"><input type="checkbox" data-hic="10"> 10. Carta de Compromiso</label>
+        <label class="chk-item"><input type="checkbox" data-hic="11"> 11. Referencia Personal</label>
+        <label class="chk-item"><input type="checkbox" data-hic="12"> 12. Inspección Técnica</label>
+        <label class="chk-item"><input type="checkbox" data-hic="13"> 13. Aprobación Comité</label>
+        <label class="chk-item"><input type="checkbox" data-hic="14"> 14. Acta Entregable</label>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button>
+        <button type="button" class="btn" onclick="guardarProgresoChecklist()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Estado local persistente
+    let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
+      { id: 1, nombre: 'Kit de Alimentos 20Kg', categoria: 'Alimentos', cantidad: 15, ubicacion: 'Almacén Central', stock_minimo: 30 },
+      { id: 2, nombre: 'Filtros de Agua Potable', categoria: 'Implementación', cantidad: 8, ubicacion: 'Almacén Regional', stock_minimo: 20 },
+      { id: 3, nombre: 'Kits Médicos de Emergencia', categoria: 'Medicina', cantidad: 5, ubicacion: 'Almacén Central', stock_minimo: 15 }
+    ];
+
+    let cacheBeneficiarios = JSON.parse(localStorage.getItem('salh_beneficiarios')) || [
+      { id: '1', documento: 'V-15489210', nombre: 'Carmen Rosa Silva', comunidad: 'Sector Las Marías', familiares: 4, checklist14: Array(14).fill(true) },
+      { id: '2', documento: 'V-22104932', nombre: 'José Gregorio Rivas', comunidad: 'Barrio El Progreso', familiares: 3, checklist14: [true,true,true,true,false,false,false,false,false,false,false,false,false,false] }
+    ];
+
+    let cacheOC = JSON.parse(localStorage.getItem('salh_oc')) || [
+      { id: 'OC-9021', proveedor: 'Múltiple (Optimizado por IA)', insumos: 'Arroz, Agua, Botiquines', costo: '$3,450.00', estado: 'Aprobada' }
+    ];
+
+    let currentBeneficiarioId = null;
+    let ultimaOptimizacionSourcing = null;
+
+    // Base de datos de ítems por crisis con simulador de múltiples proveedores web
+    const crisisItemsCatalogo = {
+      'Inundación Severa en Zona Alta': [
+        { nombre: 'Filtros de Agua Portátiles', cantidad: 120, categoria: 'Saneamiento', webCatalogo: [
+            { proveedor: 'Aquatech Solutions Web', precioUnit: 14.50, tiempoEntrega: '24 hrs' },
+            { proveedor: 'Distribuidora Sanitaria C.A.', precioUnit: 12.80, tiempoEntrega: '48 hrs' },
+            { proveedor: 'Importadora Global Water', precioUnit: 15.00, tiempoEntrega: 'Inmediata' }
+          ]
+        },
+        { nombre: 'Botes Inflables de Rescate', cantidad: 4, categoria: 'Logística', webCatalogo: [
+            { proveedor: 'Marine & Rescue Online', precioUnit: 320.00, tiempoEntrega: '48 hrs' },
+            { proveedor: 'Equipamientos Náuticos S.A.', precioUnit: 295.50, tiempoEntrega: '72 hrs' },
+            { proveedor: 'Global Outdoor Store', precioUnit: 340.00, tiempoEntrega: '24 hrs' }
+          ]
+        },
+        { nombre: 'Mantas Térmicas Impermeables', cantidad: 250, categoria: 'Refugio', webCatalogo: [
+            { proveedor: 'Textiles de Emergencia C.A.', precioUnit: 3.20, tiempoEntrega: '24 hrs' },
+            { proveedor: 'Comercializadora Andina', precioUnit: 2.90, tiempoEntrega: '48 hrs' },
+            { proveedor: 'MegaMayorista Express', precioUnit: 3.50, tiempoEntrega: 'Inmediata' }
+          ]
+        }
+      ],
+      'Crisis Alimentaria Comunitaria': [
+        { nombre: 'Sacos de Arroz 20Kg', cantidad: 80, categoria: 'Alimentos', webCatalogo: [
+            { proveedor: 'Cereales del Sur S.A.', precioUnit: 22.00, tiempoEntrega: '24 hrs' },
+            { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 20.50, tiempoEntrega: '48 hrs' },
+            { proveedor: 'Distribuidora Central Web', precioUnit: 21.80, tiempoEntrega: 'Inmediata' }
+          ]
+        },
+        { nombre: 'Aceite Comestible (Bidón 5L)', cantidad: 60, categoria: 'Alimentos', webCatalogo: [
+            { proveedor: 'Aceites y Grasas del País', precioUnit: 11.50, tiempoEntrega: '24 hrs' },
+            { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 10.90, tiempoEntrega: '48 hrs' },
+            { proveedor: 'Supermercados Asociados B2B', precioUnit: 12.00, tiempoEntrega: '24 hrs' }
+          ]
+        },
+        { nombre: 'Enlatados de Atún (Pack x24)', cantidad: 50, categoria: 'Alimentos', webCatalogo: [
+            { proveedor: 'Procesadora Pesquera C.A.', precioUnit: 34.00, tiempoEntrega: '48 hrs' },
+            { proveedor: 'Comercializadora Global', precioUnit: 31.50, tiempoEntrega: '24 hrs' },
+            { proveedor: 'MegaMayorista Express', precioUnit: 33.00, tiempoEntrega: 'Inmediata' }
+          ]
+        }
+      ],
+      'Apoyo Médico de Urgencia': [
+        { nombre: 'Botiquines de Primeros Auxilios (Tipo A)', cantidad: 40, categoria: 'Medicina', webCatalogo: [
+            { proveedor: 'Droguería e Insumos Médicos S.A.', precioUnit: 45.00, tiempoEntrega: '12 hrs' },
+            { proveedor: 'Farmacéutica Nacional Web', precioUnit: 42.50, tiempoEntrega: '24 hrs' },
+            { proveedor: 'Medical Supply Express', precioUnit: 48.00, tiempoEntrega: 'Inmediata' }
+          ]
+        },
+        { nombre: 'Antibióticos de Amplio Espectro (Cajas)', cantidad: 100, categoria: 'Medicina', webCatalogo: [
+            { proveedor: 'Farmacéutica Nacional Web', precioUnit: 18.20, tiempoEntrega: '24 hrs' },
+            { proveedor: 'Laboratorios Unidos C.A.', precioUnit: 16.90, tiempoEntrega: '48 hrs' },
+            { proveedor: 'Droguería e Insumos Médicos S.A.', precioUnit: 17.50, tiempoEntrega: 'Inmediata' }
+          ]
+        }
+      ]
+    };
+
+    // Inicialización
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'flex';
+      renderizarTodo();
+    });
+
+    function guardarEstado() {
+      localStorage.setItem('salh_inventario', JSON.stringify(cacheInventario));
+      localStorage.setItem('salh_beneficiarios', JSON.stringify(cacheBeneficiarios));
+      localStorage.setItem('salh_oc', JSON.stringify(cacheOC));
+    }
+
+    function showSection(secId) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('sidebar nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById(secId).classList.add('active');
+      document.getElementById('nav-' + secId.replace('sec-', '')).classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function renderizarTodo() {
+      renderInventario();
+      renderBeneficiarios();
+      renderOC();
+      actualizarMetricas();
+      guardarEstado();
+    }
+
+    function actualizarMetricas() {
+      const criticos = cacheInventario.filter(i => i.cantidad <= 20).length;
+      document.getElementById('m-total-insumos').innerText = cacheInventario.length;
+      document.getElementById('m-criticos').innerText = criticos;
+      document.getElementById('m-ocs').innerText = cacheOC.length;
+      document.getElementById('m-beneficiarios').innerText = cacheBeneficiarios.length;
+    }
+
+    function renderInventario() {
+      const html = cacheInventario.map(i => {
+        const critico = i.cantidad <= 20;
+        return `
+          <tr>
+            <td><strong>${i.nombre}</strong></td>
+            <td>${i.categoria}</td>
+            <td>${i.cantidad} unidades</td>
+            <td>${i.ubicacion}</td>
+            <td><span class="badge ${critico ? 'badge-alert' : 'badge-ok'}">${critico ? 'Stock Crítico (Sourcing IA)' : 'Óptimo'}</span></td>
+          </tr>
+        `;
+      }).join('');
+      document.getElementById('dash-table').innerHTML = html;
+      document.getElementById('full-inventario-table').innerHTML = html;
+    }
+
+    function renderBeneficiarios() {
+      const tbody = document.getElementById('beneficiarios-table');
+      tbody.innerHTML = cacheBeneficiarios.map(b => {
+        const count = b.checklist14.filter(Boolean).length;
+        const pct = Math.round((count / 14) * 100);
+        return `
+          <tr>
+            <td>${b.documento}</td>
+            <td><strong>${b.nombre}</strong></td>
+            <td>${b.comunidad}</td>
+            <td>${b.familiares}</td>
+            <td>
+              <div class="progress-bar-bg" style="margin-bottom:0.2rem; height:8px;">
+                <div class="h-full ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}" style="width: ${pct}%"></div>
+              </div>
+              <span style="font-size: 0.75rem;">${pct}% (${count}/14)</span>
+            </td>
+            <td>
+              <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')">
+                <i class="fa-solid fa-list-check"></i> Traza-14
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function abrirChecklist(id) {
+      currentBeneficiarioId = id;
+      const b = cacheBeneficiarios.find(item => item.id === id);
+      if (!b) return;
+      document.getElementById('chkModalSubtitulo').innerText = `Beneficiario: ${b.nombre} (${b.documento}) - ${b.comunidad}`;
+      
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      checkboxes.forEach((chk, idx) => {
+        chk.checked = b.checklist14[idx] || false;
+      });
+      actualizarBarraChecklistModal();
+      openModal('modalChecklist14');
+    }
+
+    function actualizarBarraChecklistModal() {
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      let checkedCount = 0;
+      checkboxes.forEach(chk => {
+        if (chk.checked) checkedCount++;
+      });
+      const pct = Math.round((checkedCount / 14) * 100);
+      const barra = document.getElementById('barraProgreso14');
+      barra.style.width = `${pct}%`;
+      barra.className = `h-full transition-all ${pct === 100 ? 'bg-emerald-600' : pct > 50 ? 'bg-blue-600' : 'bg-amber-500'}`;
+      document.getElementById('porcentajeProgresoText').innerText = `${pct}% (${checkedCount}/14)`;
+    }
+
+    document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener('change', actualizarBarraChecklistModal);
+    });
+
+    function guardarProgresoChecklist() {
+      if (!currentBeneficiarioId) return;
+      const b = cacheBeneficiarios.find(item => item.id === currentBeneficiarioId);
+      if (!b) return;
+      
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      b.checklist14 = Array.from(checkboxes).map(chk => chk.checked);
+      guardarEstado();
+      renderBeneficiarios();
+      closeModal('modalChecklist14');
+    }
+
+    function autocompletarTraza14PorIA() {
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      checkboxes.forEach(chk => chk.checked = true);
+      actualizarBarraChecklistModal();
+    }
+
+    function simularLecturaOCR() {
+      document.getElementById('ben-doc').value = 'V-' + Math.floor(10000000 + Math.random() * 90000000);
+      document.getElementById('ben-nombre').value = ['María Alejandra Pérez', 'Carlos Eduardo Gómez', 'Ana Rosa Rojas', 'Luis Fernando Torres'][Math.floor(Math.random() * 4)];
+      document.getElementById('ben-comunidad').value = ['Sector Los Mangos', 'Urbanización El Parque', 'Comunidad La Esperanza'][Math.floor(Math.random() * 3)];
+      document.getElementById('ben-familiares').value = Math.floor(1 + Math.random() * 5);
+    }
+
+    // Formularios modales
+    document.getElementById('form-insumo').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nuevo = {
+        id: cacheInventario.length + 1,
+        nombre: document.getElementById('ins-nombre').value,
+        categoria: document.getElementById('ins-categoria').value,
+        cantidad: parseInt(document.getElementById('ins-cantidad').value),
+        ubicacion: document.getElementById('ins-ubicacion').value,
+        stock_minimo: 20
+      };
+      cacheInventario.push(nuevo);
+      renderizarTodo();
+      closeModal('modal-insumo');
+      e.target.reset();
+    });
+
+    document.getElementById('form-beneficiario').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nuevo = {
+        id: Date.now().toString(),
+        documento: document.getElementById('ben-doc').value,
+        nombre: document.getElementById('ben-nombre').value,
+        comunidad: document.getElementById('ben-comunidad').value,
+        familiares: parseInt(document.getElementById('ben-familiares').value),
+        checklist14: [true, true, true, true, false, false, false, false, false, false, false, false, false, false]
+      };
+      cacheBeneficiarios.push(nuevo);
+      renderizarTodo();
+      closeModal('modal-beneficiario');
+      e.target.reset();
+    });
+
+    // Sourcing IA / Web Scraping Simulator
+    function ejecutarSourcingIA(crisisNombre) {
+      showSection('sec-salh');
+      const terminal = document.getElementById('salh-terminal');
+      const presupuestoMax = parseFloat(document.getElementById('input-presupuesto').value) || 5000;
+      const criterio = document.getElementById('select-criterio').value;
+      
+      terminal.innerHTML = `[SALH_SOURCING] Iniciando análisis para: "${crisisNombre}"...\n`;
+      terminal.innerHTML += `[SALH_SOURCING] Presupuesto asignado: $${presupuestoMax.toLocaleString()}\n`;
+      terminal.innerHTML += `[SALH_SOURCING] Conectando con nodos web de proveedores multi-regionales...\n`;
+
+      setTimeout(() => {
+        const items = crisisItemsCatalogo[crisisNombre] || [];
+        let htmlResultado = `<table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:#f1f5f9; text-align:left;">
+              <th style="padding:8px;">Ítem Requerido</th>
+              <th style="padding:8px;">Cant.</th>
+              <th style="padding:8px;">Proveedores Web Rastreados (Comparativa)</th>
+              <th style="padding:8px;">Selección IA</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        let totalOptimo = 0;
+        let resumenItemsOC = [];
+
+        items.forEach((item, index) => {
+          let catalogOrdenado = [...item.webCatalogo];
+          if (criterio === 'precio') {
+            catalogOrdenado.sort((a, b) => a.precioUnit - b.precioUnit);
+          } else {
+            catalogOrdenado.sort((a, b) => a.precioUnit - b.precioUnit);
+          }
+          const ganador = catalogOrdenado[0];
+          const subtotal = ganador.precioUnit * item.cantidad;
+          totalOptimo += subtotal;
+          resumenItemsOC.push(`${item.nombre} (${item.cantidad}u)`);
+
+          htmlResultado += `
+            <tr style="border-bottom:1px solid #e2e8f0;">
+              <td style="padding:8px;"><strong>${item.nombre}</strong><br><small style="color:#666;">${item.categoria}</small></td>
+              <td style="padding:8px;">${item.cantidad}</td>
+              <td style="padding:8px; font-size:0.85rem;">
+                ${item.webCatalogo.map(w => `• ${w.proveedor}: $${w.precioUnit.toFixed(2)} (${w.tiempoEntrega})${w.proveedor === ganador.proveedor ? ' 🏆' : ''}<br>`).join('')}
+              </td>
+              <td style="padding:8px; background:#f0fdf4;">
+                <strong>${ganador.proveedor}</strong><br>
+                <span style="color:#059669; font-weight:bold;">$${subtotal.toFixed(2)}</span> ($${ganador.precioUnit.toFixed(2)} c/u)<br>
+                <small>Entrega: ${ganador.tiempoEntrega}</small>
+              </td>
+            </tr>
+          `;
+        });
+
+        htmlResultado += `</tbody></table>`;
+        htmlResultado += `<div style="margin-top:1rem; padding:1rem; background:#f8fafc; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+          <span>Costo Total Consolidado: <strong>$${totalOptimo.toFixed(2)}</strong> (Presupuesto Disponible: $${presupuestoMax.toLocaleString()})</span>
+          <span class="badge ${totalOptimo <= presupuestoMax ? 'badge-ok' : 'badge-alert'}">${totalOptimo <= presupuestoMax ? 'Dentro del Presupuesto' : 'Excede Presupuesto'}</span>
+        </div>`;
+
+        document.getElementById('modal-sourcing-title').innerText = `Optimización Sourcing: ${crisisNombre}`;
+        document.getElementById('modal-sourcing-subtitle').innerText = `Criterio aplicado: ${criterio === 'precio' ? 'Menor Precio Estricto' : 'Balanceado'}`;
+        document.getElementById('modal-sourcing-content').innerHTML = htmlResultado;
+
+        ultimaOptimizacionSourcing = {
+          ocId: 'OC-' + Math.floor(1000 + Math.random() * 9000),
+          proveedor: 'Múltiple Automatizado (IA)',
+          insumos: resumenItemsOC.join(', '),
+          costo: `$${totalOptimo.toFixed(2)}`,
+          estado: 'Emitida / Pendiente de Recepción'
+        };
+
+        terminal.innerHTML += `[SALH_SOURCING] Rastreo web finalizado con éxito.\n`;
+        terminal.innerHTML += `[SALH_SOURCING] Ofertas óptimas seleccionadas. Abriendo panel de validación de órdenes de compra...\n`;
+
+        openModal('modal-sourcing-resultado');
+      }, 1200);
+    }
+
+    function confirmarYEmitirOCMultiProveedor() {
+      if (!ultimaOptimizacionSourcing) return;
+      cacheOC.unshift(ultimaOptimizacionSourcing);
+      guardarEstado();
+      renderOC();
+      closeModal('modal-sourcing-resultado');
+      showSection('sec-proveedores');
+    }
+
+    function renderOC() {
+      const tbody = document.getElementById('oc-table');
+      tbody.innerHTML = cacheOC.map(oc => `
+        <tr>
+          <td><strong>${oc.id}</strong></td>
+          <td>${oc.proveedor}</td>
+          <td>${oc.insumos}</td>
+          <td><strong>${oc.costo}</strong></td>
+          <td><span class="badge badge-ok">${oc.estado}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTable(input, tableId) {
+      const filter = input.value.toLowerCase();
+      const tbody = document.getElementById(tableId);
+      const rows = tbody.getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].textContent || rows[i].innerText;
+        rows[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
+      }
+    }
+  </script>
+</body>
+</html>
