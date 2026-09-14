@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADRA - Gestión Integral</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #008559;
+      --primary-dark: #006040;
+      --bg-color: #f4f7f6;
+      --sidebar-width: 240px;
+      --text-color: #333;
+      --blue-card: #2e6b9e;
+      --green-card: #4a7c59;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); display: flex; min-height: 100vh; }
+
+    /* Login Screen */
+    #login-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: #008559; display: flex; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .login-card {
+      background: #fff; padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15); text-align: center;
+    }
+    .login-card h2 { color: var(--primary); margin-bottom: 0.5rem; }
+    .form-group { margin-bottom: 1rem; text-align: left; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: #666; display: block; margin-bottom: 0.3rem; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; outline: none;
+    }
+    .btn {
+      padding: 0.75rem 1.2rem; background: var(--primary); color: #fff; border: none;
+      border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+    }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-block { width: 100%; }
+    .error-box { background: #ffebee; color: #c62828; padding: 0.5rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; display: none; }
+
+    /* Layout Principal */
+    #app-screen { display: flex; width: 100%; }
+    sidebar {
+      width: var(--sidebar-width); background: #1b2a26; color: #fff; min-height: 100vh; padding: 1.5rem 1rem;
+    }
+    sidebar .brand { font-size: 1.3rem; font-weight: bold; color: #4caf50; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
+    sidebar nav ul { list-style: none; }
+    sidebar nav li { margin-bottom: 0.5rem; }
+    sidebar nav a {
+      color: #b0bec5; text-decoration: none; padding: 0.75rem 1rem; border-radius: 6px; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; cursor: pointer;
+    }
+    sidebar nav a:hover, sidebar nav a.active { background: var(--primary); color: #fff; }
+
+    main { flex: 1; padding: 2rem; overflow-y: auto; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .user-profile { font-weight: 600; color: #555; }
+
+    /* Metric Cards */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .card .title { font-size: 0.85rem; color: #777; margin-bottom: 0.5rem; }
+    .card .value { font-size: 1.8rem; font-weight: bold; color: var(--primary); }
+
+    /* Secciones Interactivas */
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
+    /* Table Styling & Controls */
+    .table-container { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
+    
+    /* Barra de Búsqueda */
+    .search-box {
+      display: flex; align-items: center; background: #f0f4f2; border: 1px solid #dcdcdc;
+      border-radius: 6px; padding: 0.5rem 0.8rem; width: 100%; max-width: 320px;
+    }
+    .search-box i { color: #888; margin-right: 0.5rem; }
+    .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 0.9rem; }
+
+    /* Tabs de Inventario */
+    .tabs-container { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #eee; overflow-x: auto; padding-bottom: 2px; }
+    .tab-btn {
+      padding: 0.6rem 1rem; background: transparent; border: none; font-weight: 600;
+      color: #666; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    th, td { text-align: left; padding: 0.85rem; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+    th { background: #fafafa; color: #666; font-weight: 600; }
+    .badge { padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+    .badge-ok { background: #e8f5e9; color: #2e7d32; }
+    .badge-alert { background: #ffebee; color: #c62828; }
+    .badge-cat { background: #e3f2fd; color: #1565c0; margin-left: 0.3rem; }
+
+    /* Estilos del Módulo SINCRONÍA (SIN BARRA MARRÓN) */
+    .sincronia-wrapper {
+      background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .sincronia-container {
+      margin-top: 1.5rem; width: 100%;
+    }
+    .sincronia-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; width: 100%;
+    }
+    .sync-card {
+      color: #fff; padding: 1.2rem; border-radius: 8px; text-align: center;
+      font-weight: bold; font-size: 1.05rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.8rem; min-height: 65px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .sync-card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    .sync-blue { background-color: var(--blue-card); }
+    .sync-green { background-color: var(--green-card); }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5);
+      display: none; justify-content: center; align-items: center; z-index: 2000;
+    }
+    .modal-card { background: #fff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 500px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-close { cursor: pointer; font-size: 1.2rem; color: #888; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h2><i class="fa-solid fa-hand-holding-heart"></i> ADRA Gestión</h2>
+      <p style="color:#777; font-size: 0.85rem; margin-bottom: 1.5rem;">Inicia sesión para continuar</p>
+      <div id="login-error" class="error-box"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="correo" value="admin@adra.org" required>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="password" value="admin123" required>
+        </div>
+        <button type="submit" class="btn btn-block">Ingresar al Sistema</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SISTEMA PRINCIPAL -->
+  <div id="app-screen" style="display: none;">
+    <sidebar>
+      <div class="brand">
+        <i class="fa-solid fa-hand-holding-heart"></i> ADRA Sistema
+      </div>
+      <nav>
+        <ul>
+          <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+          <li><a onclick="showSection('sec-sincronia')" id="nav-sincronia"><i class="fa-solid fa-diagram-project"></i> Sincronía</a></li>
+          <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Inventario</a></li>
+          <li><a onclick="showSection('sec-rrhh')" id="nav-rrhh"><i class="fa-solid fa-user-group"></i> Recursos Humanos</a></li>
+          <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users"></i> Beneficiarios</a></li>
+        </ul>
+      </nav>
+    </sidebar>
+
+    <main>
+      <header>
+        <h2 id="section-title">Panel de Control - Humanitario</h2>
+        <div class="user-profile" id="user-display">
+          <i class="fa-solid fa-circle-user"></i> Administrador
+        </div>
+      </header>
+
+      <!-- SECCIÓN 1: DASHBOARD -->
+      <section id="sec-dashboard" class="view-section active">
+        <div class="metrics-grid">
+          <div class="card">
+            <div class="title">Total Insumos / Artículos</div>
+            <div class="value" id="metric-total">0</div>
+          </div>
+          <div class="card">
+            <div class="title">Stock Crítico (Alertas)</div>
+            <div class="value" style="color: #c62828;" id="metric-critico">0</div>
+          </div>
+          <div class="card">
+            <div class="title">Personal / Voluntarios Activos</div>
+            <div class="value" style="color: #0288d1;" id="metric-personal">0</div>
+          </div>
+          <div class="card">
+            <div class="title">Beneficiarios Registrados</div>
+            <div class="value" style="color: #7b1fa2;" id="metric-beneficiarios">0</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Resumen de Inventario General</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'dash-inventario-table')">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Insumo</th><th>Tipo</th><th>Cantidad</th><th>Ubicación</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="dash-inventario-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN SINCRONÍA OPERATIVA -->
+      <section id="sec-sincronia" class="view-section">
+        <div class="sincronia-wrapper">
+          <div class="table-header">
+            <div>
+              <h3>Estructura Organizacional y Operativa - SINCRONÍA</h3>
+              <p style="color: #666; font-size: 0.85rem;">Selecciona un área operativa para acceder directamente a su gestión</p>
+            </div>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar área operativa..." onkeyup="filterSyncCards(this)">
+            </div>
+          </div>
+
+          <div class="sincronia-container">
+            <div class="sincronia-grid" id="sync-cards-container">
+              <div class="sync-card sync-blue" onclick="showSection('sec-sincronia')"><i class="fa-solid fa-map-location-dot"></i> ESTADOS</div>
+              <div class="sync-card sync-green" onclick="showSection('sec-beneficiarios')"><i class="fa-solid fa-house-chimney-window"></i> COMUNIDADES</div>
+
+              <div class="sync-card sync-blue" onclick="showSection('sec-rrhh')"><i class="fa-solid fa-hand-holding-hand"></i> VOLUNTARIOS</div>
+              <div class="sync-card sync-green" onclick="filterInventoryTab('comida')"><i class="fa-solid fa-utensils"></i> REFRIGERIOS</div>
+
+              <div class="sync-card sync-blue" onclick="filterInventoryTab('implementacion')"><i class="fa-solid fa-screwdriver-wrench"></i> EQUIPOS IMPLEMENTACION</div>
+              <div class="sync-card sync-green" onclick="filterInventoryTab('transporte')"><i class="fa-solid fa-truck-fast"></i> TRANSPORTE</div>
+
+              <div class="sync-card sync-blue" onclick="showSection('sec-rrhh')"><i class="fa-solid fa-bullhorn"></i> VISIBILIDAD INTERNA Y EXTERNA</div>
+              <div class="sync-card sync-green" onclick="showSection('sec-inventario')"><i class="fa-solid fa-store"></i> PROVEEDORES</div>
+
+              <div class="sync-card sync-blue" onclick="filterInventoryTab('tecnologia')"><i class="fa-solid fa-laptop-code"></i> EQUIPOS TECNOLOGICOS</div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: INVENTARIO (CON NUEVAS PESTAÑAS DEDICADAS) -->
+      <section id="sec-inventario" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Gestión de Almacén e Insumos</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'full-inventario-table')">
+            </div>
+            <button class="btn" onclick="openModal('modal-insumo')"><i class="fa-solid fa-plus"></i> Registrar Insumo</button>
+          </div>
+
+          <!-- Pestañas Específicas de Inventario -->
+          <div class="tabs-container">
+            <button class="tab-btn active" id="tab-todos" onclick="switchInventoryTab('todos')"><i class="fa-solid fa-boxes-stacked"></i> Todos</button>
+            <button class="tab-btn" id="tab-comida" onclick="switchInventoryTab('comida')"><i class="fa-solid fa-utensils"></i> Alimentos / Refrigerios</button>
+            <button class="tab-btn" id="tab-transporte" onclick="switchInventoryTab('transporte')"><i class="fa-solid fa-truck-fast"></i> Transporte</button>
+            <button class="tab-btn" id="tab-tecnologia" onclick="switchInventoryTab('tecnologia')"><i class="fa-solid fa-laptop-code"></i> Equipos Tecnológicos</button>
+            <button class="tab-btn" id="tab-implementacion" onclick="switchInventoryTab('implementacion')"><i class="fa-solid fa-screwdriver-wrench"></i> Equipos de Implementación</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr><th>Insumo</th><th>Tipo / Categoría</th><th>Cantidad</th><th>Ubicación</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="full-inventario-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: RECURSOS HUMANOS -->
+      <section id="sec-rrhh" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Personal y Voluntariado ADRA</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar por cédula, nombre..." onkeyup="filterTable(this, 'rrhh-table')">
+            </div>
+            <button class="btn" onclick="openModal('modal-personal')"><i class="fa-solid fa-user-plus"></i> Registrar Personal</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Documento / Cédula</th><th>Nombre Completo</th><th>Cargo</th><th>Área</th><th>Teléfono</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="rrhh-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 4: BENEFICIARIOS -->
+      <section id="sec-beneficiarios" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Padrón de Beneficiarios</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar beneficiario..." onkeyup="filterTable(this, 'beneficiarios-table')">
+            </div>
+            <button class="btn" onclick="openModal('modal-beneficiario')"><i class="fa-solid fa-plus"></i> Nuevo Beneficiario</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Documento</th><th>Nombre</th><th>Comunidad</th><th>Carga Familiar</th><th>Teléfono</th></tr>
+            </thead>
+            <tbody id="beneficiarios-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: NUEVO INSUMO -->
+  <div id="modal-insumo" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Registrar Insumo</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i>
+      </div>
+      <form id="form-insumo">
+        <div class="form-group">
+          <label>Tipo de Insumo</label>
+          <select id="ins-tipo" required>
+            <option value="comida">Alimentos / Refrigerios</option>
+            <option value="transporte">Transporte / Vehículos / Repuestos</option>
+            <option value="tecnologia">Equipos Tecnológicos</option>
+            <option value="implementacion">Equipos de Implementación / Herramientas</option>
+            <option value="objetos">Otros Objetos / Insumos Varios</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Nombre del Insumo</label><input type="text" id="ins-nombre" required></div>
+        <div class="form-group"><label>Categoría Específica</label><input type="text" id="ins-categoria" placeholder="Ej. Laptops, Repuestos, Granos" required></div>
+        <div class="form-group"><label>Cantidad</label><input type="number" id="ins-cantidad" required></div>
+        <div class="form-group"><label>Unidad de Medida</label><input type="text" id="ins-unidad" placeholder="Unidades, Kits, Piezas, Kg" required></div>
+        <div class="form-group"><label>Ubicación / Almacén</label><input type="text" id="ins-ubicacion"></div>
+        <button type="submit" class="btn btn-block">Guardar Insumo</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO PERSONAL (RRHH) -->
+  <div id="modal-personal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Registrar Miembro del Personal</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-personal')"></i>
+      </div>
+      <form id="form-personal">
+        <div class="form-group"><label>Cédula / Documento</label><input type="text" id="per-doc" required></div>
+        <div class="form-group"><label>Nombre Completo</label><input type="text" id="per-nombre" required></div>
+        <div class="form-group"><label>Cargo</label><input type="text" id="per-cargo" placeholder="Coordinador, Voluntario" required></div>
+        <div class="form-group"><label>Área / Proyecto</label><input type="text" id="per-area" required></div>
+        <div class="form-group"><label>Teléfono</label><input type="text" id="per-tel"></div>
+        <button type="submit" class="btn btn-block">Guardar Personal</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let cacheInventario = [];
+    const loginForm = document.getElementById('login-form');
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+
+    // LOGIN
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('correo', document.getElementById('correo').value);
+      formData.append('password', document.getElementById('password').value);
+
+      const res = await fetch('/api/auth/login', { method: 'POST', body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        loginScreen.style.display = 'none';
+        appScreen.style.display = 'flex';
+        document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-circle-user"></i> ${data.usuario.nombre}`;
+        loadAllData();
+      }
+    });
+
+    // NAVEGACIÓN ENTRE SECCIONES
+    function showSection(secId) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('sidebar nav a').forEach(a => a.classList.remove('active'));
+      
+      document.getElementById(secId).classList.add('active');
+      
+      if(secId === 'sec-dashboard') {
+        document.getElementById('section-title').innerText = "Panel de Control - Humanitario";
+        document.getElementById('nav-dashboard').classList.add('active');
+      } else if(secId === 'sec-sincronia') {
+        document.getElementById('section-title').innerText = "Organigrama de Sincronía Operativa";
+        document.getElementById('nav-sincronia').classList.add('active');
+      } else if(secId === 'sec-inventario') {
+        document.getElementById('section-title').innerText = "Gestión de Inventario";
+        document.getElementById('nav-inventario').classList.add('active');
+      } else if(secId === 'sec-rrhh') {
+        document.getElementById('section-title').innerText = "Recursos Humanos y Voluntariado";
+        document.getElementById('nav-rrhh').classList.add('active');
+      } else if(secId === 'sec-beneficiarios') {
+        document.getElementById('section-title').innerText = "Padrón de Beneficiarios";
+        document.getElementById('nav-beneficiarios').classList.add('active');
+      }
+    }
+
+    // REDIRECCIÓN DIRECTA DESDE SINCRONÍA A PESTAÑA ESPECÍFICA
+    function filterInventoryTab(tipo) {
+      showSection('sec-inventario');
+      switchInventoryTab(tipo);
+    }
+
+    // CAMBIO DE PESTAÑAS DENTRO DE INVENTARIO
+    function switchInventoryTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if(activeBtn) activeBtn.classList.add('active');
+
+      if (tab === 'todos') {
+        renderInventario(cacheInventario);
+      } else {
+        const filtrados = cacheInventario.filter(i => {
+          if (i.tipo && i.tipo === tab) return true;
+          const cat = i.categoria.toLowerCase();
+          if (tab === 'comida' && (cat.includes('alimento') || cat.includes('refrigerio'))) return true;
+          if (tab === 'transporte' && (cat.includes('transporte') || cat.includes('vehiculo') || cat.includes('repuesto'))) return true;
+          if (tab === 'tecnologia' && (cat.includes('tecnolog') || cat.includes('laptop') || cat.includes('pc'))) return true;
+          if (tab === 'implementacion' && (cat.includes('implementac') || cat.includes('herramienta'))) return true;
+          return false;
+        });
+        renderInventario(filtrados);
+      }
+    }
+
+    // BÚSQUEDA EN TABLAS
+    function filterTable(input, tableBodyId) {
+      const filter = input.value.toLowerCase().trim();
+      const tbody = document.getElementById(tableBodyId);
+      const rows = tbody.getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const rowText = rows[i].textContent || rows[i].innerText;
+        rows[i].style.display = rowText.toLowerCase().includes(filter) ? "" : "none";
+      }
+    }
+
+    // BÚSQUEDA FILTRADA EN TARJETAS DE SINCRONÍA
+    function filterSyncCards(input) {
+      const filter = input.value.toLowerCase().trim();
+      const cards = document.querySelectorAll('.sync-card');
+      cards.forEach(card => {
+        const text = card.textContent || card.innerText;
+        card.style.display = text.toLowerCase().includes(filter) ? "flex" : "none";
+      });
+    }
+
+    // CARGA GENERAL DE DATOS
+    async function loadAllData() {
+      // Metric Dashboard
+      const resSum = await fetch('/api/dashboard/summary');
+      const metrics = await resSum.json();
+      document.getElementById('metric-total').innerText = metrics.total_articulos;
+      document.getElementById('metric-critico').innerText = metrics.stock_critico;
+      document.getElementById('metric-personal').innerText = metrics.total_personal;
+      document.getElementById('metric-beneficiarios').innerText = metrics.total_beneficiarios;
+
+      // Inventario
+      const resInv = await fetch('/api/inventario');
+      cacheInventario = await resInv.json();
+      renderInventario(cacheInventario);
+
+      // RRHH
+      const resRrhh = await fetch('/api/personal');
+      const rrhhData = await resRrhh.json();
+      renderRRHH(rrhhData);
+
+      // Beneficiarios
+      const resBen = await fetch('/api/beneficiarios');
+      const benData = await resBen.json();
+      renderBeneficiarios(benData);
+    }
+
+    function renderInventario(items) {
+      const rows = items.map(i => {
+        const esCritico = i.cantidad <= i.stock_minimo;
+        
+        // Asignar icono y badge según el tipo/categoría
+        let badgeIcon = 'fa-boxes-stacked';
+        let tipoLabel = i.tipo || 'General';
+        
+        if (i.tipo === 'comida' || i.categoria.toLowerCase().includes('alimento')) {
+          badgeIcon = 'fa-utensils'; tipoLabel = 'Alimentos';
+        } else if (i.tipo === 'transporte' || i.categoria.toLowerCase().includes('transporte')) {
+          badgeIcon = 'fa-truck-fast'; tipoLabel = 'Transporte';
+        } else if (i.tipo === 'tecnologia' || i.categoria.toLowerCase().includes('tecnolog')) {
+          badgeIcon = 'fa-laptop-code'; tipoLabel = 'Tecnología';
+        } else if (i.tipo === 'implementacion' || i.categoria.toLowerCase().includes('implementac')) {
+          badgeIcon = 'fa-screwdriver-wrench'; tipoLabel = 'Implementación';
+        }
+
+        const etiquetaTipo = `<span class="badge badge-cat"><i class="fa-solid ${badgeIcon}"></i> ${tipoLabel}</span>`;
+
+        return `
+          <tr>
+            <td><strong>${i.nombre}</strong></td>
+            <td>${i.categoria} ${etiquetaTipo}</td>
+            <td>${i.cantidad} ${i.unidad}</td>
+            <td>${i.ubicacion || 'Sin asignar'}</td>
+            <td><span class="badge ${esCritico ? 'badge-alert':'badge-ok'}">${esCritico ? 'Stock Bajo':'Disponible'}</span></td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('dash-inventario-table').innerHTML = rows;
+      document.getElementById('full-inventario-table').innerHTML = rows;
+    }
+
+    function renderRRHH(list) {
+      const rows = list.map(p => `
+        <tr>
+          <td><strong>${p.documento}</strong></td>
+          <td>${p.nombre}</td>
+          <td>${p.cargo}</td>
+          <td>${p.area}</td>
+          <td>${p.telefono || 'N/A'}</td>
+          <td><span class="badge badge-ok">${p.estado}</span></td>
+        </tr>
+      `).join('');
+      document.getElementById('rrhh-table').innerHTML = rows;
+    }
+
+    function renderBeneficiarios(list) {
+      const rows = list.map(b => `
+        <tr>
+          <td><strong>${b.documento}</strong></td>
+          <td>${b.nombre}</td>
+          <td>${b.comunidad}</td>
+          <td>${b.familiares} personas</td>
+          <td>${b.telefono || 'N/A'}</td>
+        </tr>
+      `).join('');
+      document.getElementById('beneficiarios-table').innerHTML = rows;
+    }
+
+    // MODALES
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // GUARDAR PERSONAL (FORM)
+    document.getElementById('form-personal').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('documento', document.getElementById('per-doc').value);
+      formData.append('nombre', document.getElementById('per-nombre').value);
+      formData.append('cargo', document.getElementById('per-cargo').value);
+      formData.append('area', document.getElementById('per-area').value);
+      formData.append('telefono', document.getElementById('per-tel').value);
+
+      const res = await fetch('/api/personal', { method: 'POST', body: formData });
+      if (res.ok) {
+        closeModal('modal-personal');
+        loadAllData();
+      }
+    });
+
+    // GUARDAR INSUMO (FORM)
+    document.getElementById('form-insumo').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('nombre', document.getElementById('ins-nombre').value);
+      formData.append('tipo', document.getElementById('ins-tipo').value);
+      formData.append('categoria', document.getElementById('ins-categoria').value);
+      formData.append('cantidad', document.getElementById('ins-cantidad').value);
+      formData.append('unidad', document.getElementById('ins-unidad').value);
+      formData.append('ubicacion', document.getElementById('ins-ubicacion').value);
+
+      const res = await fetch('/api/inventario', { method: 'POST', body: formData });
+      if (res.ok) {
+        closeModal('modal-insumo');
+        loadAllData();
+      }
+    });
+  </script>
+</body>
+</html>
