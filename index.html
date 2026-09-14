@@ -96,6 +96,7 @@
     .badge-ok { background: #e8f5e9; color: #2e7d32; }
     .badge-alert { background: #ffebee; color: #c62828; }
     .badge-blue { background: #e0f2fe; color: #0369a1; }
+    .badge-gray { background: #f1f5f9; color: #64748b; }
 
     /* SALH Panel Inteligente de Precios y Web Scraping */
     .salh-panel { background: linear-gradient(135deg, #004d33 0%, #008559 100%); color: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
@@ -134,6 +135,10 @@
     .h-full { height: 100%; }
 
     .log-terminal { background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 220px; overflow-y: auto; margin-top: 1rem; line-height: 1.4; }
+    
+    /* Scrollbar del contenedor de RRHH */
+    #lista-seleccion-personal::-webkit-scrollbar { width: 8px; }
+    #lista-seleccion-personal::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -142,11 +147,22 @@
   <div id="login-screen">
     <div class="login-card">
       <h2><i class="fa-solid fa-brain"></i> SALH v2 - ADRA</h2>
-      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Motor Autónomo Multi-Proveedor por Web Scraping</p>
+      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Motor Autónomo Multi-Proveedor y RRHH</p>
       <form id="login-form">
         <div class="form-group">
           <label>Credencial de Acceso</label>
           <input type="email" id="correo" value="salh.admin@adra.org" required>
+        </div>
+        <div class="form-group">
+          <label>Nivel de Jerarquía (Rango)</label>
+          <select id="login-rango" required>
+            <option value="1">Director País</option>
+            <option value="2">Gerente de RRHH</option>
+            <option value="3">Gerente</option>
+            <option value="4">Oficial / Coordinador</option>
+            <option value="5">Asistente</option>
+            <option value="6">Voluntario</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Clave de Seguridad</label>
@@ -167,6 +183,7 @@
         <nav>
           <ul>
             <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard Central</a></li>
+            <li><a onclick="showSection('sec-proyectos')" id="nav-proyectos"><i class="fa-solid fa-diagram-project"></i> Proyectos y RRHH</a></li>
             <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo IA</a></li>
             <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén & Stock</a></li>
             <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes Multi-Proveedor</a></li>
@@ -183,7 +200,7 @@
       <header>
         <h2 id="section-title">Dashboard Central y Suministro Desglosado</h2>
         <div class="user-profile" id="user-display">
-          <i class="fa-solid fa-user-shield"></i> Operador SALH Sourcing
+          <i class="fa-solid fa-user-shield"></i> Operador
         </div>
       </header>
 
@@ -199,8 +216,8 @@
             <div class="value" style="color: #d97706;" id="m-criticos">0</div>
           </div>
           <div class="card blue">
-            <div class="title">Órdenes Optimizadas (IA)</div>
-            <div class="value" style="color: #2563eb;" id="m-ocs">0</div>
+            <div class="title">Proyectos Activos</div>
+            <div class="value" style="color: #2563eb;" id="m-proyectos">0</div>
           </div>
           <div class="card purple">
             <div class="title">Beneficiarios Activos</div>
@@ -221,6 +238,45 @@
               <tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén Asignado</th><th>Estatus SALH</th></tr>
             </thead>
             <tbody id="dash-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: PROYECTOS Y RRHH -->
+      <section id="sec-proyectos" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Gestión de Proyectos Operativos</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar proyecto..." onkeyup="filterTable(this, 'proyectos-table')">
+            </div>
+            <!-- Botón solo visible para rangos altos (1, 2, 3) -->
+            <button class="btn btn-accent" id="btn-crear-proyecto" onclick="abrirModalProyecto()" style="display:none;">
+              <i class="fa-solid fa-plus"></i> Nuevo Proyecto
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Nombre del Proyecto</th><th>Creado por (Rango)</th><th>Personal Asignado</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="proyectos-table"></tbody>
+          </table>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Directorio de Personal ADRA (Base de Datos)</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar personal..." onkeyup="filterTable(this, 'personal-table')">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Nombre Completo</th><th>Rango / Posición</th><th>Estado</th><th>Proyecto Actual</th></tr>
+            </thead>
+            <tbody id="personal-table"></tbody>
           </table>
         </div>
       </section>
@@ -333,6 +389,38 @@
     </main>
   </div>
 
+  <!-- MODAL: CREAR PROYECTO (RRHH) -->
+  <div id="modal-proyecto" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Crear Proyecto y Asignar RRHH</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-proyecto')"></i>
+      </div>
+      <form id="form-proyecto">
+        <div class="form-group">
+          <label>Nombre del Proyecto</label>
+          <input type="text" id="proy-nombre" placeholder="Ej. Respuesta Inundaciones Zona Sur" required>
+        </div>
+        
+        <div style="margin-bottom: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
+          <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;"><strong>Asignación Automática Inteligente:</strong> El sistema filtrará la base de datos de ADRA buscando personal de menor rango al tuyo que esté en estado "Disponible".</p>
+          <button type="button" class="btn btn-secondary btn-block" onclick="autocompletarPersonal()">
+            <i class="fa-solid fa-users-viewfinder"></i> Autocompletar con Personal Disponible
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>Selección de Personal (Inferior a tu Rango)</label>
+          <div id="lista-seleccion-personal" style="max-height: 220px; overflow-y: auto; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- Renderizado dinámico de personal de rango inferior -->
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-block btn-accent"><i class="fa-solid fa-save"></i> Guardar Proyecto e Iniciar Operaciones</button>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL: RESULTADO DE SOURCING IA Y COMPARATIVA WEB -->
   <div id="modal-sourcing-resultado" class="modal-overlay hidden">
     <div class="modal-card" style="max-width: 900px;">
@@ -347,7 +435,7 @@
       <div style="display: flex; gap: 1rem; justify-content: flex-end;">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-sourcing-resultado')">Cerrar</button>
         <button type="button" class="btn btn-accent" onclick="confirmarYEmitirOCMultiProveedor()">
-          <i class="fa-solid fa-check-double"></i> Aprobar y Emitir Órdenes a Proveedores por Separado
+          <i class="fa-solid fa-check-double"></i> Aprobar y Emitir Órdenes a Proveedores
         </button>
       </div>
     </div>
@@ -441,6 +529,18 @@
   </div>
 
   <script>
+    // Configuración de Rangos
+    const NOMBRES_RANGOS = {
+      1: 'Director País',
+      2: 'Gerente de RRHH',
+      3: 'Gerente',
+      4: 'Oficial / Coordinador',
+      5: 'Asistente',
+      6: 'Voluntario'
+    };
+
+    let currentUserRol = 6; // Por defecto Voluntario
+
     // Estado local persistente
     let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
       { id: 1, nombre: 'Kit de Alimentos 20Kg', categoria: 'Alimentos', cantidad: 15, ubicacion: 'Almacén Central', stock_minimo: 30 },
@@ -457,6 +557,22 @@
       { id: 'OC-9021', proveedor: 'Múltiple (Optimizado por IA)', insumos: 'Arroz, Agua, Botiquines', costo: '$3,450.00', estado: 'Aprobada' }
     ];
 
+    // --- NUEVO: Base de Datos de Personal y Proyectos ---
+    let cachePersonal = JSON.parse(localStorage.getItem('salh_personal')) || [
+      { id: 'P1', nombre: 'Roberto Gómez', rango: 3, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P2', nombre: 'Lucía Méndez', rango: 4, estado: 'Ocupada', proyecto: 'Censo Zona Norte' },
+      { id: 'P3', nombre: 'Carlos Ruiz', rango: 4, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P4', nombre: 'Ana Torroja', rango: 5, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P5', nombre: 'Miguel Santos', rango: 5, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P6', nombre: 'Elena Vásquez', rango: 6, estado: 'Ocupada', proyecto: 'Censo Zona Norte' },
+      { id: 'P7', nombre: 'Pedro Castillo', rango: 6, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P8', nombre: 'Sofia Castro', rango: 6, estado: 'Disponible', proyecto: 'Ninguno' }
+    ];
+
+    let cacheProyectos = JSON.parse(localStorage.getItem('salh_proyectos')) || [
+      { id: 'PR-01', nombre: 'Censo Zona Norte', creador: 'Director País', personalAsignado: 2, estado: 'En Ejecución' }
+    ];
+
     let currentBeneficiarioId = null;
     let ultimaOptimizacionSourcing = null;
 
@@ -470,57 +586,40 @@
           ]
         },
         { nombre: 'Botes Inflables de Rescate', cantidad: 4, categoria: 'Logística', webCatalogo: [
-            { proveedor: 'Marine & Rescue Online', precioUnit: 320.00, tiempoEntrega: '48 hrs' },
-            { proveedor: 'Equipamientos Náuticos S.A.', precioUnit: 295.50, tiempoEntrega: '72 hrs' },
-            { proveedor: 'Global Outdoor Store', precioUnit: 340.00, tiempoEntrega: '24 hrs' }
-          ]
-        },
-        { nombre: 'Mantas Térmicas Impermeables', cantidad: 250, categoria: 'Refugio', webCatalogo: [
-            { proveedor: 'Textiles de Emergencia C.A.', precioUnit: 3.20, tiempoEntrega: '24 hrs' },
-            { proveedor: 'Comercializadora Andina', precioUnit: 2.90, tiempoEntrega: '48 hrs' },
-            { proveedor: 'MegaMayorista Express', precioUnit: 3.50, tiempoEntrega: 'Inmediata' }
+            { proveedor: 'Marine & Rescue Online', precioUnit: 320.00, tiempoEntrega: '48 hrs' }
           ]
         }
       ],
       'Crisis Alimentaria Comunitaria': [
         { nombre: 'Sacos de Arroz 20Kg', cantidad: 80, categoria: 'Alimentos', webCatalogo: [
             { proveedor: 'Cereales del Sur S.A.', precioUnit: 22.00, tiempoEntrega: '24 hrs' },
-            { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 20.50, tiempoEntrega: '48 hrs' },
-            { proveedor: 'Distribuidora Central Web', precioUnit: 21.80, tiempoEntrega: 'Inmediata' }
-          ]
-        },
-        { nombre: 'Aceite Comestible (Bidón 5L)', cantidad: 60, categoria: 'Alimentos', webCatalogo: [
-            { proveedor: 'Aceites y Grasas del País', precioUnit: 11.50, tiempoEntrega: '24 hrs' },
-            { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 10.90, tiempoEntrega: '48 hrs' },
-            { proveedor: 'Supermercados Asociados B2B', precioUnit: 12.00, tiempoEntrega: '24 hrs' }
-          ]
-        },
-        { nombre: 'Enlatados de Atún (Pack x24)', cantidad: 50, categoria: 'Alimentos', webCatalogo: [
-            { proveedor: 'Procesadora Pesquera C.A.', precioUnit: 34.00, tiempoEntrega: '48 hrs' },
-            { proveedor: 'Comercializadora Global', precioUnit: 31.50, tiempoEntrega: '24 hrs' },
-            { proveedor: 'MegaMayorista Express', precioUnit: 33.00, tiempoEntrega: 'Inmediata' }
+            { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 20.50, tiempoEntrega: '48 hrs' }
           ]
         }
       ],
       'Apoyo Médico de Urgencia': [
-        { nombre: 'Botiquines de Primeros Auxilios (Tipo A)', cantidad: 40, categoria: 'Medicina', webCatalogo: [
-            { proveedor: 'Droguería e Insumos Médicos S.A.', precioUnit: 45.00, tiempoEntrega: '12 hrs' },
-            { proveedor: 'Farmacéutica Nacional Web', precioUnit: 42.50, tiempoEntrega: '24 hrs' },
-            { proveedor: 'Medical Supply Express', precioUnit: 48.00, tiempoEntrega: 'Inmediata' }
-          ]
-        },
-        { nombre: 'Antibióticos de Amplio Espectro (Cajas)', cantidad: 100, categoria: 'Medicina', webCatalogo: [
-            { proveedor: 'Farmacéutica Nacional Web', precioUnit: 18.20, tiempoEntrega: '24 hrs' },
-            { proveedor: 'Laboratorios Unidos C.A.', precioUnit: 16.90, tiempoEntrega: '48 hrs' },
-            { proveedor: 'Droguería e Insumos Médicos S.A.', precioUnit: 17.50, tiempoEntrega: 'Inmediata' }
+        { nombre: 'Botiquines (Tipo A)', cantidad: 40, categoria: 'Medicina', webCatalogo: [
+            { proveedor: 'Droguería Médica S.A.', precioUnit: 45.00, tiempoEntrega: '12 hrs' }
           ]
         }
       ]
     };
 
-    // Inicialización
+    // Inicialización y Login
     document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
+      currentUserRol = parseInt(document.getElementById('login-rango').value);
+      
+      // Actualizar Header
+      document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-shield"></i> ${NOMBRES_RANGOS[currentUserRol]}`;
+      
+      // Control de Acceso: Botón de Crear Proyecto (solo Rango 1, 2, 3)
+      if (currentUserRol <= 3) {
+        document.getElementById('btn-crear-proyecto').style.display = 'inline-flex';
+      } else {
+        document.getElementById('btn-crear-proyecto').style.display = 'none';
+      }
+
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app-screen').style.display = 'flex';
       renderizarTodo();
@@ -530,6 +629,8 @@
       localStorage.setItem('salh_inventario', JSON.stringify(cacheInventario));
       localStorage.setItem('salh_beneficiarios', JSON.stringify(cacheBeneficiarios));
       localStorage.setItem('salh_oc', JSON.stringify(cacheOC));
+      localStorage.setItem('salh_personal', JSON.stringify(cachePersonal));
+      localStorage.setItem('salh_proyectos', JSON.stringify(cacheProyectos));
     }
 
     function showSection(secId) {
@@ -546,6 +647,7 @@
       renderInventario();
       renderBeneficiarios();
       renderOC();
+      renderProyectosYPersonal();
       actualizarMetricas();
       guardarEstado();
     }
@@ -554,9 +656,105 @@
       const criticos = cacheInventario.filter(i => i.cantidad <= 20).length;
       document.getElementById('m-total-insumos').innerText = cacheInventario.length;
       document.getElementById('m-criticos').innerText = criticos;
-      document.getElementById('m-ocs').innerText = cacheOC.length;
+      document.getElementById('m-proyectos').innerText = cacheProyectos.length;
       document.getElementById('m-beneficiarios').innerText = cacheBeneficiarios.length;
     }
+
+    // --- NUEVAS FUNCIONES DE RRHH Y PROYECTOS ---
+    function renderProyectosYPersonal() {
+      // Tabla Proyectos
+      const tbodyProy = document.getElementById('proyectos-table');
+      tbodyProy.innerHTML = cacheProyectos.map(p => `
+        <tr>
+          <td><strong>${p.nombre}</strong></td>
+          <td>${p.creador}</td>
+          <td>${p.personalAsignado} Colaboradores</td>
+          <td><span class="badge badge-ok">${p.estado}</span></td>
+        </tr>
+      `).join('');
+
+      // Tabla Personal
+      const tbodyPers = document.getElementById('personal-table');
+      tbodyPers.innerHTML = cachePersonal.map(p => {
+        const badgeClass = p.estado === 'Disponible' ? 'badge-ok' : (p.estado === 'Ocupado' || p.estado === 'Ocupada') ? 'badge-alert' : 'badge-gray';
+        return `
+        <tr>
+          <td><strong>${p.nombre}</strong></td>
+          <td>${NOMBRES_RANGOS[p.rango]}</td>
+          <td><span class="badge ${badgeClass}">${p.estado}</span></td>
+          <td>${p.proyecto}</td>
+        </tr>
+      `}).join('');
+    }
+
+    function abrirModalProyecto() {
+      document.getElementById('proy-nombre').value = '';
+      const contenedor = document.getElementById('lista-seleccion-personal');
+      contenedor.innerHTML = '';
+
+      // Filtramos la base de datos de ADRA para mostrar SOLO rangos INFERIORES al del usuario actual
+      const personalElegible = cachePersonal.filter(p => p.rango > currentUserRol);
+      
+      if(personalElegible.length === 0) {
+        contenedor.innerHTML = '<div style="color:#666; font-size:0.85rem; padding: 0.5rem;">No hay personal de rango inferior disponible en la base de datos.</div>';
+      } else {
+        personalElegible.forEach(p => {
+          const isDisponible = p.estado === 'Disponible';
+          contenedor.innerHTML += `
+            <label class="chk-item" style="justify-content: space-between; opacity: ${isDisponible ? '1' : '0.6'};">
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="checkbox" class="chk-personal" value="${p.id}" data-disponible="${isDisponible}">
+                <span><strong>${p.nombre}</strong> (${NOMBRES_RANGOS[p.rango]})</span>
+              </div>
+              <span class="badge ${isDisponible ? 'badge-ok' : 'badge-alert'}">${p.estado}</span>
+            </label>
+          `;
+        });
+      }
+      openModal('modal-proyecto');
+    }
+
+    function autocompletarPersonal() {
+      // Marca automáticamente a todos los que estén 'Disponibles' en el modal
+      const checkboxes = document.querySelectorAll('.chk-personal');
+      checkboxes.forEach(chk => {
+        if (chk.getAttribute('data-disponible') === 'true') {
+          chk.checked = true;
+        }
+      });
+    }
+
+    document.getElementById('form-proyecto').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nombreProyecto = document.getElementById('proy-nombre').value;
+      
+      // Obtener personal seleccionado
+      const checkboxes = document.querySelectorAll('.chk-personal:checked');
+      const seleccionadosIds = Array.from(checkboxes).map(c => c.value);
+
+      // Actualizar Base de datos de Personal (marcarlos como ocupados)
+      seleccionadosIds.forEach(id => {
+        const persona = cachePersonal.find(p => p.id === id);
+        if(persona) {
+          persona.estado = persona.rango === 4 || persona.rango === 6 ? 'Ocupada' : 'Ocupado';
+          persona.proyecto = nombreProyecto;
+        }
+      });
+
+      // Registrar Proyecto
+      cacheProyectos.push({
+        id: 'PR-' + Math.floor(100 + Math.random() * 900),
+        nombre: nombreProyecto,
+        creador: NOMBRES_RANGOS[currentUserRol],
+        personalAsignado: seleccionadosIds.length,
+        estado: 'En Ejecución'
+      });
+
+      renderizarTodo();
+      closeModal('modal-proyecto');
+    });
+
+    // --- FIN FUNCIONES RRHH ---
 
     function renderInventario() {
       const html = cacheInventario.map(i => {
@@ -658,7 +856,6 @@
       document.getElementById('ben-familiares').value = Math.floor(1 + Math.random() * 5);
     }
 
-    // Formularios modales
     document.getElementById('form-insumo').addEventListener('submit', (e) => {
       e.preventDefault();
       const nuevo = {
@@ -691,7 +888,7 @@
       e.target.reset();
     });
 
-    // Sourcing IA / Web Scraping Simulator
+    // Sourcing IA
     function ejecutarSourcingIA(crisisNombre) {
       showSection('sec-salh');
       const terminal = document.getElementById('salh-terminal');
@@ -700,7 +897,7 @@
       
       terminal.innerHTML = `[SALH_SOURCING] Iniciando análisis para: "${crisisNombre}"...\n`;
       terminal.innerHTML += `[SALH_SOURCING] Presupuesto asignado: $${presupuestoMax.toLocaleString()}\n`;
-      terminal.innerHTML += `[SALH_SOURCING] Conectando con nodos web de proveedores multi-regionales...\n`;
+      terminal.innerHTML += `[SALH_SOURCING] Conectando con nodos web de proveedores...\n`;
 
       setTimeout(() => {
         const items = crisisItemsCatalogo[crisisNombre] || [];
@@ -720,11 +917,7 @@
 
         items.forEach((item, index) => {
           let catalogOrdenado = [...item.webCatalogo];
-          if (criterio === 'precio') {
-            catalogOrdenado.sort((a, b) => a.precioUnit - b.precioUnit);
-          } else {
-            catalogOrdenado.sort((a, b) => a.precioUnit - b.precioUnit);
-          }
+          catalogOrdenado.sort((a, b) => a.precioUnit - b.precioUnit);
           const ganador = catalogOrdenado[0];
           const subtotal = ganador.precioUnit * item.cantidad;
           totalOptimo += subtotal;
@@ -757,11 +950,11 @@
         document.getElementById('modal-sourcing-content').innerHTML = htmlResultado;
 
         ultimaOptimizacionSourcing = {
-          ocId: 'OC-' + Math.floor(1000 + Math.random() * 9000),
+          id: 'OC-' + Math.floor(1000 + Math.random() * 9000),
           proveedor: 'Múltiple Automatizado (IA)',
           insumos: resumenItemsOC.join(', '),
           costo: `$${totalOptimo.toFixed(2)}`,
-          estado: 'Emitida / Pendiente de Recepción'
+          estado: 'Emitida / Pendiente'
         };
 
         terminal.innerHTML += `[SALH_SOURCING] Rastreo web finalizado con éxito.\n`;
@@ -799,7 +992,7 @@
       const rows = tbody.getElementsByTagName('tr');
       for (let i = 0; i < rows.length; i++) {
         const text = rows[i].textContent || rows[i].innerText;
-        rows[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
+        rows[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? "" : "none";
       }
     }
   </script>
