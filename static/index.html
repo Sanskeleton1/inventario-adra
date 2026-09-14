@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ADRA - Sistema Autónomo de Logística Humanitaria (SALH v2)</title>
+  <title>ADRA - SALH v2 (Sistema Autónomo de Logística Humanitaria)</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -26,7 +26,8 @@
       background: #fff; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 420px;
       box-shadow: 0 12px 32px rgba(0,0,0,0.2); text-align: center;
     }
-    .login-card h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; }
+    .login-card h2 { color: var(--primary); margin-bottom: 0.3rem; font-size: 1.6rem; }
+    .version-tag { background: #e8f5e9; color: var(--primary-dark); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 1.2rem; }
     .form-group { margin-bottom: 1.2rem; text-align: left; }
     .form-group label { font-size: 0.85rem; font-weight: 600; color: #555; display: block; margin-bottom: 0.3rem; }
     .form-group input, .form-group select {
@@ -51,7 +52,8 @@
       width: var(--sidebar-width); background: #1b2a26; color: #fff; min-height: 100vh; padding: 1.5rem 1rem;
       display: flex; flex-direction: column; justify-content: space-between;
     }
-    sidebar .brand { font-size: 1.3rem; font-weight: bold; color: #4caf50; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
+    sidebar .brand { font-size: 1.2rem; font-weight: bold; color: #4caf50; margin-bottom: 2rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    sidebar .brand span { font-size: 0.75rem; color: #a5d6a7; font-weight: normal; background: rgba(255,255,255,0.1); padding: 0.15rem 0.4rem; border-radius: 4px; width: fit-content; }
     sidebar nav ul { list-style: none; }
     sidebar nav li { margin-bottom: 0.5rem; }
     sidebar nav a {
@@ -97,7 +99,7 @@
     .badge-alert { background: #ffebee; color: #c62828; }
     .badge-blue { background: #e0f2fe; color: #0369a1; }
 
-    /* SALH Panel Inteligente de Precios y Web Scraping */
+    /* SALH Panel Inteligente v2 */
     .salh-panel { background: linear-gradient(135deg, #004d33 0%, #008559 100%); color: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
     .salh-panel h3 { font-size: 1.4rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.7rem; }
     .salh-panel p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 1.5rem; max-width: 750px; }
@@ -141,18 +143,19 @@
   <!-- LOGIN -->
   <div id="login-screen">
     <div class="login-card">
-      <h2><i class="fa-solid fa-brain"></i> SALH v2 - ADRA</h2>
-      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Motor Autónomo Multi-Proveedor por Web Scraping</p>
+      <h2>ADRA - SALH</h2>
+      <span class="version-tag">Versión 2.0 - Sourcing & Traza-14</span>
+      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Sistema Autónomo de Logística Humanitaria con Web Scraping Multi-Proveedor</p>
       <form id="login-form">
         <div class="form-group">
           <label>Credencial de Acceso</label>
-          <input type="email" id="correo" value="salh.admin@adra.org" required>
+          <input type="email" id="correo" value="salh.v2@adra.org" required>
         </div>
         <div class="form-group">
           <label>Clave de Seguridad</label>
           <input type="password" id="password" value="adra2026" required>
         </div>
-        <button type="submit" class="btn btn-block">Iniciar Sesión Segura</button>
+        <button type="submit" class="btn btn-block">Ingresar a SALH v2</button>
       </form>
     </div>
   </div>
@@ -162,12 +165,13 @@
     <sidebar>
       <div>
         <div class="brand">
-          <i class="fa-solid fa-network-wired"></i> SALH Core v2
+          <i class="fa-solid fa-network-wired"></i> ADRA - SALH v2
+          <span>Módulo Autónomo</span>
         </div>
         <nav>
           <ul>
             <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard Central</a></li>
-            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo IA</a></li>
+            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo v2</a></li>
             <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén & Stock</a></li>
             <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes Multi-Proveedor</a></li>
             <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón & Traza-14</a></li>
@@ -175,15 +179,15 @@
         </nav>
       </div>
       <div class="offline-badge">
-        <i class="fa-solid fa-wifi" id="sync-icon"></i> <span id="sync-text">Modo Local SQLite Activo</span>
+        <i class="fa-solid fa-wifi" id="sync-icon"></i> <span id="sync-text">SALH v2 Activo (SQLite Local)</span>
       </div>
     </sidebar>
 
     <main>
       <header>
-        <h2 id="section-title">Dashboard Central y Suministro Desglosado</h2>
+        <h2 id="section-title">Dashboard Central - SALH v2</h2>
         <div class="user-profile" id="user-display">
-          <i class="fa-solid fa-user-shield"></i> Operador SALH Sourcing
+          <i class="fa-solid fa-user-shield"></i> Operador SALH v2
         </div>
       </header>
 
@@ -199,7 +203,7 @@
             <div class="value" style="color: #d97706;" id="m-criticos">0</div>
           </div>
           <div class="card blue">
-            <div class="title">Órdenes Optimizadas (IA)</div>
+            <div class="title">Órdenes v2 (Multi-Proveedor)</div>
             <div class="value" style="color: #2563eb;" id="m-ocs">0</div>
           </div>
           <div class="card purple">
@@ -210,7 +214,7 @@
 
         <div class="table-container">
           <div class="table-header">
-            <h3>Estado del Inventario Global</h3>
+            <h3>Estado del Inventario Global (SALH v2)</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Filtrar inventario..." onkeyup="filterTable(this, 'dash-table')">
@@ -218,18 +222,18 @@
           </div>
           <table>
             <thead>
-              <tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén Asignado</th><th>Estatus SALH</th></tr>
+              <tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén Asignado</th><th>Estatus SALH v2</th></tr>
             </thead>
             <tbody id="dash-table"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- SECCIÓN: MOTOR AUTÓNOMO DE SOURCING (SALH) -->
+      <!-- SECCIÓN: MOTOR AUTÓNOMO DE SOURCING v2 -->
       <section id="sec-salh" class="view-section">
         <div class="salh-panel">
-          <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo y Comparador Web por IA</h3>
-          <p>Selecciona la situación de crisis e ingresa el presupuesto máximo disponible. La IA desglosará automáticamente los ítems necesarios por separado, rastreará y comparará en tiempo real los precios en las webs de múltiples proveedores y seleccionará la mejor oferta por ítem.</p>
+          <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo v2 (Comparador Web Multi-Proveedor)</h3>
+          <p>Selecciona la situación de crisis e ingresa el presupuesto máximo. SALH v2 desglosará automáticamente los ítems por separado, rastreará precios en tiempo real en webs de múltiples proveedores y seleccionará la oferta óptima por ítem.</p>
           
           <div class="config-grid">
             <div>
@@ -237,10 +241,10 @@
               <input type="number" id="input-presupuesto" value="5000" min="100" step="50">
             </div>
             <div>
-              <label>Margen de Aceptación de Proveedor</label>
+              <label>Criterio de Optimización v2</label>
               <select id="select-criterio">
                 <option value="precio">Optimizar Estricto por Menor Precio</option>
-                <option value="mixto">Balanceado (Precio + Rapidez de Entrega)</option>
+                <option value="mixto">Balanceado v2 (Precio + Rapidez de Entrega)</option>
               </select>
             </div>
           </div>
@@ -248,23 +252,23 @@
           <div class="crisis-triggers">
             <button class="crisis-btn" onclick="ejecutarSourcingIA('Inundación Severa en Zona Alta')">
               <i class="fa-solid fa-house-flood-water"></i>
-              Inundación Severa (Desglose de Ítems)
+              Inundación Severa (Desglose v2)
             </button>
             <button class="crisis-btn" onclick="ejecutarSourcingIA('Crisis Alimentaria Comunitaria')">
               <i class="fa-solid fa-bowl-food"></i>
-              Crisis Alimentaria (Desglose de Ítems)
+              Crisis Alimentaria (Desglose v2)
             </button>
             <button class="crisis-btn" onclick="ejecutarSourcingIA('Apoyo Médico de Urgencia')">
               <i class="fa-solid fa-kit-medical"></i>
-              Emergencia Médica (Desglose de Ítems)
+              Emergencia Médica (Desglose v2)
             </button>
           </div>
         </div>
 
         <div class="table-container">
-          <h3>Consola de Web Scraping y Negociación Multivendedor</h3>
+          <h3>Consola de Web Scraping v2 y Negociación Multivendedor</h3>
           <div class="log-terminal" id="salh-terminal">
-            [SALH_SOURCING] Motor listo. Configura tu presupuesto y selecciona una crisis para iniciar el rastreo web de proveedores...
+            [SALH_v2_CORE] Motor autónomo listo. Configura tu presupuesto y selecciona una crisis para iniciar el rastreo web multinivel...
           </div>
         </div>
       </section>
@@ -273,7 +277,7 @@
       <section id="sec-inventario" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Gestión de Almacén e Insumos</h3>
+            <h3>Gestión de Almacén e Insumos (SALH v2)</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'full-inventario-table')">
@@ -293,7 +297,7 @@
       <section id="sec-proveedores" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Órdenes de Compra Generadas Multi-Proveedor</h3>
+            <h3>Órdenes de Compra Generadas Multi-Proveedor (SALH v2)</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Buscar orden..." onkeyup="filterTable(this, 'oc-table')">
@@ -301,7 +305,7 @@
           </div>
           <table>
             <thead>
-              <tr><th>N° OC</th><th>Proveedor Ganador</th><th>Ítems Comprados</th><th>Costo Total</th><th>Estatus</th></tr>
+              <tr><th>N° OC v2</th><th>Proveedor Ganador</th><th>Ítems Comprados</th><th>Costo Total</th><th>Estatus</th></tr>
             </thead>
             <tbody id="oc-table"></tbody>
           </table>
@@ -312,7 +316,7 @@
       <section id="sec-beneficiarios" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Padrón de Beneficiarios (Motor Documental Traza-14)</h3>
+            <h3>Padrón de Beneficiarios (Motor Documental Traza-14 v2)</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Buscar beneficiario..." onkeyup="filterTable(this, 'beneficiarios-table')">
@@ -333,12 +337,12 @@
     </main>
   </div>
 
-  <!-- MODAL: RESULTADO DE SOURCING IA Y COMPARATIVA WEB -->
+  <!-- MODAL: RESULTADO DE SOURCING v2 -->
   <div id="modal-sourcing-resultado" class="modal-overlay hidden">
     <div class="modal-card" style="max-width: 900px;">
       <div class="modal-header">
         <div>
-          <h3 id="modal-sourcing-title">Resultado de Optimización de Compras por Ítem</h3>
+          <h3 id="modal-sourcing-title">Resultado de Optimización v2 por Ítem</h3>
           <p style="font-size: 0.85rem; color: #666;" id="modal-sourcing-subtitle"></p>
         </div>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-sourcing-resultado')"></i>
@@ -347,7 +351,7 @@
       <div style="display: flex; gap: 1rem; justify-content: flex-end;">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-sourcing-resultado')">Cerrar</button>
         <button type="button" class="btn btn-accent" onclick="confirmarYEmitirOCMultiProveedor()">
-          <i class="fa-solid fa-check-double"></i> Aprobar y Emitir Órdenes a Proveedores por Separado
+          <i class="fa-solid fa-check-double"></i> Aprobar y Emitir Órdenes Multi-Proveedor v2
         </button>
       </div>
     </div>
@@ -357,7 +361,7 @@
   <div id="modal-insumo" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Registrar Nuevo Insumo</h3>
+        <h3>Registrar Nuevo Insumo (SALH v2)</h3>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i>
       </div>
       <form id="form-insumo">
@@ -365,7 +369,7 @@
         <div class="form-group"><label>Categoría</label><input type="text" id="ins-categoria" placeholder="Ej. Alimentos, Medicina, Herramienta" required></div>
         <div class="form-group"><label>Cantidad Inicial</label><input type="number" id="ins-cantidad" required></div>
         <div class="form-group"><label>Almacén / Ubicación</label><input type="text" id="ins-ubicacion" required></div>
-        <button type="submit" class="btn btn-block">Guardar en Base Local</button>
+        <button type="submit" class="btn btn-block">Guardar en Base Local v2</button>
       </form>
     </div>
   </div>
@@ -374,12 +378,12 @@
   <div id="modal-beneficiario" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Registro de Beneficiario con Ingesta Automática (OCR)</h3>
+        <h3>Registro con Ingesta Automática OCR (SALH v2)</h3>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i>
       </div>
       <div style="margin-bottom: 1rem;">
         <button type="button" class="btn btn-accent btn-block" onclick="simularLecturaOCR()">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Simular Escaneo Automático de Cédula (Carga Instantánea)
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Simular Escaneo Automático de Cédula v2
         </button>
       </div>
       <form id="form-beneficiario">
@@ -397,7 +401,7 @@
     <div class="modal-card" style="max-width: 650px;">
       <div class="modal-header">
         <div>
-          <h3>Motor Documental Traza-14</h3>
+          <h3>Motor Documental Traza-14 v2</h3>
           <p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p>
         </div>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i>
@@ -405,14 +409,14 @@
 
       <div style="margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
-          <span>Progreso Automatizado:</span>
+          <span>Progreso Automatizado v2:</span>
           <strong id="porcentajeProgresoText">0% (0/14)</strong>
         </div>
         <div class="progress-bar-bg">
           <div id="barraProgreso14" class="h-full bg-amber-500 transition-all" style="width: 0%;"></div>
         </div>
         <button type="button" class="btn btn-secondary btn-block" style="margin-top: 0.5rem; font-size: 0.8rem;" onclick="autocompletarTraza14PorIA()">
-          <i class="fa-solid fa-bolt"></i> Autocompletar 14 Documentos por Validación de Contexto
+          <i class="fa-solid fa-bolt"></i> Autocompletar 14 Hitos por Contexto v2
         </button>
       </div>
 
@@ -435,47 +439,47 @@
 
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button>
-        <button type="button" class="btn" onclick="guardarProgresoChecklist()">Guardar Cambios</button>
+        <button type="button" class="btn" onclick="guardarProgresoChecklist()">Guardar Cambios v2</button>
       </div>
     </div>
   </div>
 
   <script>
-    // Estado local persistente
-    let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
-      { id: 1, nombre: 'Kit de Alimentos 20Kg', categoria: 'Alimentos', cantidad: 15, ubicacion: 'Almacén Central', stock_minimo: 30 },
-      { id: 2, nombre: 'Filtros de Agua Potable', categoria: 'Implementación', cantidad: 8, ubicacion: 'Almacén Regional', stock_minimo: 20 },
-      { id: 3, nombre: 'Kits Médicos de Emergencia', categoria: 'Medicina', cantidad: 5, ubicacion: 'Almacén Central', stock_minimo: 15 }
+    // Estado local persistente SALH v2
+    let cacheInventario = JSON.parse(localStorage.getItem('salh_v2_inventario')) || [
+      { id: 1, nombre: 'Kit de Alimentos 20Kg (v2)', categoria: 'Alimentos', cantidad: 15, ubicacion: 'Almacén Central v2', stock_minimo: 30 },
+      { id: 2, nombre: 'Filtros de Agua Potable', categoria: 'Implementación', cantidad: 8, ubicacion: 'Almacén Regional v2', stock_minimo: 20 },
+      { id: 3, nombre: 'Kits Médicos de Emergencia', categoria: 'Medicina', cantidad: 5, ubicacion: 'Almacén Central v2', stock_minimo: 15 }
     ];
 
-    let cacheBeneficiarios = JSON.parse(localStorage.getItem('salh_beneficiarios')) || [
+    let cacheBeneficiarios = JSON.parse(localStorage.getItem('salh_v2_beneficiarios')) || [
       { id: '1', documento: 'V-15489210', nombre: 'Carmen Rosa Silva', comunidad: 'Sector Las Marías', familiares: 4, checklist14: Array(14).fill(true) },
       { id: '2', documento: 'V-22104932', nombre: 'José Gregorio Rivas', comunidad: 'Barrio El Progreso', familiares: 3, checklist14: [true,true,true,true,false,false,false,false,false,false,false,false,false,false] }
     ];
 
-    let cacheOC = JSON.parse(localStorage.getItem('salh_oc')) || [
-      { id: 'OC-9021', proveedor: 'Múltiple (Optimizado por IA)', insumos: 'Arroz, Agua, Botiquines', costo: '$3,450.00', estado: 'Aprobada' }
+    let cacheOC = JSON.parse(localStorage.getItem('salh_v2_oc')) || [
+      { id: 'OC-v2-9021', proveedor: 'Múltiple (Optimizado SALH v2)', insumos: 'Arroz v2, Agua, Botiquines v2', costo: '$3,450.00', estado: 'Aprobada v2' }
     ];
 
     let currentBeneficiarioId = null;
     let ultimaOptimizacionSourcing = null;
 
-    // Base de datos de ítems por crisis con simulador de múltiples proveedores web
+    // Base de datos de ítems por crisis con simulador v2 de múltiples proveedores web
     const crisisItemsCatalogo = {
       'Inundación Severa en Zona Alta': [
-        { nombre: 'Filtros de Agua Portátiles', cantidad: 120, categoria: 'Saneamiento', webCatalogo: [
-            { proveedor: 'Aquatech Solutions Web', precioUnit: 14.50, tiempoEntrega: '24 hrs' },
+        { nombre: 'Filtros de Agua Portátiles v2', cantidad: 120, categoria: 'Saneamiento', webCatalogo: [
+            { proveedor: 'Aquatech Solutions Web v2', precioUnit: 14.50, tiempoEntrega: '24 hrs' },
             { proveedor: 'Distribuidora Sanitaria C.A.', precioUnit: 12.80, tiempoEntrega: '48 hrs' },
             { proveedor: 'Importadora Global Water', precioUnit: 15.00, tiempoEntrega: 'Inmediata' }
           ]
         },
-        { nombre: 'Botes Inflables de Rescate', cantidad: 4, categoria: 'Logística', webCatalogo: [
+        { nombre: 'Botes Inflables de Rescate v2', cantidad: 4, categoria: 'Logística', webCatalogo: [
             { proveedor: 'Marine & Rescue Online', precioUnit: 320.00, tiempoEntrega: '48 hrs' },
             { proveedor: 'Equipamientos Náuticos S.A.', precioUnit: 295.50, tiempoEntrega: '72 hrs' },
             { proveedor: 'Global Outdoor Store', precioUnit: 340.00, tiempoEntrega: '24 hrs' }
           ]
         },
-        { nombre: 'Mantas Térmicas Impermeables', cantidad: 250, categoria: 'Refugio', webCatalogo: [
+        { nombre: 'Mantas Térmicas Impermeables v2', cantidad: 250, categoria: 'Refugio', webCatalogo: [
             { proveedor: 'Textiles de Emergencia C.A.', precioUnit: 3.20, tiempoEntrega: '24 hrs' },
             { proveedor: 'Comercializadora Andina', precioUnit: 2.90, tiempoEntrega: '48 hrs' },
             { proveedor: 'MegaMayorista Express', precioUnit: 3.50, tiempoEntrega: 'Inmediata' }
@@ -483,19 +487,19 @@
         }
       ],
       'Crisis Alimentaria Comunitaria': [
-        { nombre: 'Sacos de Arroz 20Kg', cantidad: 80, categoria: 'Alimentos', webCatalogo: [
+        { nombre: 'Sacos de Arroz 20Kg v2', cantidad: 80, categoria: 'Alimentos', webCatalogo: [
             { proveedor: 'Cereales del Sur S.A.', precioUnit: 22.00, tiempoEntrega: '24 hrs' },
             { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 20.50, tiempoEntrega: '48 hrs' },
             { proveedor: 'Distribuidora Central Web', precioUnit: 21.80, tiempoEntrega: 'Inmediata' }
           ]
         },
-        { nombre: 'Aceite Comestible (Bidón 5L)', cantidad: 60, categoria: 'Alimentos', webCatalogo: [
+        { nombre: 'Aceite Comestible (Bidón 5L) v2', cantidad: 60, categoria: 'Alimentos', webCatalogo: [
             { proveedor: 'Aceites y Grasas del País', precioUnit: 11.50, tiempoEntrega: '24 hrs' },
             { proveedor: 'Alimentos Mayoristas C.A.', precioUnit: 10.90, tiempoEntrega: '48 hrs' },
             { proveedor: 'Supermercados Asociados B2B', precioUnit: 12.00, tiempoEntrega: '24 hrs' }
           ]
         },
-        { nombre: 'Enlatados de Atún (Pack x24)', cantidad: 50, categoria: 'Alimentos', webCatalogo: [
+        { nombre: 'Enlatados de Atún (Pack x24) v2', cantidad: 50, categoria: 'Alimentos', webCatalogo: [
             { proveedor: 'Procesadora Pesquera C.A.', precioUnit: 34.00, tiempoEntrega: '48 hrs' },
             { proveedor: 'Comercializadora Global', precioUnit: 31.50, tiempoEntrega: '24 hrs' },
             { proveedor: 'MegaMayorista Express', precioUnit: 33.00, tiempoEntrega: 'Inmediata' }
@@ -503,13 +507,13 @@
         }
       ],
       'Apoyo Médico de Urgencia': [
-        { nombre: 'Botiquines de Primeros Auxilios (Tipo A)', cantidad: 40, categoria: 'Medicina', webCatalogo: [
+        { nombre: 'Botiquines de Primeros Auxilios v2', cantidad: 40, categoria: 'Medicina', webCatalogo: [
             { proveedor: 'Droguería e Insumos Médicos S.A.', precioUnit: 45.00, tiempoEntrega: '12 hrs' },
             { proveedor: 'Farmacéutica Nacional Web', precioUnit: 42.50, tiempoEntrega: '24 hrs' },
             { proveedor: 'Medical Supply Express', precioUnit: 48.00, tiempoEntrega: 'Inmediata' }
           ]
         },
-        { nombre: 'Antibióticos de Amplio Espectro (Cajas)', cantidad: 100, categoria: 'Medicina', webCatalogo: [
+        { nombre: 'Antibióticos de Amplio Espectro v2', cantidad: 100, categoria: 'Medicina', webCatalogo: [
             { proveedor: 'Farmacéutica Nacional Web', precioUnit: 18.20, tiempoEntrega: '24 hrs' },
             { proveedor: 'Laboratorios Unidos C.A.', precioUnit: 16.90, tiempoEntrega: '48 hrs' },
             { proveedor: 'Droguería e Insumos Médicos S.A.', precioUnit: 17.50, tiempoEntrega: 'Inmediata' }
@@ -518,7 +522,7 @@
       ]
     };
 
-    // Inicialización del sistema
+    // Inicialización del sistema v2
     document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
       document.getElementById('login-screen').style.display = 'none';
@@ -527,9 +531,9 @@
     });
 
     function guardarEstado() {
-      localStorage.setItem('salh_inventario', JSON.stringify(cacheInventario));
-      localStorage.setItem('salh_beneficiarios', JSON.stringify(cacheBeneficiarios));
-      localStorage.setItem('salh_oc', JSON.stringify(cacheOC));
+      localStorage.setItem('salh_v2_inventario', JSON.stringify(cacheInventario));
+      localStorage.setItem('salh_v2_beneficiarios', JSON.stringify(cacheBeneficiarios));
+      localStorage.setItem('salh_v2_oc', JSON.stringify(cacheOC));
     }
 
     function showSection(secId) {
@@ -567,7 +571,7 @@
             <td>${i.categoria}</td>
             <td>${i.cantidad} unidades</td>
             <td>${i.ubicacion}</td>
-            <td><span class="badge ${critico ? 'badge-alert' : 'badge-ok'}">${critico ? 'Stock Crítico (Sourcing IA)' : 'Óptimo'}</span></td>
+            <td><span class="badge ${critico ? 'badge-alert' : 'badge-ok'}">${critico ? 'Stock Crítico (Sourcing v2)' : 'Óptimo'}</span></td>
           </tr>
         `;
       }).join('');
@@ -595,7 +599,7 @@
             </td>
             <td>
               <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')">
-                <i class="fa-solid fa-list-check"></i> Traza-14
+                <i class="fa-solid fa-list-check"></i> Traza-14 v2
               </button>
             </td>
           </tr>
@@ -626,29 +630,27 @@
       });
     }
 
-    // Funciones del Motor Sourcing IA y Web Scraping
+    // Funciones del Motor Sourcing v2 y Web Scraping
     async function ejecutarSourcingIA(tipoCrisis) {
       const terminal = document.getElementById('salh-terminal');
       const presupuesto = parseFloat(document.getElementById('input-presupuesto').value) || 5000;
       const criterio = document.getElementById('select-criterio').value;
       
-      terminal.innerHTML = `[SALH_SOURCING] Iniciando ciclo para crisis: "${tipoCrisis}"...\n`;
-      terminal.innerHTML += `[SCRAPING] Conectando con pasarelas de proveedores B2B locales y regionales...\n`;
+      terminal.innerHTML = `[SALH_v2_SOURCING] Iniciando ciclo para crisis: "${tipoCrisis}"...\n`;
+      terminal.innerHTML += `[SCRAPING_v2] Conectando con pasarelas web de múltiples proveedores en paralelo...\n`;
       
       await new Promise(r => setTimeout(r, 600));
-      terminal.innerHTML += `[IA] Analizando catálogos en tiempo real y aplicando criterio: ${criterio.toUpperCase()}...\n`;
+      terminal.innerHTML += `[IA_v2] Analizando catálogos y aplicando regla de optimización: ${criterio.toUpperCase()}...\n`;
 
       const items = crisisItemsCatalogo[tipoCrisis] || [];
       let itemsSeleccionados = [];
       let costoTotalGeneral = 0;
 
       items.forEach(item => {
-        // Ordenar según criterio
         let catalogoOrdenado = [...item.webCatalogo];
         if (criterio === 'precio') {
           catalogoOrdenado.sort((a, b) => a.precioUnit - b.precioUnit);
         } else {
-          // Mixto: ponderación simple de precio y entrega rápida
           catalogoOrdenado.sort((a, b) => {
             let scoreA = a.precioUnit + (a.tiempoEntrega.includes('12') || a.tiempoEntrega.includes('24') ? 0 : 5);
             let scoreB = b.precioUnit + (b.tiempoEntrega.includes('12') || b.tiempoEntrega.includes('24') ? 0 : 5);
@@ -679,23 +681,22 @@
       };
 
       await new Promise(r => setTimeout(r, 800));
-      terminal.innerHTML += `[EXITO] Sourcing completado con éxito. Costo Total Optimizado: $${costoTotalGeneral.toFixed(2)}\n`;
-      terminal.innerHTML += `[INTERFAZ] Desplegando desglose detallado de ofertas por ítem...`;
+      terminal.innerHTML += `[EXITO_v2] Sourcing completado. Costo Total Optimizado v2: $${costoTotalGeneral.toFixed(2)}\n`;
+      terminal.innerHTML += `[INTERFAZ] Desplegando desglose detallado de ofertas web por ítem...`;
 
-      // Mostrar Modal con Resultados
       mostrarModalResultadosSourcing(ultimaOptimizacionSourcing);
     }
 
     function mostrarModalResultadosSourcing(data) {
-      document.getElementById('modal-sourcing-title').innerText = `Optimización: ${data.crisis}`;
-      document.getElementById('modal-sourcing-subtitle').innerText = `Presupuesto disponible: $${data.presupuestoMax.toFixed(2)} | Costo Estimado: $${data.costoTotal.toFixed(2)}`;
+      document.getElementById('modal-sourcing-title').innerText = `Optimización v2: ${data.crisis}`;
+      document.getElementById('modal-sourcing-subtitle').innerText = `Presupuesto disponible: $${data.presupuestoMax.toFixed(2)} | Costo Estimado v2: $${data.costoTotal.toFixed(2)}`;
 
       let html = `
         <table style="width:100%; font-size:0.85rem;">
           <thead>
             <tr>
               <th>Ítem y Cantidad</th>
-              <th>Proveedor Seleccionado (Mejor Oferta)</th>
+              <th>Proveedor Ganador (Web Scraping v2)</th>
               <th>Precio Unit.</th>
               <th>Subtotal</th>
               <th>Entrega</th>
@@ -724,32 +725,31 @@
     function confirmarYEmitirOCMultiProveedor() {
       if (!ultimaOptimizacionSourcing) return;
 
-      const nuevaOCId = `OC-${Math.floor(1000 + Math.random() * 9000)}`;
+      const nuevaOCId = `OC-v2-${Math.floor(1000 + Math.random() * 9000)}`;
       const nombresInsumos = ultimaOptimizacionSourcing.items.map(i => i.nombre).join(', ');
       
       cacheOC.unshift({
         id: nuevaOCId,
-        proveedor: 'Múltiple / Multi-Proveedor IA',
+        proveedor: 'Múltiple / Multi-Proveedor v2',
         insumos: nombresInsumos,
         costo: `$${ultimaOptimizacionSourcing.costoTotal.toFixed(2)}`,
-        estado: 'Emitida / En Proceso'
+        estado: 'Emitida v2 / En Proceso'
       });
 
-      // Añadir al inventario local
       ultimaOptimizacionSourcing.items.forEach(i => {
         cacheInventario.push({
           id: cacheInventario.length + 1,
           nombre: i.nombre,
           categoria: i.categoria,
           cantidad: i.cantidad,
-          ubicacion: 'Almacén Central (Tránsito)'
+          ubicacion: 'Almacén Central (Tránsito v2)'
         });
       });
 
       renderizarTodo();
       closeModal('modal-sourcing-resultado');
       showSection('sec-proveedores');
-      alert(`¡Órdenes de Compra multi-proveedor emitidas con éxito bajo el código ${nuevaOCId}!`);
+      alert(`¡Órdenes de Compra multi-proveedor emitidas con éxito bajo el código ${nuevaOCId} (SALH v2)!`);
     }
 
     // Formularios adicionales
@@ -803,7 +803,7 @@
       openModal('modalChecklist14');
     }
 
-    document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => {
+    document.querySelectorAll('#contenedorHions14 input[type="checkbox"]')?.forEach(chk => {
       chk.addEventListener('change', actualizarBarraChecklist);
     });
 
