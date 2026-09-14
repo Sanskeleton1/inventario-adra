@@ -10,6 +10,7 @@
       --primary: #008559;
       --primary-dark: #006040;
       --accent: #2563eb;
+      --ai-color: #8b5cf6; /* Color morado para acciones IA */
       --bg-color: #f4f7f6;
       --sidebar-width: 260px;
       --text-color: #333;
@@ -46,6 +47,8 @@
     .btn-accent:hover { background: #1d4ed8; }
     .btn-danger { background: #dc2626; color: #fff; }
     .btn-danger:hover { background: #b91c1c; }
+    .btn-ia { background: var(--ai-color); color: #fff; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+    .btn-ia:hover { background: #7c3aed; }
 
     /* Layout Principal */
     #app-screen { display: flex; width: 100%; }
@@ -99,6 +102,7 @@
     .badge-alert { background: #ffebee; color: #c62828; }
     .badge-blue { background: #e0f2fe; color: #0369a1; }
     .badge-gray { background: #f1f5f9; color: #64748b; }
+    .badge-ai { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
 
     /* SALH Panel Inteligente */
     .salh-panel { background: linear-gradient(135deg, #004d33 0%, #008559 100%); color: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
@@ -116,15 +120,14 @@
 
     /* Modal Overlay */
     .hidden { display: none !important; }
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
-      display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 1rem;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 1rem; }
     .modal-card { background: #fff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .modal-close { cursor: pointer; font-size: 1.2rem; color: #888; }
+    .modal-close { cursor: pointer; font-size: 1.2rem; color: #888; transition: 0.2s; }
+    .modal-close:hover { color: #dc2626; }
     
-    .chk-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; background: #fff; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; }
+    .chk-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; background: #fff; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.25rem; }
+    .chk-item:hover { border-color: #cbd5e1; background: #f8fafc; }
     
     /* Ficha Perfil Personal */
     .perfil-card { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
@@ -137,6 +140,8 @@
     .perfil-grid div strong { color: #334155; font-size: 0.95rem; }
     .stars { color: #f59e0b; font-size: 0.9rem; }
 
+    .checklist-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin: 1rem 0; }
+    @media (min-width: 640px) { .checklist-grid { grid-template-columns: 1fr 1fr; } }
     .progress-bar-bg { background-color: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem; }
     .bg-amber-500 { background-color: #f59e0b; }
     .bg-blue-600 { background-color: #2563eb; }
@@ -145,6 +150,8 @@
     .h-full { height: 100%; }
 
     .log-terminal { background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 220px; overflow-y: auto; margin-top: 1rem; line-height: 1.4; }
+    
+    .ia-reasoning-box { background: #ede9fe; border: 1px solid #c4b5fd; padding: 1rem; border-radius: 8px; color: #4c1d95; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
   </style>
 </head>
 <body>
@@ -153,7 +160,7 @@
   <div id="login-screen">
     <div class="login-card">
       <h2><i class="fa-solid fa-brain"></i> SALH v2 - ADRA</h2>
-      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Gestión de RRHH, Proyectos y Logística</p>
+      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Gestión de RRHH, Proyectos y Logística IA</p>
       <form id="login-form">
         <div class="form-group">
           <label>Credencial de Acceso</label>
@@ -190,26 +197,27 @@
           <ul>
             <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard Central</a></li>
             <li><a onclick="showSection('sec-proyectos')" id="nav-proyectos"><i class="fa-solid fa-diagram-project"></i> Proyectos y RRHH</a></li>
-            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo</a></li>
-            <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén & Stock</a></li>
-            <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón & Traza-14</a></li>
+            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo IA</a></li>
+            <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén e Inventario</a></li>
+            <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes de Compra</a></li>
+            <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón y Traza-14</a></li>
           </ul>
         </nav>
       </div>
       <div class="offline-badge">
-        <i class="fa-solid fa-wifi"></i> <span>Sistema En Línea</span>
+        <i class="fa-solid fa-microchip"></i> <span>Motor IA Optimizado</span>
       </div>
     </sidebar>
 
     <main>
       <header>
-        <h2 id="section-title">Panel de Control Operativo</h2>
+        <h2 id="section-title">Centro de Mando Logístico y RRHH</h2>
         <div class="user-profile" id="user-display">
           <i class="fa-solid fa-user-shield"></i> Operador
         </div>
       </header>
 
-      <!-- SECCIÓN: DASHBOARD -->
+      <!-- SECCIÓN 1: DASHBOARD -->
       <section id="sec-dashboard" class="view-section active">
         <div class="metrics-grid">
           <div class="card">
@@ -221,17 +229,34 @@
             <div class="value" style="color: #2563eb;" id="m-proyectos">0</div>
           </div>
           <div class="card orange">
-            <div class="title">Insumos Críticos</div>
+            <div class="title">Alertas Stock Crítico</div>
             <div class="value" style="color: #d97706;" id="m-criticos">0</div>
           </div>
           <div class="card purple">
-            <div class="title">Beneficiarios</div>
+            <div class="title">Beneficiarios Traza-14</div>
             <div class="value" style="color: #7c3aed;" id="m-beneficiarios">0</div>
           </div>
         </div>
+
+        <!-- Inventario global en el dashboard -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Estado del Inventario Global</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Filtrar inventario..." onkeyup="filterTable(this, 'dash-table')">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén</th><th>Estado IA</th></tr>
+            </thead>
+            <tbody id="dash-table"></tbody>
+          </table>
+        </div>
       </section>
 
-      <!-- SECCIÓN: PROYECTOS Y RRHH -->
+      <!-- SECCIÓN 2: PROYECTOS Y RRHH -->
       <section id="sec-proyectos" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -255,7 +280,7 @@
 
         <div class="table-container">
           <div class="table-header">
-            <h3>Directorio de Personal (Base de Datos)</h3>
+            <h3>Directorio Central de Personal</h3>
             <div class="search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" placeholder="Filtrar personal..." onkeyup="filterTable(this, 'personal-table')">
@@ -270,55 +295,146 @@
         </div>
       </section>
 
-      <!-- SECCIONES OCULTAS (SALH, INVENTARIO, BENEFICIARIOS) -->
+      <!-- SECCIÓN 3: MOTOR AUTÓNOMO DE SOURCING (SALH) -->
       <section id="sec-salh" class="view-section">
         <div class="salh-panel">
-          <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo</h3>
-          <p>Módulo de IA y presupuestos.</p>
+          <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo y Comparador Web por IA</h3>
+          <p>La inteligencia artificial desglosará ítems necesarios, rastreará webs de proveedores y optimizará el presupuesto de compras en tiempo real para armar las mejores órdenes de suministro.</p>
+          
+          <div class="config-grid">
+            <div>
+              <label>Presupuesto Máximo Disponible ($)</label>
+              <input type="number" id="input-presupuesto" value="5000" min="100" step="50">
+            </div>
+            <div>
+              <label>Criterio de Negociación IA</label>
+              <select id="select-criterio">
+                <option value="precio">Optimizar Estricto por Menor Precio</option>
+                <option value="mixto">Balanceado (Precio + Rapidez de Entrega)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="crisis-triggers">
+            <button class="crisis-btn" onclick="ejecutarSourcingIA('Inundación Severa en Zona Alta')">
+              <i class="fa-solid fa-house-flood-water"></i> Inundación Severa (Catálogo)
+            </button>
+            <button class="crisis-btn" onclick="ejecutarSourcingIA('Crisis Alimentaria Comunitaria')">
+              <i class="fa-solid fa-bowl-food"></i> Crisis Alimentaria (Catálogo)
+            </button>
+            <button class="crisis-btn" onclick="ejecutarSourcingIA('Apoyo Médico de Urgencia')">
+              <i class="fa-solid fa-kit-medical"></i> Emergencia Médica (Catálogo)
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <h3>Consola de Web Scraping y Negociación Multivendedor</h3>
+          <div class="log-terminal" id="salh-terminal">
+            [SALH_SOURCING] Motor IA en línea y a la espera de instrucciones...
+          </div>
         </div>
       </section>
+
+      <!-- SECCIÓN 4: INVENTARIO Y ALMACÉN -->
       <section id="sec-inventario" class="view-section">
-        <div class="table-container"><h3>Almacén e Insumos</h3></div>
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Gestión de Almacén e Insumos</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'full-inventario-table')">
+            </div>
+            <button class="btn btn-ia" onclick="openModal('modal-insumo')"><i class="fa-solid fa-plus"></i> Ingresar Ítem Manual</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Insumo</th><th>Categoría</th><th>Cantidad</th><th>Ubicación</th><th>Automatización IA</th></tr>
+            </thead>
+            <tbody id="full-inventario-table"></tbody>
+          </table>
+        </div>
       </section>
+
+      <!-- SECCIÓN 5: ÓRDENES DE COMPRA (PROVEEDORES) -->
+      <section id="sec-proveedores" class="view-section">
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Órdenes de Compra (Optimizadas por Sourcing IA)</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar orden..." onkeyup="filterTable(this, 'oc-table')">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>N° OC</th><th>Proveedor(es)</th><th>Ítems Comprados</th><th>Costo Total</th><th>Estado Sistema</th></tr>
+            </thead>
+            <tbody id="oc-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 6: BENEFICIARIOS Y TRAZA-14 -->
       <section id="sec-beneficiarios" class="view-section">
-        <div class="table-container"><h3>Padrón Traza-14</h3></div>
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Padrón de Beneficiarios (Motor Documental Traza-14)</h3>
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Buscar beneficiario..." onkeyup="filterTable(this, 'beneficiarios-table')">
+            </div>
+            <button class="btn btn-ia" onclick="openModal('modal-beneficiario')">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo Beneficiario (OCR)
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Cédula</th><th>Nombre</th><th>Comunidad</th><th>Familiar</th><th>Progreso Traza-14</th><th>Auditoría</th></tr>
+            </thead>
+            <tbody id="beneficiarios-table"></tbody>
+          </table>
+        </div>
       </section>
+
     </main>
   </div>
 
-  <!-- MODAL: CREAR PROYECTO (RRHH) -->
+  <!-- MODAL: CREAR PROYECTO CON IA (RRHH) -->
   <div id="modal-proyecto" class="modal-overlay hidden">
     <div class="modal-card" style="max-width: 650px;">
       <div class="modal-header">
-        <h3>Crear Proyecto e Ingestar Personal</h3>
+        <h3>Crear Proyecto y Configurar Equipo</h3>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-proyecto')"></i>
       </div>
       <form id="form-proyecto">
         <div class="form-group">
           <label>Nombre del Proyecto</label>
-          <input type="text" id="proy-nombre" placeholder="Ej. Operación Rescate Norte" required>
-        </div>
-        
-        <div style="margin-bottom: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
-          <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.8rem;">
-            <strong>Nota de Contratación:</strong> Solo se muestra el personal de rango inferior al tuyo que se encuentre <strong>Disponible</strong> actualmente. Haz clic en "Ficha" para ver detalles técnicos y de departamento antes de seleccionar.
-          </p>
+          <div style="display:flex; gap: 0.5rem;">
+            <input type="text" id="proy-nombre" placeholder="Ej. Operación Médica Frontera" required style="flex:1;">
+            <button type="button" class="btn btn-ia" onclick="ejecutarAutoSeleccionIA()" title="Selección Inteligente según nombre del proyecto">
+              <i class="fa-solid fa-robot"></i> Auto-Selección IA
+            </button>
+          </div>
+          <small style="color:#666;">La IA analizará el nombre para formar el equipo ideal.</small>
         </div>
 
+        <!-- Caja de Razonamiento IA -->
+        <div id="ia-reasoning-box" class="ia-reasoning-box"></div>
+        
         <div class="form-group">
-          <label>Candidatos Disponibles</label>
+          <label>Candidatos Disponibles (Rango Inferior al Tuyo)</label>
           <div id="lista-seleccion-personal" style="max-height: 250px; overflow-y: auto; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5rem;">
             <!-- Renderizado dinámico -->
           </div>
         </div>
 
-        <button type="submit" class="btn btn-block btn-accent"><i class="fa-solid fa-save"></i> Registrar Proyecto y Asignar Personal</button>
+        <button type="submit" class="btn btn-block btn-accent"><i class="fa-solid fa-save"></i> Iniciar Proyecto y Desplegar Personal</button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: FICHA DE PERFIL PERSONAL -->
-  <!-- Z-index mayor para que aparezca por encima del modal de proyecto -->
+  <!-- MODAL: FICHA DE PERFIL PERSONAL (Sobre el modal de proyectos) -->
   <div id="modal-perfil-personal" class="modal-overlay hidden" style="z-index: 2500;">
     <div class="modal-card" style="max-width: 450px; padding: 0; overflow: hidden;">
       <div class="perfil-card">
@@ -329,28 +445,14 @@
           <div class="perfil-avatar" id="perf-inicial">A</div>
           <h3 id="perf-nombre" style="margin-bottom: 0.2rem;">Nombre Apellido</h3>
           <p id="perf-rango" style="color: #64748b; font-size: 0.85rem; font-weight: bold;">Rango</p>
-          <div style="margin-top: 0.5rem;" id="perf-estrellas">
-            <i class="fa-solid fa-star stars"></i><i class="fa-solid fa-star stars"></i><i class="fa-solid fa-star stars"></i><i class="fa-solid fa-star stars"></i><i class="fa-solid fa-star-half-stroke stars"></i>
-          </div>
+          <div style="margin-top: 0.5rem;" id="perf-estrellas"></div>
         </div>
         <div class="perfil-body">
           <div class="perfil-grid">
-            <div>
-              <span>Cédula Identidad</span>
-              <strong id="perf-cedula">V-00000000</strong>
-            </div>
-            <div>
-              <span>Departamento</span>
-              <strong id="perf-depto">Logística</strong>
-            </div>
-            <div style="grid-column: span 2;">
-              <span>Habilidades Técnicas</span>
-              <strong id="perf-habilidades">Conducción, Primeros Auxilios</strong>
-            </div>
-            <div style="grid-column: span 2;">
-              <span>Experiencia Relevante</span>
-              <strong id="perf-experiencia" style="font-weight: normal; font-size: 0.9rem;">Participación en rescates 2024. Alto nivel de respuesta bajo presión.</strong>
-            </div>
+            <div><span>Cédula Identidad</span><strong id="perf-cedula">V-00000000</strong></div>
+            <div><span>Departamento</span><strong id="perf-depto">Logística</strong></div>
+            <div style="grid-column: span 2;"><span>Habilidades Técnicas</span><strong id="perf-habilidades">Conducción, Primeros Auxilios</strong></div>
+            <div style="grid-column: span 2;"><span>Experiencia / Desempeño</span><strong id="perf-experiencia" style="font-weight: normal; font-size: 0.9rem;">Sin registro previo.</strong></div>
           </div>
           <button type="button" class="btn btn-block" onclick="closeModal('modal-perfil-personal')">Cerrar Ficha</button>
         </div>
@@ -358,45 +460,172 @@
     </div>
   </div>
 
+  <!-- MODAL: RESULTADO DE SOURCING IA -->
+  <div id="modal-sourcing-resultado" class="modal-overlay hidden" style="z-index: 3000;">
+    <div class="modal-card" style="max-width: 900px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-sourcing-title">Optimización Multivendedor Finalizada</h3>
+          <p style="font-size: 0.85rem; color: #666;" id="modal-sourcing-subtitle"></p>
+        </div>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-sourcing-resultado')"></i>
+      </div>
+      <div id="modal-sourcing-content" style="margin-bottom: 1.5rem; overflow-x: auto;"></div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-sourcing-resultado')">Descartar</button>
+        <button type="button" class="btn btn-ia" onclick="confirmarYEmitirOCMultiProveedor()">
+          <i class="fa-solid fa-file-signature"></i> Autorizar Emisión Automática de Órdenes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO INSUMO -->
+  <div id="modal-insumo" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Registrar Insumo Manual</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i>
+      </div>
+      <form id="form-insumo">
+        <div class="form-group"><label>Nombre del Insumo</label><input type="text" id="ins-nombre" required></div>
+        <div class="form-group"><label>Categoría</label><input type="text" id="ins-categoria" placeholder="Ej. Alimentos, Medicina, Herramienta" required></div>
+        <div class="form-group"><label>Cantidad Inicial</label><input type="number" id="ins-cantidad" required></div>
+        <div class="form-group"><label>Almacén / Ubicación</label><input type="text" id="ins-ubicacion" required></div>
+        <button type="submit" class="btn btn-block">Registrar en Base de Datos</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVO BENEFICIARIO (OCR IA) -->
+  <div id="modal-beneficiario" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Ingesta Inteligente de Beneficiario</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i>
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <button type="button" class="btn btn-ia btn-block" onclick="simularLecturaOCR()">
+          <i class="fa-solid fa-camera-viewfinder"></i> Escanear Documento (Extracción IA)
+        </button>
+      </div>
+      <form id="form-beneficiario">
+        <div class="form-group"><label>Cédula Documento</label><input type="text" id="ben-doc" required></div>
+        <div class="form-group"><label>Nombre Completo</label><input type="text" id="ben-nombre" required></div>
+        <div class="form-group"><label>Comunidad Identificada</label><input type="text" id="ben-comunidad" required></div>
+        <div class="form-group"><label>Carga Familiar (Análisis Social)</label><input type="number" id="ben-familiares" value="1" min="1" required></div>
+        <button type="submit" class="btn btn-block">Guardar e Iniciar Traza-14</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CHECKLIST TRAZA-14 -->
+  <div id="modalChecklist14" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <h3>Gestor Documental Traza-14</h3>
+          <p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p>
+        </div>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+          <span>Integridad Expediente:</span>
+          <strong id="porcentajeProgresoText">0% (0/14)</strong>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="barraProgreso14" class="h-full bg-amber-500 transition-all" style="width: 0%;"></div>
+        </div>
+        <button type="button" class="btn btn-ia btn-block" style="margin-top: 0.5rem; font-size: 0.85rem;" onclick="autocompletarTraza14PorIA()">
+          <i class="fa-solid fa-bolt-lightning"></i> Validación IA Contextual (Aprobar Expediente)
+        </button>
+      </div>
+
+      <div class="checklist-grid" id="contenedorHitos14">
+        <label class="chk-item"><input type="checkbox"> 1. Documento Identidad</label>
+        <label class="chk-item"><input type="checkbox"> 2. RIF Vigente</label>
+        <label class="chk-item"><input type="checkbox"> 3. Constancia Residencial</label>
+        <label class="chk-item"><input type="checkbox"> 4. Carta de Solicitud</label>
+        <label class="chk-item"><input type="checkbox"> 5. Certificado Médico</label>
+        <label class="chk-item"><input type="checkbox"> 6. Informe Social</label>
+        <label class="chk-item"><input type="checkbox"> 7. Presupuesto Formal</label>
+        <label class="chk-item"><input type="checkbox"> 8. Fotos de Soporte</label>
+        <label class="chk-item"><input type="checkbox"> 9. Planilla de Registro</label>
+        <label class="chk-item"><input type="checkbox"> 10. Carta Compromiso</label>
+        <label class="chk-item"><input type="checkbox"> 11. Referencia Personal</label>
+        <label class="chk-item"><input type="checkbox"> 12. Inspección Técnica</label>
+        <label class="chk-item"><input type="checkbox"> 13. Aprobación Comité</label>
+        <label class="chk-item"><input type="checkbox"> 14. Acta Entregable</label>
+      </div>
+
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button>
+        <button type="button" class="btn" onclick="guardarProgresoChecklist()">Sincronizar Cambios</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Configuración de Rangos
-    const NOMBRES_RANGOS = {
-      1: 'Director País',
-      2: 'Gerente de RRHH',
-      3: 'Gerente',
-      4: 'Oficial / Coordinador',
-      5: 'Asistente',
-      6: 'Voluntario'
-    };
-
+    // Configuración Base
+    const NOMBRES_RANGOS = { 1: 'Director País', 2: 'Gerente de RRHH', 3: 'Gerente', 4: 'Oficial / Coordinador', 5: 'Asistente', 6: 'Voluntario' };
     let currentUserRol = 6; 
+    let currentBeneficiarioId = null;
+    let ultimaOptimizacionSourcing = null;
 
-    // Base de Datos Mock
+    // --- BASES DE DATOS LOCALES ---
     let cachePersonal = JSON.parse(localStorage.getItem('salh_personal')) || [
-      { id: 'P1', cedula: 'V-15890234', nombre: 'Roberto Gómez', rango: 3, departamento: 'Operaciones', habilidades: 'Logística de Terreno, Liderazgo', experiencia: 'Coordinó despliegue en zona sur (2025).', estrellas: 5, estado: 'Disponible', proyecto: 'Ninguno' },
-      { id: 'P2', cedula: 'V-22109432', nombre: 'Lucía Méndez', rango: 4, departamento: 'Salud / Médico', habilidades: 'Paramédico, Triaje', experiencia: 'Rescatista certificada Cruz Roja.', estrellas: 4.5, estado: 'Ocupada', proyecto: 'Censo Zona Norte' },
-      { id: 'P3', cedula: 'V-19882312', nombre: 'Carlos Ruiz', rango: 4, departamento: 'Logística', habilidades: 'Manejo Flota 4x4, Inventario', experiencia: 'Manejo de almacenes regionales.', estrellas: 4, estado: 'Disponible', proyecto: 'Ninguno' },
-      { id: 'P4', cedula: 'V-26001239', nombre: 'Ana Torroja', rango: 5, departamento: 'Comunicaciones', habilidades: 'Radioperador, Redes', experiencia: 'Gestión de crisis mediática.', estrellas: 5, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P1', cedula: 'V-15890234', nombre: 'Roberto Gómez', rango: 3, departamento: 'Operaciones', habilidades: 'Logística de Terreno, Liderazgo', experiencia: 'Alta capacidad organizativa.', estrellas: 5, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P2', cedula: 'V-22109432', nombre: 'Lucía Méndez', rango: 4, departamento: 'Salud / Médico', habilidades: 'Paramédico, Triaje', experiencia: 'Cruz Roja. Atención de traumas.', estrellas: 4.8, estado: 'Ocupada', proyecto: 'Censo Zona Norte' },
+      { id: 'P3', cedula: 'V-19882312', nombre: 'Carlos Ruiz', rango: 4, departamento: 'Logística', habilidades: 'Manejo Flota 4x4, Inventario', experiencia: 'Manejo de almacenes.', estrellas: 4.2, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P4', cedula: 'V-26001239', nombre: 'Ana Torroja', rango: 5, departamento: 'Comunicaciones', habilidades: 'Radioperador, Redes', experiencia: 'Gestión de crisis mediática.', estrellas: 4.9, estado: 'Disponible', proyecto: 'Ninguno' },
       { id: 'P5', cedula: 'V-27456781', nombre: 'Miguel Santos', rango: 5, departamento: 'Seguridad', habilidades: 'Evaluación de Riesgos', experiencia: 'Ex-bombero, protocolos de seguridad.', estrellas: 3.5, estado: 'Disponible', proyecto: 'Ninguno' },
       { id: 'P6', cedula: 'V-29001222', nombre: 'Elena Vásquez', rango: 6, departamento: 'Voluntariado General', habilidades: 'Distribución de Alimentos', experiencia: 'Apoyo en 3 campamentos.', estrellas: 4, estado: 'Ocupada', proyecto: 'Censo Zona Norte' },
-      { id: 'P7', cedula: 'V-30112334', nombre: 'Pedro Castillo', rango: 6, departamento: 'Voluntariado General', habilidades: 'Fuerza Física, Armado de Carpas', experiencia: 'Sin experiencia previa.', estrellas: 3, estado: 'Disponible', proyecto: 'Ninguno' }
+      { id: 'P7', cedula: 'V-30112334', nombre: 'Pedro Castillo', rango: 6, departamento: 'Voluntariado General', habilidades: 'Fuerza Física, Armado', experiencia: 'Sin experiencia previa.', estrellas: 3.2, estado: 'Disponible', proyecto: 'Ninguno' },
+      { id: 'P8', cedula: 'V-24555111', nombre: 'Sara Montero', rango: 5, departamento: 'Salud / Médico', habilidades: 'Enfermería, Farmacia', experiencia: 'Clínica de campaña en inundación.', estrellas: 4.7, estado: 'Disponible', proyecto: 'Ninguno' }
     ];
 
     let cacheProyectos = JSON.parse(localStorage.getItem('salh_proyectos')) || [
       { id: 'PR-01', nombre: 'Censo Zona Norte', creadorNombre: 'Admin Central', rangoCreador: 1, personalAsignado: 2, estado: 'En Ejecución' }
     ];
 
-    // Login
+    let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
+      { id: 1, nombre: 'Kit de Alimentos 20Kg', categoria: 'Alimentos', cantidad: 45, ubicacion: 'Almacén Central' },
+      { id: 2, nombre: 'Filtros de Agua Portátiles', categoria: 'Implementación', cantidad: 8, ubicacion: 'Almacén Regional' },
+      { id: 3, nombre: 'Kits Médicos de Emergencia', categoria: 'Medicina', cantidad: 5, ubicacion: 'Almacén Sur' }
+    ];
+
+    let cacheBeneficiarios = JSON.parse(localStorage.getItem('salh_beneficiarios')) || [
+      { id: '1', documento: 'V-15489210', nombre: 'Carmen Rosa Silva', comunidad: 'Sector Las Marías', familiares: 4, checklist14: Array(14).fill(true) },
+      { id: '2', documento: 'V-22104932', nombre: 'José Gregorio Rivas', comunidad: 'Barrio El Progreso', familiares: 3, checklist14: [true,true,true,true,false,false,false,false,false,false,false,false,false,false] }
+    ];
+
+    let cacheOC = JSON.parse(localStorage.getItem('salh_oc')) || [
+      { id: 'OC-9021', proveedor: 'Aquatech Solutions, Cereales Sur', insumos: 'Agua, Arroz, Medicinas', costo: '$3,450.00', estado: 'Aprobada / En Tránsito' }
+    ];
+
+    const crisisItemsCatalogo = {
+      'Inundación Severa en Zona Alta': [
+        { nombre: 'Filtros de Agua Portátiles', cantidad: 120, categoria: 'Saneamiento', webCatalogo: [ { proveedor: 'Aquatech Solutions Web', precioUnit: 14.50, tiempoEntrega: '24 hrs' }, { proveedor: 'Distribuidora Sanitaria', precioUnit: 12.80, tiempoEntrega: '48 hrs' } ] },
+        { nombre: 'Botes de Rescate', cantidad: 4, categoria: 'Logística', webCatalogo: [ { proveedor: 'Marine Online', precioUnit: 320.00, tiempoEntrega: '48 hrs' } ] }
+      ],
+      'Crisis Alimentaria Comunitaria': [
+        { nombre: 'Sacos de Arroz 20Kg', cantidad: 80, categoria: 'Alimentos', webCatalogo: [ { proveedor: 'Cereales del Sur', precioUnit: 22.00, tiempoEntrega: '24 hrs' }, { proveedor: 'Alimentos Mayoristas', precioUnit: 20.50, tiempoEntrega: '48 hrs' } ] }
+      ],
+      'Apoyo Médico de Urgencia': [
+        { nombre: 'Botiquines (Tipo A)', cantidad: 40, categoria: 'Medicina', webCatalogo: [ { proveedor: 'Droguería Médica', precioUnit: 45.00, tiempoEntrega: '12 hrs' }, { proveedor: 'FarmaNacional', precioUnit: 42.50, tiempoEntrega: '24 hrs' } ] }
+      ]
+    };
+
+    // --- INICIALIZACIÓN ---
     document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
       currentUserRol = parseInt(document.getElementById('login-rango').value);
-      
       document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-shield"></i> ${NOMBRES_RANGOS[currentUserRol]}`;
       
-      // Permisos de Crear Proyecto (Rangos 1, 2, 3)
       if (currentUserRol <= 3) {
         document.getElementById('btn-crear-proyecto').style.display = 'inline-flex';
-        // Mostrar columna de acciones
         document.querySelectorAll('.col-acciones').forEach(el => el.style.display = 'table-cell');
       } else {
         document.getElementById('btn-crear-proyecto').style.display = 'none';
@@ -421,64 +650,53 @@
     function guardarEstado() {
       localStorage.setItem('salh_personal', JSON.stringify(cachePersonal));
       localStorage.setItem('salh_proyectos', JSON.stringify(cacheProyectos));
+      localStorage.setItem('salh_inventario', JSON.stringify(cacheInventario));
+      localStorage.setItem('salh_beneficiarios', JSON.stringify(cacheBeneficiarios));
+      localStorage.setItem('salh_oc', JSON.stringify(cacheOC));
     }
 
     function renderizarTodo() {
       renderProyectosYPersonal();
+      renderInventario();
+      renderBeneficiarios();
+      renderOC();
       
-      // Actualizar Métricas
+      // Actualizar Métricas Dashboard
       document.getElementById('m-proyectos').innerText = cacheProyectos.length;
       document.getElementById('m-personal-disp').innerText = cachePersonal.filter(p => p.estado === 'Disponible').length;
+      document.getElementById('m-criticos').innerText = cacheInventario.filter(i => i.cantidad <= 20).length;
+      document.getElementById('m-beneficiarios').innerText = cacheBeneficiarios.length;
+      
       guardarEstado();
     }
 
+    // --- FUNCIONES PROYECTOS Y RRHH ---
     function renderProyectosYPersonal() {
       const tbodyProy = document.getElementById('proyectos-table');
       tbodyProy.innerHTML = cacheProyectos.map(p => {
-        // Lógica de Eliminación: Solo si mi rango es <= al rango del creador. (1 es el más alto)
         const puedeEliminar = (currentUserRol <= 3) && (currentUserRol <= p.rangoCreador);
-        
         let botonEliminar = '';
         if (currentUserRol <= 3) {
-          if (puedeEliminar) {
-            botonEliminar = `<td class="col-acciones"><button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.id}')"><i class="fa-solid fa-trash"></i> Eliminar</button></td>`;
-          } else {
-            botonEliminar = `<td class="col-acciones"><span style="font-size:0.75rem; color:#888;"><i class="fa-solid fa-lock"></i> Bloqueado por Rango Superior</span></td>`;
-          }
+          botonEliminar = puedeEliminar ? 
+            `<td class="col-acciones"><button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.id}')"><i class="fa-solid fa-trash"></i> Eliminar</button></td>` : 
+            `<td class="col-acciones"><span style="font-size:0.75rem; color:#888;"><i class="fa-solid fa-lock"></i> Bloqueado (Nivel Superior)</span></td>`;
         }
-
-        return `
-        <tr>
-          <td><strong>${p.nombre}</strong></td>
-          <td>${NOMBRES_RANGOS[p.rangoCreador]}</td>
-          <td>${p.personalAsignado} Colaboradores</td>
-          <td><span class="badge badge-ok">${p.estado}</span></td>
-          ${botonEliminar}
-        </tr>
-      `}).join('');
+        return `<tr><td><strong>${p.nombre}</strong></td><td>${p.creadorNombre}</td><td>${p.personalAsignado} Colaboradores</td><td><span class="badge badge-ok">${p.estado}</span></td>${botonEliminar}</tr>`;
+      }).join('');
 
       const tbodyPers = document.getElementById('personal-table');
       tbodyPers.innerHTML = cachePersonal.map(p => {
         const badgeClass = p.estado === 'Disponible' ? 'badge-ok' : 'badge-alert';
-        return `
-        <tr>
-          <td style="color:#666; font-size:0.85rem;">${p.cedula}</td>
-          <td><strong>${p.nombre}</strong></td>
-          <td>${NOMBRES_RANGOS[p.rango]}</td>
-          <td><span class="badge badge-gray">${p.departamento}</span></td>
-          <td><span class="badge ${badgeClass}">${p.estado}</span></td>
-          <td>${p.proyecto}</td>
-        </tr>
-      `}).join('');
+        return `<tr><td style="color:#666; font-size:0.85rem;">${p.cedula}</td><td><strong>${p.nombre}</strong></td><td>${NOMBRES_RANGOS[p.rango]}</td><td><span class="badge badge-gray">${p.departamento}</span></td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td>${p.proyecto}</td></tr>`;
+      }).join('');
     }
 
-    // Modal Crear Proyecto
     function abrirModalProyecto() {
       document.getElementById('proy-nombre').value = '';
+      document.getElementById('ia-reasoning-box').style.display = 'none';
       const contenedor = document.getElementById('lista-seleccion-personal');
       contenedor.innerHTML = '';
 
-      // REGLA: Personal Disponible Y Rango Estrictamente Inferior (Número mayor)
       const personalElegible = cachePersonal.filter(p => p.rango > currentUserRol && p.estado === 'Disponible');
       
       if(personalElegible.length === 0) {
@@ -488,8 +706,8 @@
           contenedor.innerHTML += `
             <div class="chk-item" style="justify-content: space-between;">
               <label style="display: flex; gap: 0.5rem; align-items: center; cursor:pointer; flex: 1;">
-                <input type="checkbox" class="chk-personal" value="${p.id}">
-                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento})</span></span>
+                <input type="checkbox" class="chk-personal" value="${p.id}" data-depto="${p.departamento}" data-estrellas="${p.estrellas}">
+                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento} | ⭐${p.estrellas})</span></span>
               </label>
               <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="verPerfilPersonal('${p.id}')">
                 <i class="fa-solid fa-address-card"></i> Ficha
@@ -501,11 +719,56 @@
       openModal('modal-proyecto');
     }
 
-    // Ver Ficha Detallada
+    // --- NUEVA INTELIGENCIA: AUTO-SELECCIÓN DE PERSONAL ---
+    function ejecutarAutoSeleccionIA() {
+      const nombreProy = document.getElementById('proy-nombre').value.toLowerCase();
+      if (!nombreProy) {
+        alert("Escribe primero el nombre del proyecto para que la IA entienda el contexto (Ej. 'Respuesta Médica' o 'Logística Sur').");
+        return;
+      }
+
+      // Determinar perfil ideal basado en palabras clave
+      let deptosIdeales = [];
+      let contextoDetectado = "General";
+
+      if (nombreProy.includes('médic') || nombreProy.includes('medic') || nombreProy.includes('salud') || nombreProy.includes('hospital')) {
+        deptosIdeales = ['Salud / Médico', 'Operaciones', 'Comunicaciones'];
+        contextoDetectado = "Médico / Sanitario";
+      } else if (nombreProy.includes('rescate') || nombreProy.includes('desastre') || nombreProy.includes('seguridad')) {
+        deptosIdeales = ['Seguridad', 'Operaciones', 'Salud / Médico'];
+        contextoDetectado = "Rescate y Seguridad";
+      } else if (nombreProy.includes('logístic') || nombreProy.includes('logistic') || nombreProy.includes('distribu') || nombreProy.includes('alimento')) {
+        deptosIdeales = ['Logística', 'Operaciones', 'Voluntariado General'];
+        contextoDetectado = "Logística y Distribución";
+      } else {
+        deptosIdeales = ['Voluntariado General', 'Comunicaciones', 'Logística'];
+      }
+
+      const checkboxes = document.querySelectorAll('.chk-personal');
+      let seleccionados = 0;
+      
+      // Limpiar anteriores
+      checkboxes.forEach(c => c.checked = false);
+
+      checkboxes.forEach(chk => {
+        const depto = chk.getAttribute('data-depto');
+        const estrellas = parseFloat(chk.getAttribute('data-estrellas'));
+        
+        // Criterio IA: Selecciona si el depto hace match O si es personal de alto rendimiento (>= 4.5)
+        if (deptosIdeales.includes(depto) || estrellas >= 4.5) {
+          chk.checked = true;
+          seleccionados++;
+        }
+      });
+
+      const box = document.getElementById('ia-reasoning-box');
+      box.style.display = 'block';
+      box.innerHTML = `<strong><i class="fa-solid fa-microchip"></i> Análisis Completado:</strong> Proyecto detectado tipo <strong>[${contextoDetectado}]</strong>. Se han marcado automáticamente ${seleccionados} especialistas óptimos (coincidencia de departamento y perfiles de alto rendimiento).`;
+    }
+
     function verPerfilPersonal(id) {
       const p = cachePersonal.find(x => x.id === id);
       if(!p) return;
-
       document.getElementById('perf-inicial').innerText = p.nombre.charAt(0);
       document.getElementById('perf-nombre').innerText = p.nombre;
       document.getElementById('perf-rango').innerText = NOMBRES_RANGOS[p.rango];
@@ -513,8 +776,7 @@
       document.getElementById('perf-depto').innerText = p.departamento;
       document.getElementById('perf-habilidades').innerText = p.habilidades;
       document.getElementById('perf-experiencia').innerText = p.experiencia;
-
-      // Estrellas
+      
       let htmlEstrellas = '';
       for(let i = 1; i <= 5; i++) {
         if(i <= Math.floor(p.estrellas)) htmlEstrellas += '<i class="fa-solid fa-star stars"></i>';
@@ -522,30 +784,20 @@
         else htmlEstrellas += '<i class="fa-regular fa-star stars" style="color:#ccc;"></i>';
       }
       document.getElementById('perf-estrellas').innerHTML = htmlEstrellas;
-
       openModal('modal-perfil-personal');
     }
 
-    // Guardar Proyecto
     document.getElementById('form-proyecto').addEventListener('submit', (e) => {
       e.preventDefault();
       const nombreProyecto = document.getElementById('proy-nombre').value;
-      
       const checkboxes = document.querySelectorAll('.chk-personal:checked');
       const seleccionadosIds = Array.from(checkboxes).map(c => c.value);
 
-      if (seleccionadosIds.length === 0) {
-        alert("Debes seleccionar al menos a una persona para iniciar el proyecto.");
-        return;
-      }
+      if (seleccionadosIds.length === 0) { alert("Debes seleccionar al menos a una persona."); return; }
 
-      // Marcar como ocupados
       seleccionadosIds.forEach(id => {
         const persona = cachePersonal.find(p => p.id === id);
-        if(persona) {
-          persona.estado = (persona.rango === 4 || persona.rango === 6) ? 'Ocupada' : 'Ocupado';
-          persona.proyecto = nombreProyecto;
-        }
+        if(persona) { persona.estado = (persona.rango === 4 || persona.rango === 6) ? 'Ocupada' : 'Ocupado'; persona.proyecto = nombreProyecto; }
       });
 
       cacheProyectos.push({
@@ -561,35 +813,169 @@
       closeModal('modal-proyecto');
     });
 
-    // Eliminar Proyecto y Liberar Personal
     function eliminarProyecto(idProy) {
       const proyecto = cacheProyectos.find(p => p.id === idProy);
       if (!proyecto) return;
-
-      if (confirm(`¿Estás seguro de eliminar el proyecto "${proyecto.nombre}"? Todo el personal asignado quedará libre inmediatamente.`)) {
-        
-        // Liberar personal
-        cachePersonal.forEach(p => {
-          if (p.proyecto === proyecto.nombre) {
-            p.estado = 'Disponible';
-            p.proyecto = 'Ninguno';
-          }
-        });
-
-        // Borrar de BD
+      if (confirm(`¿Eliminar el proyecto "${proyecto.nombre}"? El personal será liberado.`)) {
+        cachePersonal.forEach(p => { if (p.proyecto === proyecto.nombre) { p.estado = 'Disponible'; p.proyecto = 'Ninguno'; } });
         cacheProyectos = cacheProyectos.filter(p => p.id !== idProy);
         renderizarTodo();
       }
     }
 
+    // --- FUNCIONES INVENTARIO ---
+    function renderInventario() {
+      const html = cacheInventario.map(i => {
+        const critico = i.cantidad <= 20;
+        const btnAccion = critico ? 
+          `<button class="btn btn-ia" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="showSection('sec-salh')"><i class="fa-solid fa-robot"></i> Sugerencia Sourcing</button>` 
+          : `<span class="badge badge-gray">Stock Normal</span>`;
+        return `<tr>
+            <td><strong>${i.nombre}</strong></td>
+            <td>${i.categoria}</td>
+            <td style="color:${critico ? '#dc2626; font-weight:bold;' : 'inherit'};">${i.cantidad} un.</td>
+            <td>${i.ubicacion}</td>
+            <td>${btnAccion}</td>
+          </tr>`;
+      }).join('');
+      document.getElementById('dash-table').innerHTML = html;
+      document.getElementById('full-inventario-table').innerHTML = html;
+    }
+
+    document.getElementById('form-insumo').addEventListener('submit', (e) => {
+      e.preventDefault();
+      cacheInventario.push({
+        id: cacheInventario.length + 1,
+        nombre: document.getElementById('ins-nombre').value,
+        categoria: document.getElementById('ins-categoria').value,
+        cantidad: parseInt(document.getElementById('ins-cantidad').value),
+        ubicacion: document.getElementById('ins-ubicacion').value
+      });
+      renderizarTodo();
+      closeModal('modal-insumo');
+      e.target.reset();
+    });
+
+    // --- FUNCIONES SOURCING E IA ---
+    function ejecutarSourcingIA(crisisNombre) {
+      const terminal = document.getElementById('salh-terminal');
+      const pres = document.getElementById('input-presupuesto').value;
+      terminal.innerHTML = `[SALH_SOURCING] Configurando red neuronal multivendedor para: "${crisisNombre}"...\n`;
+      terminal.innerHTML += `[SALH_SOURCING] Presupuesto asignado: $${pres}\n`;
+      
+      setTimeout(() => {
+        const items = crisisItemsCatalogo[crisisNombre] || [];
+        let htmlResultado = `<table style="width:100%; border-collapse:collapse;">
+          <tr style="background:#f1f5f9; text-align:left;"><th>Ítem</th><th>Cant.</th><th>Proveedores Analizados</th><th>Mejor Opción IA</th></tr>`;
+        let total = 0; let resumen = [];
+
+        items.forEach(item => {
+          let catalog = [...item.webCatalogo].sort((a, b) => a.precioUnit - b.precioUnit);
+          const gan = catalog[0]; const sub = gan.precioUnit * item.cantidad; total += sub;
+          resumen.push(`${item.nombre}`);
+          htmlResultado += `<tr style="border-bottom:1px solid #e2e8f0;">
+            <td><strong>${item.nombre}</strong></td><td>${item.cantidad}</td>
+            <td style="font-size:0.8rem;">${item.webCatalogo.map(w => `• ${w.proveedor}: $${w.precioUnit} ${w.proveedor === gan.proveedor ? '🏆' : ''}<br>`).join('')}</td>
+            <td style="background:#f0fdf4;"><strong>${gan.proveedor}</strong><br><span style="color:#059669; font-weight:bold;">$${sub.toFixed(2)}</span></td>
+          </tr>`;
+        });
+        htmlResultado += `</table>`;
+        htmlResultado += `<div style="margin-top:1rem; padding:1rem; background:#f8fafc; border-radius:6px;"><strong>Costo Total Generado: $${total.toFixed(2)}</strong></div>`;
+
+        document.getElementById('modal-sourcing-title').innerText = `Cotización Sourcing: ${crisisNombre}`;
+        document.getElementById('modal-sourcing-content').innerHTML = htmlResultado;
+        
+        ultimaOptimizacionSourcing = {
+          id: 'OC-' + Math.floor(1000 + Math.random() * 9000),
+          proveedor: 'Motor Sourcing (IA)',
+          insumos: resumen.join(', '),
+          costo: `$${total.toFixed(2)}`,
+          estado: 'Procesada / Activa'
+        };
+
+        terminal.innerHTML += `[SALH_SOURCING] Negociación finalizada con éxito. Ofertas listas para aprobación.\n`;
+        openModal('modal-sourcing-resultado');
+      }, 1500);
+    }
+
+    function confirmarYEmitirOCMultiProveedor() {
+      if (!ultimaOptimizacionSourcing) return;
+      cacheOC.unshift(ultimaOptimizacionSourcing);
+      renderizarTodo();
+      closeModal('modal-sourcing-resultado');
+      showSection('sec-proveedores');
+    }
+
+    function renderOC() {
+      document.getElementById('oc-table').innerHTML = cacheOC.map(oc => `
+        <tr><td><strong>${oc.id}</strong></td><td>${oc.proveedor}</td><td>${oc.insumos}</td><td><strong>${oc.costo}</strong></td><td><span class="badge badge-ai">${oc.estado}</span></td></tr>
+      `).join('');
+    }
+
+    // --- FUNCIONES BENEFICIARIOS Y TRAZA-14 ---
+    function renderBeneficiarios() {
+      document.getElementById('beneficiarios-table').innerHTML = cacheBeneficiarios.map(b => {
+        const count = b.checklist14.filter(Boolean).length; const pct = Math.round((count / 14) * 100);
+        return `<tr>
+            <td>${b.documento}</td><td><strong>${b.nombre}</strong></td><td>${b.comunidad}</td><td>${b.familiares}</td>
+            <td>
+              <div class="progress-bar-bg" style="margin-bottom:0.2rem; height:6px;"><div class="h-full ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}" style="width: ${pct}%"></div></div>
+              <span style="font-size: 0.75rem;">${pct}% completado</span>
+            </td>
+            <td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')"><i class="fa-solid fa-folder-open"></i> Traza-14</button></td>
+          </tr>`;
+      }).join('');
+    }
+
+    function abrirChecklist(id) {
+      currentBeneficiarioId = id; const b = cacheBeneficiarios.find(x => x.id === id);
+      document.getElementById('chkModalSubtitulo').innerText = `Expediente: ${b.nombre} (${b.documento})`;
+      const checkboxes = document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]');
+      checkboxes.forEach((chk, idx) => { chk.checked = b.checklist14[idx] || false; });
+      actualizarBarraChecklistModal(); openModal('modalChecklist14');
+    }
+
+    function actualizarBarraChecklistModal() {
+      let c = 0; document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => { if(chk.checked) c++; });
+      const pct = Math.round((c / 14) * 100);
+      const b = document.getElementById('barraProgreso14'); b.style.width = `${pct}%`;
+      b.className = `h-full transition-all ${pct === 100 ? 'bg-emerald-600' : pct > 50 ? 'bg-blue-600' : 'bg-amber-500'}`;
+      document.getElementById('porcentajeProgresoText').innerText = `${pct}% (${c}/14 documentos)`;
+    }
+
+    document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(c => c.addEventListener('change', actualizarBarraChecklistModal));
+
+    function autocompletarTraza14PorIA() {
+      document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => chk.checked = true);
+      actualizarBarraChecklistModal();
+    }
+
+    function guardarProgresoChecklist() {
+      const b = cacheBeneficiarios.find(x => x.id === currentBeneficiarioId);
+      b.checklist14 = Array.from(document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]')).map(c => c.checked);
+      renderizarTodo(); closeModal('modalChecklist14');
+    }
+
+    function simularLecturaOCR() {
+      document.getElementById('ben-doc').value = 'V-' + Math.floor(10000000 + Math.random() * 90000000);
+      document.getElementById('ben-nombre').value = 'Carlos E. Gómez (Extracción OCR)';
+      document.getElementById('ben-comunidad').value = 'Sector Sur 2';
+      document.getElementById('ben-familiares').value = 4;
+    }
+
+    document.getElementById('form-beneficiario').addEventListener('submit', (e) => {
+      e.preventDefault();
+      cacheBeneficiarios.push({
+        id: Date.now().toString(), documento: document.getElementById('ben-doc').value,
+        nombre: document.getElementById('ben-nombre').value, comunidad: document.getElementById('ben-comunidad').value,
+        familiares: parseInt(document.getElementById('ben-familiares').value), checklist14: [true, true, true, false, false, false, false, false, false, false, false, false, false, false]
+      });
+      renderizarTodo(); closeModal('modal-beneficiario'); e.target.reset();
+    });
+
     function filterTable(input, tableId) {
-      const filter = input.value.toLowerCase();
-      const tbody = document.getElementById(tableId);
-      const rows = tbody.getElementsByTagName('tr');
-      for (let i = 0; i < rows.length; i++) {
-        const text = rows[i].textContent || rows[i].innerText;
-        rows[i].style.display = text.toLowerCase().indexOf(filter) > -1 ? "" : "none";
-      }
+      const filter = input.value.toLowerCase(); const rows = document.getElementById(tableId).getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) { rows[i].style.display = (rows[i].innerText.toLowerCase().indexOf(filter) > -1) ? "" : "none"; }
     }
   </script>
 </body>
