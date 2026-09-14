@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADRA Gestión — Demo UX</title>
+<style>
+:root{
+  --navy:#006B54; --blue:#00866A; --sky:#e8f5f0; --bg:#f5f7f9;
+  --text:#24313d; --muted:#71808d; --line:#dfe6eb; --white:#fff;
+  --green:#2e8b68; --yellow:#b78318; --red:#b44a4a; --purple:#7359a8;
+  --shadow:0 10px 30px rgba(25,48,68,.07);
+}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+.app{display:flex;min-height:100vh}.sidebar{width:250px;background:var(--navy);color:#fff;padding:22px 15px;position:fixed;inset:0 auto 0 0}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 10px 26px}.brand-mark{width:38px;height:38px;border-radius:10px;background:#fff;color:var(--navy);display:grid;place-items:center;font-weight:900}.brand b{font-size:17px}.brand small{display:block;opacity:.65;margin-top:2px}
+.nav-title{font-size:10px;letter-spacing:1.2px;opacity:.5;padding:12px 12px 7px;text-transform:uppercase}.nav button{width:100%;border:0;background:transparent;color:#dbe6ee;text-align:left;padding:11px 12px;border-radius:9px;margin:2px 0;font-size:13px}.nav button:hover,.nav button.active{background:rgba(255,255,255,.11);color:#fff}
+.content{margin-left:250px;width:calc(100% - 250px)}.top{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:5}.role{border:1px solid var(--line);padding:9px 12px;border-radius:8px;background:#fff;color:var(--text)}.user{display:flex;align-items:center;gap:10px;font-size:13px}.avatar{width:34px;height:34px;border-radius:50%;background:var(--sky);color:var(--blue);display:grid;place-items:center;font-weight:700}
+main{padding:30px 34px 50px;max-width:1500px;margin:auto}.head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:25px}.head h1{margin:0;font-size:26px}.head p{color:var(--muted);margin:6px 0 0;font-size:13px}.primary{background:var(--blue);color:#fff;border:0;padding:11px 15px;border-radius:8px;font-weight:600}.secondary{background:#fff;color:var(--text);border:1px solid var(--line);padding:10px 14px;border-radius:8px}
+.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(5,1fr)}.card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}.stat{padding:18px}.stat .label{font-size:12px;color:var(--muted)}.stat .num{font-size:27px;font-weight:750;margin:8px 0}.trend{font-size:11px;color:var(--green)}
+.cols{grid-template-columns:1.55fr 1fr;margin-top:18px}.panel{padding:20px}.panel h3{font-size:14px;margin:0 0 16px}.table{width:100%;border-collapse:collapse;font-size:12px}.table th{color:var(--muted);font-weight:600;text-align:left;background:#fafbfc}.table th,.table td{padding:12px 10px;border-bottom:1px solid var(--line)}.badge{display:inline-flex;padding:5px 8px;border-radius:20px;font-size:10px;font-weight:700}.green{background:#e7f5ef;color:var(--green)}.yellow{background:#fff4d9;color:var(--yellow)}.red{background:#fbe9e9;color:var(--red)}.blue{background:#e8f1f8;color:var(--blue)}.purple{background:#eeeafa;color:var(--purple)}
+.bar{height:9px;background:#edf1f4;border-radius:10px;overflow:hidden}.fill{height:100%;background:var(--blue);border-radius:10px}.project{margin:15px 0}.project-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px}
+.quick{grid-template-columns:repeat(4,1fr);margin-top:18px}.quick button{padding:18px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:11px}.quick strong{display:block;margin-bottom:5px}.quick span{font-size:11px;color:var(--muted)}
+.page{display:none}.page.active{display:block}.toolbar{display:flex;gap:9px;justify-content:space-between;margin-bottom:16px}.search{border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;min-width:260px}.filter{border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff}.field.full{grid-column:1/-1}.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.modal{position:fixed;inset:0;background:rgba(17,31,43,.45);display:none;align-items:center;justify-content:center;z-index:20}.modal.show{display:flex}.modal-box{background:#fff;border-radius:14px;width:min(720px,92vw);padding:25px;box-shadow:0 30px 70px rgba(0,0,0,.2)}.modal-head{display:flex;justify-content:space-between}.close{border:0;background:transparent;font-size:22px;color:var(--muted)}
+.timeline{border-left:2px solid #dce5eb;margin:5px 0 0 8px;padding-left:20px}.event{position:relative;margin:0 0 19px}.event:before{content:"";position:absolute;left:-27px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--blue)}.event b{font-size:12px}.event small{display:block;color:var(--muted);margin-top:3px}
+.notice{padding:12px 14px;background:#f8fbfd;border:1px solid #dceaf2;border-radius:9px;font-size:12px;color:#526673;margin-bottom:15px}
+.footer-note{font-size:11px;color:var(--muted);margin-top:25px;text-align:center}
+@media(max-width:1000px){.sidebar{width:210px}.content{margin-left:210px;width:calc(100% - 210px)}.stats{grid-template-columns:repeat(3,1fr)}.cols{grid-template-columns:1fr}.quick{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.sidebar{display:none}.content{margin-left:0;width:100%}main{padding:20px}.stats{grid-template-columns:1fr 1fr}.form{grid-template-columns:1fr}.quick{grid-template-columns:1fr}.top{padding:0 15px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">A</div><div><b>ADRA Gestión</b><small>Venezuela · Demo UX</small></div></div>
+  <div class="nav">
+    <div class="nav-title">Principal</div>
+    <button class="active" data-page="dashboard">⌂ &nbsp; Dashboard</button>
+    <button data-page="proyectos">▣ &nbsp; Proyectos</button>
+    <button data-page="solicitudes">▤ &nbsp; Solicitudes</button>
+    <button data-page="compras">🛒 &nbsp; Compras</button>
+    <button data-page="inventario">📦 &nbsp; Inventario</button>
+    <button data-page="almacenes">▥ &nbsp; Almacenes</button>
+    <div class="nav-title">Operación</div>
+    <button data-page="vehiculos">🚙 &nbsp; Vehículos</button>
+    <button data-page="voluntarios">👥 &nbsp; Voluntarios</button>
+    <button data-page="finanzas">💰 &nbsp; Finanzas</button>
+    <button data-page="reportes">◫ &nbsp; Reportes</button>
+    <div class="nav-title">Sistema</div>
+    <button data-page="auditoria">◉ &nbsp; Auditoría</button>
+    <button data-page="config">⚙ &nbsp; Configuración</button>
+  </div>
+</aside>
+
+<section class="content">
+<header class="top">
+  <div><select class="role" id="role"><option value="director">Director País</option><option value="programas">Director de Programas</option><option value="gerente">Gerente de Programa</option><option value="compras">Coordinador de Compras</option><option value="almacen">Encargado de Almacén</option><option value="finanzas">Director de Finanzas</option><option value="voluntario">Voluntario</option></select></div>
+  <div class="user"><span>Demo ADRA</span><div class="avatar">DA</div></div>
+</header>
+
+<main>
+<section id="dashboard" class="page active">
+  <div class="head"><div><h1>Buenos días, Director País</h1><p>Resumen operativo de ADRA Venezuela · 09 septiembre 2026</p></div><button class="primary" onclick="openModal('requestModal')">+ Nueva solicitud</button></div>
+  <div class="grid stats">
+    <div class="card stat"><div class="label">Proyectos activos</div><div class="num">18</div><div class="trend">↑ 2 este mes</div></div>
+    <div class="card stat"><div class="label">Solicitudes pendientes</div><div class="num">14</div><div class="trend">5 requieren revisión</div></div>
+    <div class="card stat"><div class="label">Compras en proceso</div><div class="num">$43.850</div><div class="trend">12 órdenes abiertas</div></div>
+    <div class="card stat"><div class="label">Inventario valorizado</div><div class="num">$117.400</div><div class="trend">98% conciliado</div></div>
+    <div class="card stat"><div class="label">Alertas</div><div class="num">7</div><div class="trend" style="color:var(--red)">2 críticas</div></div>
+  </div>
+  <div class="grid cols">
+    <div class="card panel"><h3>Proyectos · ejecución presupuestaria</h3>
+      <div class="project"><div class="project-top"><span>Respuesta Humanitaria Zulia</span><b>82%</b></div><div class="bar"><div class="fill" style="width:82%"></div></div></div>
+      <div class="project"><div class="project-top"><span>Seguridad Alimentaria Bolívar</span><b>71%</b></div><div class="bar"><div class="fill" style="width:71%"></div></div></div>
+      <div class="project"><div class="project-top"><span>Programa Caracas</span><b>56%</b></div><div class="bar"><div class="fill" style="width:56%"></div></div></div>
+      <div class="project"><div class="project-top"><span>Respuesta Apure</span><b>41%</b></div><div class="bar"><div class="fill" style="width:41%"></div></div></div>
+    </div>
+    <div class="card panel"><h3>Actividad reciente</h3><div class="timeline">
+      <div class="event"><b>Compra PC-2026-041 aprobada</b><small>Finanzas · hace 18 min</small></div>
+      <div class="event"><b>Recepción de 150 kits registrada</b><small>Almacén Zulia · hace 43 min</small></div>
+      <div class="event"><b>Solicitud SC-2026-142 enviada</b><small>Proyecto Bolívar · hace 1 h</small></div>
+      <div class="event"><b>Vehículo ADRA-04 en mantenimiento</b><small>Logística · hace 2 h</small></div>
+    </div></div>
+  </div>
+  <div class="grid quick">
+    <button onclick="openModal('requestModal')"><strong>📝 Crear solicitud</strong><span>Solicitar materiales, servicios o compras</span></button>
+    <button onclick="go('compras')"><strong>🛒 Revisar compras</strong><span>12 órdenes requieren seguimiento</span></button>
+    <button onclick="go('inventario')"><strong>📦 Ver inventario</strong><span>12 productos bajo mínimo</span></button>
+    <button onclick="go('reportes')"><strong>📊 Generar reporte</strong><span>Consultar indicadores por proyecto</span></button>
+  </div>
+</section>
+
+<section id="solicitudes" class="page">
+  <div class="head"><div><h1>Solicitudes</h1><p>Control de solicitudes de compra y servicio</p></div><button class="primary" onclick="openModal('requestModal')">+ Nueva solicitud</button></div>
+  <div class="toolbar"><input class="search" placeholder="Buscar por código, proyecto o solicitante..." oninput="filterTable(this,'requestTable')"><select class="filter"><option>Todos los estados</option><option>Pendiente</option><option>Aprobada</option><option>En compras</option><option>Completada</option></select></div>
+  <div class="card panel"><table class="table" id="requestTable"><thead><tr><th>CÓDIGO</th><th>PROYECTO</th><th>SOLICITANTE</th><th>MONTO</th><th>ESTADO</th><th>FECHA</th></tr></thead><tbody>
+  <tr><td><b>SC-2026-142</b></td><td>Respuesta Bolívar</td><td>A. González</td><td>$1.280</td><td><span class="badge yellow">Pendiente</span></td><td>09/09/26</td></tr>
+  <tr><td><b>SC-2026-139</b></td><td>Zulia</td><td>M. Rojas</td><td>$4.850</td><td><span class="badge blue">En compras</span></td><td>08/09/26</td></tr>
+  <tr><td><b>SC-2026-137</b></td><td>Caracas</td><td>L. Pérez</td><td>$620</td><td><span class="badge green">Aprobada</span></td><td>08/09/26</td></tr>
+  <tr><td><b>SC-2026-131</b></td><td>Apure</td><td>C. Díaz</td><td>$2.100</td><td><span class="badge green">Completada</span></td><td>06/09/26</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="compras" class="page">
+  <div class="head"><div><h1>Compras</h1><p>Proveedores, cotizaciones y órdenes de compra</p></div><button class="primary">+ Nueva compra</button></div>
+  <div class="grid stats">
+    <div class="card stat"><div class="label">Órdenes abiertas</div><div class="num">12</div></div>
+    <div class="card stat"><div class="label">En cotización</div><div class="num">7</div></div>
+    <div class="card stat"><div class="label">Por recibir</div><div class="num">5</div></div>
+    <div class="card stat"><div class="label">Proveedores activos</div><div class="num">86</div></div>
+    <div class="card stat"><div class="label">Comprado este mes</div><div class="num">$18.420</div></div>
+  </div>
+  <div class="card panel" style="margin-top:18px"><h3>Flujo de compras</h3>
+    <table class="table"><thead><tr><th>ORDEN</th><th>PROYECTO</th><th>PROVEEDOR</th><th>MONTO</th><th>ETAPA</th><th></th></tr></thead><tbody>
+      <tr><td>OC-2026-041</td><td>Zulia</td><td>Servicios Delta C.A.</td><td>$4.850</td><td><span class="badge blue">Por recibir</span></td><td><button class="secondary" onclick="alert('Demo: abrir detalle OC-2026-041')">Ver</button></td></tr>
+      <tr><td>OC-2026-038</td><td>Bolívar</td><td>Proveedora Central</td><td>$1.280</td><td><span class="badge yellow">Cotizaciones</span></td><td><button class="secondary" onclick="openModal('quotesModal')">Comparar</button></td></tr>
+      <tr><td>OC-2026-035</td><td>Caracas</td><td>Tecno ADRA</td><td>$620</td><td><span class="badge green">Completada</span></td><td><button class="secondary">Ver</button></td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<section id="proveedores" class="page">
+  <div class="head"><div><h1>Proveedores</h1><p>Directorio y evaluación de proveedores</p></div><button class="primary">+ Nuevo proveedor</button></div>
+  <div class="card panel"><table class="table"><thead><tr><th>PROVEEDOR</th><th>RIF</th><th>RUBRO</th><th>COMPRAS</th><th>EVALUACIÓN</th><th>ESTADO</th></tr></thead><tbody>
+  <tr><td><b>Servicios Delta C.A.</b></td><td>J-12345678-9</td><td>Logística</td><td>$18.400</td><td>4.8 / 5</td><td><span class="badge green">Activo</span></td></tr>
+  <tr><td><b>Proveedora Central</b></td><td>J-98765432-1</td><td>Suministros</td><td>$12.850</td><td>4.5 / 5</td><td><span class="badge green">Activo</span></td></tr>
+  <tr><td><b>Tecno ADRA</b></td><td>J-24681357-0</td><td>Tecnología</td><td>$8.620</td><td>4.7 / 5</td><td><span class="badge green">Activo</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="inventario" class="page">
+  <div class="head"><div><h1>Inventario</h1><p>Existencias, movimientos y activos</p></div><button class="primary">+ Registrar entrada</button></div>
+  <div class="notice">⚠ 12 productos están por debajo del mínimo. 3 activos requieren actualización de custodio.</div>
+  <div class="card panel"><table class="table"><thead><tr><th>PRODUCTO / ACTIVO</th><th>TIPO</th><th>ALMACÉN</th><th>EXISTENCIA</th><th>MÍNIMO</th><th>ESTADO</th></tr></thead><tbody>
+    <tr><td><b>Kit de limpieza</b></td><td>Consumible</td><td>Zulia</td><td>150</td><td>100</td><td><span class="badge green">Normal</span></td></tr>
+    <tr><td><b>Resma papel A4</b></td><td>Consumible</td><td>Caracas</td><td>18</td><td>30</td><td><span class="badge red">Bajo stock</span></td></tr>
+    <tr><td><b>Laptop Lenovo — ADRA-127</b></td><td>Activo</td><td>Caracas</td><td>1</td><td>—</td><td><span class="badge purple">Asignado</span></td></tr>
+    <tr><td><b>Impresora HP — ADRA-091</b></td><td>Activo</td><td>Bolívar</td><td>1</td><td>—</td><td><span class="badge green">Operativo</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="proyectos" class="page">
+  <div class="head"><div><h1>Proyectos</h1><p>Programas, presupuesto y recursos asociados</p></div><button class="primary">+ Nuevo proyecto</button></div>
+  <div class="grid cols">
+    <div class="card panel"><h3>Respuesta Humanitaria Zulia</h3><p style="font-size:12px;color:var(--muted)">Código: ADRA-ZUL-26 · Donante: Demo Donor</p><hr style="border:0;border-top:1px solid var(--line)">
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);font-size:12px"><div><span style="color:var(--muted)">Presupuesto</span><br><b>$85.000</b></div><div><span style="color:var(--muted)">Ejecutado</span><br><b>$69.700</b></div><div><span style="color:var(--muted)">Voluntarios</span><br><b>38</b></div></div>
+      <div class="project"><div class="project-top"><span>Ejecución</span><b>82%</b></div><div class="bar"><div class="fill" style="width:82%"></div></div></div>
+    </div>
+    <div class="card panel"><h3>Recursos del proyecto</h3><div class="timeline"><div class="event"><b>24 solicitudes</b><small>7 en proceso</small></div><div class="event"><b>12 órdenes de compra</b><small>$31.400 comprometidos</small></div><div class="event"><b>2 almacenes</b><small>Zulia Norte · Zulia Sur</small></div><div class="event"><b>3 vehículos</b><small>1 en mantenimiento</small></div></div></div>
+  </div>
+</section>
+
+<section id="vehiculos" class="page">
+  <div class="head"><div><h1>Vehículos</h1><p>Flota, viajes, combustible y mantenimiento</p></div><button class="primary">+ Registrar viaje</button></div>
+  <div class="card panel"><table class="table"><thead><tr><th>VEHÍCULO</th><th>CONDUCTOR</th><th>KM</th><th>COMBUSTIBLE MES</th><th>MANTENIMIENTO</th><th>ESTADO</th></tr></thead><tbody>
+  <tr><td>ADRA-01 · Toyota Hilux</td><td>J. Martínez</td><td>82.430</td><td>$420</td><td>15/10/26</td><td><span class="badge green">Operativo</span></td></tr>
+  <tr><td>ADRA-04 · Ford Ranger</td><td>C. Díaz</td><td>64.810</td><td>$510</td><td>En taller</td><td><span class="badge yellow">Mantenimiento</span></td></tr>
+  <tr><td>ADRA-07 · Toyota Corolla</td><td>L. Pérez</td><td>41.220</td><td>$210</td><td>02/11/26</td><td><span class="badge green">Operativo</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="voluntarios" class="page">
+  <div class="head"><div><h1>Voluntarios</h1><p>Perfiles de capacidades, experiencia y disponibilidad</p></div><button class="primary">+ Nuevo voluntario</button></div>
+  <div class="notice">Los voluntarios tienen acceso únicamente a su perfil, convocatorias y actividades asignadas.</div>
+  <div class="card panel"><table class="table"><thead><tr><th>VOLUNTARIO</th><th>UBICACIÓN</th><th>CAPACIDADES</th><th>DISPONIBILIDAD</th><th>EXPERIENCIA</th></tr></thead><tbody>
+  <tr><td><b>María R.</b></td><td>Maracaibo</td><td>Logística · Primeros auxilios</td><td><span class="badge green">Disponible</span></td><td>3 proyectos</td></tr>
+  <tr><td><b>Carlos D.</b></td><td>Barquisimeto</td><td>Transporte · Logística</td><td><span class="badge yellow">Parcial</span></td><td>5 proyectos</td></tr>
+  <tr><td><b>Laura P.</b></td><td>Caracas</td><td>Educación · Comunicaciones</td><td><span class="badge green">Disponible</span></td><td>7 proyectos</td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="finanzas" class="page">
+  <div class="head"><div><h1>Finanzas</h1><p>Vista ejecutiva por proyecto · Demo</p></div><button class="secondary">Exportar</button></div>
+  <div class="grid stats"><div class="card stat"><div class="label">Presupuesto total</div><div class="num">$420K</div></div><div class="card stat"><div class="label">Ejecutado</div><div class="num">$286K</div></div><div class="card stat"><div class="label">Comprometido</div><div class="num">$64K</div></div><div class="card stat"><div class="label">Disponible</div><div class="num">$70K</div></div><div class="card stat"><div class="label">Proyectos</div><div class="num">18</div></div></div>
+  <div class="card panel" style="margin-top:18px"><h3>Ejecución por proyecto</h3><table class="table"><thead><tr><th>PROYECTO</th><th>PRESUPUESTO</th><th>EJECUTADO</th><th>%</th><th>ESTADO</th></tr></thead><tbody><tr><td>Zulia</td><td>$85.000</td><td>$69.700</td><td>82%</td><td><span class="badge green">En línea</span></td></tr><tr><td>Bolívar</td><td>$120.000</td><td>$85.200</td><td>71%</td><td><span class="badge green">En línea</span></td></tr><tr><td>Caracas</td><td>$95.000</td><td>$53.200</td><td>56%</td><td><span class="badge blue">Seguimiento</span></td></tr></tbody></table></div>
+</section>
+
+<section id="reportes" class="page">
+  <div class="head"><div><h1>Reportes</h1><p>Indicadores consolidados para dirección y gestión</p></div></div>
+  <div class="grid quick"><button onclick="alert('Demo: reporte de inventario generado')"><strong>📦 Inventario</strong><span>Existencias, movimientos y valorización</span></button><button onclick="alert('Demo: reporte de compras generado')"><strong>🛒 Compras</strong><span>Proveedores, órdenes y tiempos</span></button><button onclick="alert('Demo: reporte de proyectos generado')"><strong>🏗 Proyectos</strong><span>Presupuesto y ejecución</span></button><button onclick="alert('Demo: reporte de vehículos generado')"><strong>🚙 Vehículos</strong><span>Costos, viajes y mantenimiento</span></button></div>
+</section>
+
+<section id="almacenes" class="page"><div class="head"><div><h1>Almacenes</h1><p>Control por ubicación y proyecto</p></div><button class="primary">+ Nuevo almacén</button></div><div class="grid quick"><button><strong>📍 Almacén Caracas</strong><span>342 SKU · $42.800 valorizado</span></button><button><strong>📍 Almacén Zulia Norte</strong><span>218 SKU · $31.400 valorizado</span></button><button><strong>📍 Almacén Bolívar</strong><span>194 SKU · $27.600 valorizado</span></button><button><strong>📍 Almacén Apure</strong><span>87 SKU · $15.600 valorizado</span></button></div></section>
+<section id="auditoria" class="page"><div class="head"><div><h1>Auditoría</h1><p>Registro inmutable de acciones del sistema</p></div></div><div class="card panel"><table class="table"><thead><tr><th>FECHA</th><th>USUARIO</th><th>ACCIÓN</th><th>REGISTRO</th><th>IP / SESIÓN</th></tr></thead><tbody><tr><td>09/09 10:42</td><td>Finanzas</td><td>Aprobó compra</td><td>OC-2026-041</td><td>Sesión 83A1</td></tr><tr><td>09/09 10:17</td><td>Almacén Zulia</td><td>Registró recepción</td><td>REC-2026-022</td><td>Sesión 91BC</td></tr><tr><td>09/09 09:51</td><td>A. González</td><td>Creó solicitud</td><td>SC-2026-142</td><td>Sesión 4C11</td></tr></tbody></table></div></section>
+<section id="config" class="page"><div class="head"><div><h1>Configuración</h1><p>Reglas, roles, proyectos y catálogos</p></div></div><div class="card panel"><div class="form"><div class="field"><label>Nivel de aprobación 1</label><input value="Gerente de Programa"></div><div class="field"><label>Límite monetario</label><input value="$0 — $X"></div><div class="field"><label>Número de cotizaciones</label><input value="3"></div><div class="field"><label>Moneda operativa</label><select><option>USD</option><option>VES</option></select></div></div></div></section>
+</main>
+</section>
+</div>
+
+<div class="modal" id="requestModal"><div class="modal-box"><div class="modal-head"><div><h2 style="margin:0;font-size:20px">Nueva solicitud</h2><p style="color:var(--muted);font-size:12px">Demo del flujo ADRA Gestión</p></div><button class="close" onclick="closeModal('requestModal')">×</button></div><div class="form" style="margin-top:18px"><div class="field"><label>Proyecto *</label><select><option>Respuesta Humanitaria Zulia</option><option>Seguridad Alimentaria Bolívar</option><option>Programa Caracas</option></select></div><div class="field"><label>Tipo de solicitud *</label><select><option>Compra de materiales</option><option>Servicio</option><option>Transporte</option><option>Activo</option></select></div><div class="field"><label>Solicitante</label><input value="Demo Asistente" readonly></div><div class="field"><label>Prioridad</label><select><option>Normal</option><option>Alta</option><option>Urgente</option></select></div><div class="field full"><label>Descripción / justificación</label><textarea rows="3" placeholder="Describe la necesidad..."></textarea></div><div class="field"><label>Monto estimado</label><input placeholder="$ 0,00"></div><div class="field"><label>Fecha requerida</label><input type="date"></div></div><div class="actions"><button class="secondary" onclick="closeModal('requestModal')">Cancelar</button><button class="primary" onclick="submitRequest()">Enviar solicitud</button></div></div></div>
+
+<div class="modal" id="quotesModal"><div class="modal-box"><div class="modal-head"><div><h2 style="margin:0;font-size:20px">Comparativo de cotizaciones</h2><p style="color:var(--muted);font-size:12px">Solicitud SC-2026-139 · 3 cotizaciones</p></div><button class="close" onclick="closeModal('quotesModal')">×</button></div><table class="table" style="margin-top:15px"><thead><tr><th>PROVEEDOR</th><th>MONTO</th><th>ENTREGA</th><th>GARANTÍA</th><th></th></tr></thead><tbody><tr><td>Proveedor A</td><td>$1.340</td><td>5 días</td><td>6 meses</td><td><button class="secondary" onclick="alert('Proveedor seleccionado — Demo')">Seleccionar</button></td></tr><tr><td><b>Proveedor B</b></td><td><b>$1.280</b></td><td>7 días</td><td>12 meses</td><td><button class="primary" onclick="alert('Proveedor B seleccionado — Demo')">Seleccionar</button></td></tr><tr><td>Proveedor C</td><td>$1.410</td><td>3 días</td><td>12 meses</td><td><button class="secondary" onclick="alert('Proveedor seleccionado — Demo')">Seleccionar</button></td></tr></tbody></table></div></div>
+
+<script>
+
+const roleProfiles = {
+  director: {
+    name:"Director País", greeting:"Buenos días, Director País",
+    subtitle:"Vista nacional · Todos los programas, proyectos y áreas",
+    stats:[["Proyectos activos","18","↑ 2 este mes"],["Solicitudes pendientes","14","5 requieren revisión"],["Compras en proceso","$43.850","12 órdenes abiertas"],["Inventario valorizado","$117.400","98% conciliado"],["Alertas","7","2 críticas"]],
+    pages:["dashboard","proyectos","solicitudes","compras","inventario","almacenes","vehiculos","voluntarios","finanzas","reportes","auditoria","config"]
+  },
+  programas: {
+    name:"Director de Programas", greeting:"Resumen de Programas",
+    subtitle:"Proyectos, ejecución y recursos bajo Programas",
+    stats:[["Proyectos activos","18","2 nuevos"],["Solicitudes pendientes","9","3 requieren revisión"],["Presupuesto ejecutado","68%","↑ 4% este mes"],["Beneficiarios","12.480","↑ 8%"],["Alertas","4","1 crítica"]],
+    pages:["dashboard","proyectos","solicitudes","inventario","almacenes","vehiculos","voluntarios","reportes"]
+  },
+  gerente: {
+    name:"Gerente de Programa", greeting:"Resumen de tu Programa",
+    subtitle:"Respuesta Humanitaria Zulia · Acceso por proyecto",
+    stats:[["Proyectos asignados","2",""],["Solicitudes pendientes","5","2 por aprobar"],["Compras en proceso","$12.640","4 órdenes"],["Inventario","$31.400","2 almacenes"],["Alertas","2",""]],
+    pages:["dashboard","proyectos","solicitudes","compras","inventario","almacenes","vehiculos","voluntarios","reportes"]
+  },
+  compras: {
+    name:"Coordinador de Compras", greeting:"Centro de Compras",
+    subtitle:"Solicitudes, proveedores, cotizaciones y órdenes",
+    stats:[["Por revisar","7","Solicitudes"],["Cotizaciones","7","3 ofertas requeridas"],["Órdenes abiertas","12","5 por recibir"],["Proveedores activos","86",""],["Comprado este mes","$18.420",""]],
+    pages:["dashboard","solicitudes","compras","proveedores","reportes"]
+  },
+  almacen: {
+    name:"Encargado de Almacén", greeting:"Control de Almacén",
+    subtitle:"Almacén Zulia Norte · Existencias y movimientos",
+    stats:[["SKU activos","218",""],["Entradas este mes","34",""],["Salidas este mes","47",""],["Bajo mínimo","12","Requieren atención"],["Pendientes","3","Recepciones"]],
+    pages:["dashboard","inventario","almacenes","solicitudes","reportes"]
+  },
+  finanzas: {
+    name:"Director de Finanzas", greeting:"Control Financiero",
+    subtitle:"Ejecución presupuestaria, compras y compromisos",
+    stats:[["Presupuesto total","$420K",""],["Ejecutado","$286K","68%"],["Comprometido","$64K",""],["Disponible","$70K",""],["Por aprobar","9","Compras"]],
+    pages:["dashboard","proyectos","solicitudes","compras","finanzas","reportes","auditoria"]
+  },
+  voluntario: {
+    name:"Voluntario", greeting:"Hola, María",
+    subtitle:"Tu perfil, capacidades, disponibilidad y actividades",
+    stats:[["Proyectos","3","Historial"],["Horas de servicio","84","Este año"],["Convocatorias","2","Disponibles"],["Capacitaciones","4","Completadas"],["Perfil","92%","Completo"]],
+    pages:["dashboard","voluntarios"]
+  }
+};
+
+function applyRole(roleKey){
+  const r=roleProfiles[roleKey]||roleProfiles.director;
+  document.querySelector('.head h1').textContent=r.greeting;
+  document.querySelector('.head p').textContent=r.subtitle;
+  const statEls=document.querySelectorAll('#dashboard .stat');
+  r.stats.forEach((s,i)=>{
+    if(!statEls[i]) return;
+    statEls[i].querySelector('.label').textContent=s[0];
+    statEls[i].querySelector('.num').textContent=s[1];
+    statEls[i].querySelector('.trend').textContent=s[2];
+  });
+  document.querySelectorAll('.nav button[data-page]').forEach(btn=>{
+    const allowed=r.pages.includes(btn.dataset.page);
+    btn.style.display=allowed?'block':'none';
+  });
+  // If current page is no longer allowed, return to dashboard.
+  const active=document.querySelector('.page.active')?.id;
+  if(active && !r.pages.includes(active)) go('dashboard');
+  document.querySelector('.user span').textContent=r.name;
+  document.querySelector('.avatar').textContent=r.name.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+}
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.page)));
+function openModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function submitRequest(){closeModal('requestModal');go('solicitudes');alert('Solicitud SC-2026-143 creada — Demo')}
+function filterTable(input,id){const q=input.value.toLowerCase();document.querySelectorAll('#'+id+' tbody tr').forEach(r=>r.style.display=r.innerText.toLowerCase().includes(q)?'':'none')}
+document.getElementById('role').addEventListener('change',e=>{
+  applyRole(e.target.value);
+  const r=roleProfiles[e.target.value];
+  alert('Vista cambiada a: '+r.name+'\n\nPermisos y datos adaptados al nivel de acceso.');
+});
+applyRole('director');
+window.onclick=e=>{if(e.target.classList.contains('modal'))e.target.classList.remove('show')}
+</script>
+</body>
+</html>
