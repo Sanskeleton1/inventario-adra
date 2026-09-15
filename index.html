@@ -181,8 +181,9 @@
         <nav>
           <ul>
             <li><a onclick="showSection('sec-dashboard')" id="nav-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard Central</a></li>
-            <li><a onclick="showSection('sec-proyectos')" id="nav-proyectos"><i class="fa-solid fa-diagram-project"></i> Proyectos y RRHH</a></li>
-            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo IA</a></li>
+            <li><a onclick="showSection('sec-proyectos')" id="nav-proyectos"><i class="fa-solid fa-diagram-project"></i> Gestión Proyectos</a></li>
+            <li><a onclick="showSection('sec-rrhh')" id="nav-rrhh"><i class="fa-solid fa-users-gear"></i> Recursos Humanos</a></li>
+            <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo</a></li>
             <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén e Inventario</a></li>
             <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes de Compra</a></li>
             <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón y Traza-14</a></li>
@@ -221,7 +222,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 2: PROYECTOS Y RRHH -->
+      <!-- SECCIÓN 2: GESTIÓN DE PROYECTOS -->
       <section id="sec-proyectos" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -231,7 +232,7 @@
               <input type="text" placeholder="Buscar proyecto..." onkeyup="filterTable(this, 'proyectos-table')">
             </div>
             <button class="btn btn-accent" id="btn-crear-proyecto" onclick="abrirModalProyecto()" style="display:none;">
-              <i class="fa-solid fa-plus"></i> Nuevo Proyecto (Formato FCP001)
+              <i class="fa-solid fa-plus"></i> Nuevo Proyecto
             </button>
           </div>
           <table>
@@ -239,13 +240,18 @@
             <tbody id="proyectos-table"></tbody>
           </table>
         </div>
+      </section>
+
+      <!-- NUEVA SECCIÓN: RECURSOS HUMANOS -->
+      <section id="sec-rrhh" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Directorio Central de Personal</h3>
+            <h3>Directorio Central de Recursos Humanos</h3>
             <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Filtrar personal..." onkeyup="filterTable(this, 'personal-table')"></div>
+            <button class="btn btn-ia" onclick="openModal('modal-nuevo-personal')"><i class="fa-solid fa-user-plus"></i> Registrar Personal</button>
           </div>
           <table>
-            <thead><tr><th>Cédula</th><th>Nombre Completo</th><th>Rango</th><th>Departamento</th><th>Estado</th><th>Proyecto Actual</th></tr></thead>
+            <thead><tr><th>Cédula</th><th>Nombre Completo</th><th>Rango</th><th>Área / Depto</th><th>Especialidad</th><th>Estado</th><th>Proyecto Actual</th><th class="col-acciones">Eliminar</th></tr></thead>
             <tbody id="personal-table"></tbody>
           </table>
         </div>
@@ -257,16 +263,10 @@
           <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo y Comparador Web por IA</h3>
           <p>La IA desglosará ítems, rastreará webs de proveedores y optimizará el presupuesto en tiempo real para armar las mejores órdenes de suministro.</p>
           <div class="config-grid">
-            <div>
-              <label>Presupuesto Máximo Disponible ($)</label>
-              <input type="number" id="input-presupuesto" value="5000" min="100" step="50">
-            </div>
+            <div><label>Presupuesto Máximo Disponible ($)</label><input type="number" id="input-presupuesto" value="5000" min="100" step="50"></div>
             <div>
               <label>Criterio de Negociación IA</label>
-              <select id="select-criterio">
-                <option value="precio">Optimizar Estricto por Menor Precio</option>
-                <option value="mixto">Balanceado (Precio + Rapidez de Entrega)</option>
-              </select>
+              <select id="select-criterio"><option value="precio">Optimizar Estricto por Menor Precio</option><option value="mixto">Balanceado (Precio + Rapidez de Entrega)</option></select>
             </div>
           </div>
           <div class="crisis-triggers">
@@ -327,11 +327,11 @@
     </main>
   </div>
 
-  <!-- MODAL 1: CREAR PROYECTO (INTEGRACIÓN FCP001 CON AUTOCOMPLETADO) -->
+  <!-- MODAL: CREAR O EDITAR PROYECTO (FCP001) -->
   <div id="modal-proyecto" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Planilla Institucional de Solicitud y Proyecto (FCP001)</h3>
+        <h3 id="modal-proyecto-titulo">Planilla Institucional de Solicitud y Proyecto (FCP001)</h3>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-proyecto')"></i>
       </div>
       
@@ -341,14 +341,8 @@
           <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; text-align: center;">Escribe tu Nombre o Cédula y el sistema autocompletará el cargo y departamento si estás registrado.</div>
           <datalist id="lista-creadores"></datalist>
           <div class="fcp-grid">
-            <div class="form-group">
-              <label>Cédula de Identidad</label>
-              <input type="text" id="fcp-cedula" oninput="buscarCreadorPorCedula()" placeholder="Escribe para buscar..." required>
-            </div>
-            <div class="form-group">
-              <label>Nombre Completo</label>
-              <input type="text" id="fcp-nombre" list="lista-creadores" oninput="buscarCreadorPorNombre()" placeholder="Selecciona tu nombre..." required>
-            </div>
+            <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="fcp-cedula" oninput="buscarCreadorPorCedula()" placeholder="Escribe para buscar..." required></div>
+            <div class="form-group"><label>Nombre Completo</label><input type="text" id="fcp-nombre" list="lista-creadores" oninput="buscarCreadorPorNombre()" placeholder="Selecciona tu nombre..." required></div>
             <div class="form-group"><label>Cargo / Rango</label><input type="text" id="fcp-cargo" readonly></div>
             <div class="form-group"><label>Departamento</label><input type="text" id="fcp-depto" readonly></div>
           </div>
@@ -392,28 +386,55 @@
         </div>
 
         <div class="form-group">
-          <label>Asignación de Personal Disponible (Rango Inferior al tuyo)</label>
+          <label>Gestión de Personal (Puedes desmarcar para liberar, o marcar para agregar)</label>
           <div id="lista-seleccion-personal" style="max-height: 200px; overflow-y: auto; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5rem;">
             <!-- Renderizado dinámico -->
           </div>
         </div>
 
         <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-          <button type="submit" class="btn btn-block btn-accent"><i class="fa-solid fa-save"></i> Registrar Proyecto y Solicitud</button>
+          <button type="submit" id="btn-submit-proyecto" class="btn btn-block btn-accent"><i class="fa-solid fa-save"></i> Registrar Proyecto y Solicitud</button>
           <button type="button" class="btn btn-block btn-excel" onclick="descargarExcelFormatoExacto()"><i class="fa-solid fa-file-excel"></i> Descargar Excel Exacto</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL 2: FICHA DE PERFIL PERSONAL -->
+  <!-- MODAL: REGISTRAR NUEVO PERSONAL EN RRHH -->
+  <div id="modal-nuevo-personal" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Registrar Nuevo Personal (RRHH)</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-nuevo-personal')"></i>
+      </div>
+      <form id="form-nuevo-personal">
+        <div class="form-group"><label>Nombre(s)</label><input type="text" id="rrhh-nombre" required></div>
+        <div class="form-group"><label>Apellido(s)</label><input type="text" id="rrhh-apellido" required></div>
+        <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="rrhh-cedula" placeholder="Ej. V-12345678" required></div>
+        <div class="form-group"><label>Área / Departamento de Trabajo</label><input type="text" id="rrhh-area" placeholder="Ej. Logística, Salud, Seguridad..." required></div>
+        <div class="form-group"><label>Especialidad / Habilidades</label><input type="text" id="rrhh-habilidades" placeholder="Ej. Chofer, Paramédico, Inventario..."></div>
+        <div class="form-group">
+          <label>Nivel de Jerarquía (Rango)</label>
+          <select id="rrhh-rango" required>
+            <option value="1">1. Director País</option>
+            <option value="2">2. Gerente de RRHH</option>
+            <option value="3">3. Gerente</option>
+            <option value="4">4. Oficial / Coordinador</option>
+            <option value="5">5. Asistente</option>
+            <option value="6" selected>6. Voluntario</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-block btn-accent"><i class="fa-solid fa-user-plus"></i> Guardar en Base de Datos</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- RESTO DE MODALES (Ficha Perfil, Sourcing, Insumo, Beneficiario, Traza-14) -->
   <div id="modal-perfil-personal" class="modal-overlay hidden" style="z-index: 2500;">
     <div class="modal-card" style="max-width: 450px; padding: 0; overflow: hidden;">
       <div class="perfil-card">
         <div class="perfil-header">
-          <div style="display: flex; justify-content: space-between; position: absolute; top: 1rem; right: 1rem;">
-             <i class="fa-solid fa-xmark modal-close" style="background: rgba(0,0,0,0.1); padding: 0.4rem; border-radius: 50%;" onclick="closeModal('modal-perfil-personal')"></i>
-          </div>
+          <div style="display: flex; justify-content: space-between; position: absolute; top: 1rem; right: 1rem;"><i class="fa-solid fa-xmark modal-close" style="background: rgba(0,0,0,0.1); padding: 0.4rem; border-radius: 50%;" onclick="closeModal('modal-perfil-personal')"></i></div>
           <div class="perfil-avatar" id="perf-inicial">A</div>
           <h3 id="perf-nombre" style="margin-bottom: 0.2rem;">Nombre</h3>
           <p id="perf-rango" style="color: #64748b; font-size: 0.85rem; font-weight: bold;">Rango</p>
@@ -423,7 +444,7 @@
           <div class="perfil-grid">
             <div><span>Cédula</span><strong id="perf-cedula">V-0</strong></div>
             <div><span>Departamento</span><strong id="perf-depto">Logística</strong></div>
-            <div style="grid-column: span 2;"><span>Habilidades</span><strong id="perf-habilidades">...</strong></div>
+            <div style="grid-column: span 2;"><span>Especialidad</span><strong id="perf-habilidades">...</strong></div>
           </div>
           <button type="button" class="btn btn-block" onclick="closeModal('modal-perfil-personal')">Cerrar</button>
         </div>
@@ -431,14 +452,10 @@
     </div>
   </div>
 
-  <!-- MODAL 3: RESULTADO SOURCING IA -->
   <div id="modal-sourcing-resultado" class="modal-overlay hidden" style="z-index: 3000;">
     <div class="modal-card" style="max-width: 900px;">
       <div class="modal-header">
-        <div>
-          <h3 id="modal-sourcing-title">Optimización Multivendedor Finalizada</h3>
-          <p style="font-size: 0.85rem; color: #666;" id="modal-sourcing-subtitle"></p>
-        </div>
+        <div><h3 id="modal-sourcing-title">Optimización Multivendedor Finalizada</h3><p style="font-size: 0.85rem; color: #666;" id="modal-sourcing-subtitle"></p></div>
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-sourcing-resultado')"></i>
       </div>
       <div id="modal-sourcing-content" style="margin-bottom: 1.5rem; overflow-x: auto;"></div>
@@ -449,13 +466,9 @@
     </div>
   </div>
 
-  <!-- MODAL 4: NUEVO INSUMO -->
   <div id="modal-insumo" class="modal-overlay hidden">
     <div class="modal-card">
-      <div class="modal-header">
-        <h3>Registrar Insumo Manual</h3>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i>
-      </div>
+      <div class="modal-header"><h3>Registrar Insumo Manual</h3><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i></div>
       <form id="form-insumo">
         <div class="form-group"><label>Nombre del Insumo</label><input type="text" id="ins-nombre" required></div>
         <div class="form-group"><label>Categoría</label><input type="text" id="ins-categoria" required></div>
@@ -466,16 +479,10 @@
     </div>
   </div>
 
-  <!-- MODAL 5: BENEFICIARIO OCR -->
   <div id="modal-beneficiario" class="modal-overlay hidden">
     <div class="modal-card">
-      <div class="modal-header">
-        <h3>Ingesta Inteligente de Beneficiario</h3>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i>
-      </div>
-      <div style="margin-bottom: 1rem;">
-        <button type="button" class="btn btn-ia btn-block" onclick="simularLecturaOCR()"><i class="fa-solid fa-camera-viewfinder"></i> Escanear Documento (Extracción IA)</button>
-      </div>
+      <div class="modal-header"><h3>Ingesta Inteligente de Beneficiario</h3><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i></div>
+      <div style="margin-bottom: 1rem;"><button type="button" class="btn btn-ia btn-block" onclick="simularLecturaOCR()"><i class="fa-solid fa-camera-viewfinder"></i> Escanear Documento (Extracción IA)</button></div>
       <form id="form-beneficiario">
         <div class="form-group"><label>Cédula</label><input type="text" id="ben-doc" required></div>
         <div class="form-group"><label>Nombre Completo</label><input type="text" id="ben-nombre" required></div>
@@ -486,42 +493,24 @@
     </div>
   </div>
 
-  <!-- MODAL 6: TRAZA-14 -->
   <div id="modalChecklist14" class="modal-overlay hidden">
     <div class="modal-card" style="max-width: 650px;">
-      <div class="modal-header">
-        <div><h3>Gestor Documental Traza-14</h3><p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p></div>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i>
-      </div>
+      <div class="modal-header"><div><h3>Gestor Documental Traza-14</h3><p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p></div><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i></div>
       <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
-          <span>Integridad Expediente:</span><strong id="porcentajeProgresoText">0% (0/14)</strong>
-        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;"><span>Integridad Expediente:</span><strong id="porcentajeProgresoText">0% (0/14)</strong></div>
         <div class="progress-bar-bg"><div id="barraProgreso14" class="h-full bg-amber-500 transition-all" style="width: 0%;"></div></div>
-        <button type="button" class="btn btn-ia btn-block" style="margin-top: 0.5rem; font-size: 0.85rem;" onclick="autocompletarTraza14PorIA()">
-          <i class="fa-solid fa-bolt-lightning"></i> Validación IA Contextual (Aprobar Expediente)
-        </button>
+        <button type="button" class="btn btn-ia btn-block" style="margin-top: 0.5rem; font-size: 0.85rem;" onclick="autocompletarTraza14PorIA()"><i class="fa-solid fa-bolt-lightning"></i> Validación IA Contextual</button>
       </div>
       <div class="checklist-grid" id="contenedorHitos14">
-        <label class="chk-item"><input type="checkbox"> 1. Documento Identidad</label>
-        <label class="chk-item"><input type="checkbox"> 2. RIF Vigente</label>
-        <label class="chk-item"><input type="checkbox"> 3. Constancia Residencial</label>
-        <label class="chk-item"><input type="checkbox"> 4. Carta de Solicitud</label>
-        <label class="chk-item"><input type="checkbox"> 5. Certificado Médico</label>
-        <label class="chk-item"><input type="checkbox"> 6. Informe Social</label>
-        <label class="chk-item"><input type="checkbox"> 7. Presupuesto Formal</label>
-        <label class="chk-item"><input type="checkbox"> 8. Fotos de Soporte</label>
-        <label class="chk-item"><input type="checkbox"> 9. Planilla de Registro</label>
-        <label class="chk-item"><input type="checkbox"> 10. Carta Compromiso</label>
-        <label class="chk-item"><input type="checkbox"> 11. Referencia Personal</label>
-        <label class="chk-item"><input type="checkbox"> 12. Inspección Técnica</label>
-        <label class="chk-item"><input type="checkbox"> 13. Aprobación Comité</label>
-        <label class="chk-item"><input type="checkbox"> 14. Acta Entregable</label>
+        <label class="chk-item"><input type="checkbox"> 1. Documento Identidad</label><label class="chk-item"><input type="checkbox"> 2. RIF Vigente</label>
+        <label class="chk-item"><input type="checkbox"> 3. Constancia Residencial</label><label class="chk-item"><input type="checkbox"> 4. Carta de Solicitud</label>
+        <label class="chk-item"><input type="checkbox"> 5. Certificado Médico</label><label class="chk-item"><input type="checkbox"> 6. Informe Social</label>
+        <label class="chk-item"><input type="checkbox"> 7. Presupuesto Formal</label><label class="chk-item"><input type="checkbox"> 8. Fotos de Soporte</label>
+        <label class="chk-item"><input type="checkbox"> 9. Planilla de Registro</label><label class="chk-item"><input type="checkbox"> 10. Carta Compromiso</label>
+        <label class="chk-item"><input type="checkbox"> 11. Referencia Personal</label><label class="chk-item"><input type="checkbox"> 12. Inspección Técnica</label>
+        <label class="chk-item"><input type="checkbox"> 13. Aprobación Comité</label><label class="chk-item"><input type="checkbox"> 14. Acta Entregable</label>
       </div>
-      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
-        <button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button>
-        <button type="button" class="btn" onclick="guardarProgresoChecklist()">Sincronizar Cambios</button>
-      </div>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;"><button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button><button type="button" class="btn" onclick="guardarProgresoChecklist()">Sincronizar Cambios</button></div>
     </div>
   </div>
 
@@ -531,17 +520,22 @@
     let currentBeneficiarioId = null;
     let ultimaOptimizacionSourcing = null;
     let itemsFCPData = []; 
+    let editandoProyectoId = null; // Variable para saber si estamos creando o editando un proyecto
 
     // --- BASES DE DATOS LOCALES ---
+    // RRHH ahora con Nombre y Apellido unidos internamente
     let cachePersonal = JSON.parse(localStorage.getItem('salh_personal')) || [
       { id: 'P1', cedula: 'V-15890234', nombre: 'Roberto Gómez', rango: 3, departamento: 'Operaciones', habilidades: 'Logística', estrellas: 5, estado: 'Disponible', proyecto: 'Ninguno' },
-      { id: 'P2', cedula: 'V-22109432', nombre: 'Lucía Méndez', rango: 4, departamento: 'Salud / Médico', habilidades: 'Paramédico', estrellas: 4.8, estado: 'Ocupada', proyecto: 'Censo' },
+      { id: 'P2', cedula: 'V-22109432', nombre: 'Lucía Méndez', rango: 4, departamento: 'Salud / Médico', habilidades: 'Paramédico', estrellas: 4.8, estado: 'Ocupada', proyecto: 'FCP001-001-2026' },
       { id: 'P3', cedula: 'V-19882312', nombre: 'Carlos Ruiz', rango: 4, departamento: 'Logística', habilidades: 'Manejo', estrellas: 4.2, estado: 'Disponible', proyecto: 'Ninguno' },
       { id: 'P4', cedula: 'V-26001239', nombre: 'Ana Torroja', rango: 5, departamento: 'Comunicaciones', habilidades: 'Redes', estrellas: 4.9, estado: 'Disponible', proyecto: 'Ninguno' },
       { id: 'P6', cedula: 'V-29001222', nombre: 'Elena Vásquez', rango: 6, departamento: 'Voluntariado General', habilidades: 'Esfuerzo Físico', estrellas: 4, estado: 'Disponible', proyecto: 'Ninguno' }
     ];
 
-    let cacheProyectos = JSON.parse(localStorage.getItem('salh_proyectos')) || [];
+    // Ahora cacheProyectos guarda TODOS los datos para poder editar
+    let cacheProyectos = JSON.parse(localStorage.getItem('salh_proyectos')) || [
+      { codigo: 'FCP001-001-2026', nombre: 'Censo Zona Norte', creadorNombre: 'Roberto Gómez', creadorCedula: 'V-15890234', rangoCreador: 3, personalAsignado: 1, estado: 'En Ejecución', fecha: '2026-09-15', tipo: 'PROYECTO', linea: 'L01', centro: '890130', personalIds: ['P2'], items: [{ cantidad: 2, unidad: "UNIDAD", concepto: "BOTIQUIN", descripcion: "PRIMEROS AUXILIOS" }] }
+    ];
     let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
       { id: 1, nombre: 'Kit de Alimentos', categoria: 'Alimentos', cantidad: 45, ubicacion: 'Central' },
       { id: 2, nombre: 'Filtros de Agua', categoria: 'Implementación', cantidad: 8, ubicacion: 'Regional' }
@@ -596,7 +590,8 @@
     }
 
     function renderizarTodo() {
-      renderProyectosYPersonal();
+      renderProyectos();
+      renderRRHH();
       renderInventario();
       renderBeneficiarios();
       renderOC();
@@ -608,84 +603,143 @@
       guardarEstado();
     }
 
-    // --- PROYECTOS Y RRHH ---
-    function renderProyectosYPersonal() {
-      document.getElementById('proyectos-table').innerHTML = cacheProyectos.map(p => {
-        let botonEliminar = '';
-        if (currentUserRol <= 3) {
-          botonEliminar = (currentUserRol <= p.rangoCreador) ? 
-            `<td class="col-acciones"><button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.codigo}')"><i class="fa-solid fa-trash"></i> Eliminar</button></td>` : 
-            `<td class="col-acciones"><span style="font-size:0.75rem; color:#888;"><i class="fa-solid fa-lock"></i> Bloqueado</span></td>`;
-        }
-        return `<tr><td><strong>${p.codigo}</strong></td><td><strong>${p.nombre}</strong></td><td>${p.creadorNombre}</td><td>${p.personalAsignado} Col.</td><td><span class="badge badge-ok">${p.estado}</span></td>${botonEliminar}</tr>`;
-      }).join('');
-
+    // --- MÓDULO RRHH ---
+    function renderRRHH() {
       document.getElementById('personal-table').innerHTML = cachePersonal.map(p => {
         const badgeClass = p.estado === 'Disponible' ? 'badge-ok' : 'badge-alert';
-        return `<tr><td style="color:#666; font-size:0.85rem;">${p.cedula}</td><td><strong>${p.nombre}</strong></td><td>${NOMBRES_RANGOS[p.rango]}</td><td><span class="badge badge-gray">${p.departamento}</span></td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td>${p.proyecto}</td></tr>`;
+        let botonEliminar = '';
+        if (currentUserRol <= 3) {
+          botonEliminar = `<td class="col-acciones"><button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarPersonal('${p.id}')"><i class="fa-solid fa-trash"></i></button></td>`;
+        }
+        return `<tr><td style="color:#666; font-size:0.85rem;">${p.cedula}</td><td><strong>${p.nombre}</strong></td><td>${NOMBRES_RANGOS[p.rango]}</td><td><span class="badge badge-gray">${p.departamento}</span></td><td>${p.habilidades}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td>${p.proyecto}</td>${botonEliminar}</tr>`;
       }).join('');
     }
 
-    // --- LÓGICA FCP001 (EDITABLE Y AUTOCOMPLETADO) ---
+    document.getElementById('form-nuevo-personal').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const n = document.getElementById('rrhh-nombre').value;
+      const a = document.getElementById('rrhh-apellido').value;
+      const ced = document.getElementById('rrhh-cedula').value;
+      const depto = document.getElementById('rrhh-area').value;
+      const hab = document.getElementById('rrhh-habilidades').value;
+      const ran = parseInt(document.getElementById('rrhh-rango').value);
+
+      cachePersonal.push({
+        id: 'P' + Date.now(), cedula: ced, nombre: `${n} ${a}`, rango: ran, departamento: depto,
+        habilidades: hab, estrellas: 0, estado: 'Disponible', proyecto: 'Ninguno'
+      });
+      renderizarTodo(); closeModal('modal-nuevo-personal'); e.target.reset(); actualizarDatalistCreadores();
+      alert("Personal registrado exitosamente en la base de datos.");
+    });
+
+    function eliminarPersonal(id) {
+      const per = cachePersonal.find(x => x.id === id);
+      if (per.estado === 'Ocupada' || per.estado === 'Ocupado') {
+        alert("No puedes eliminar a un personal que está asignado a un proyecto activo. Modifica el proyecto primero.");
+        return;
+      }
+      if(confirm(`¿Estás seguro de eliminar a ${per.nombre} de la base de datos?`)){
+        cachePersonal = cachePersonal.filter(x => x.id !== id);
+        renderizarTodo(); actualizarDatalistCreadores();
+      }
+    }
+
+    // --- PROYECTOS ---
+    function renderProyectos() {
+      document.getElementById('proyectos-table').innerHTML = cacheProyectos.map(p => {
+        let botonesAccion = '';
+        if (currentUserRol <= 3) {
+          if (currentUserRol <= p.rangoCreador) {
+            botonesAccion = `<td class="col-acciones">
+              <button class="btn btn-secondary" style="padding:0.4rem; font-size:0.8rem; margin-right: 0.3rem;" onclick="abrirModalProyecto('${p.codigo}')"><i class="fa-solid fa-pen"></i> Editar</button>
+              <button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.codigo}')"><i class="fa-solid fa-trash"></i></button>
+            </td>`;
+          } else {
+            botonesAccion = `<td class="col-acciones"><span style="font-size:0.75rem; color:#888;"><i class="fa-solid fa-lock"></i> Bloqueado</span></td>`;
+          }
+        }
+        return `<tr><td><strong>${p.codigo}</strong></td><td><strong>${p.nombre}</strong></td><td>${p.creadorNombre}</td><td>${p.personalAsignado} Col.</td><td><span class="badge badge-ok">${p.estado}</span></td>${botonesAccion}</tr>`;
+      }).join('');
+    }
+
     function actualizarDatalistCreadores() {
       const dl = document.getElementById('lista-creadores');
       dl.innerHTML = cachePersonal.map(p => `<option value="${p.nombre}">${p.cedula} - ${p.departamento}</option>`).join('');
     }
-
     function buscarCreadorPorNombre() {
       const val = document.getElementById('fcp-nombre').value.toLowerCase();
       const p = cachePersonal.find(x => x.nombre.toLowerCase() === val);
-      if(p) {
-        document.getElementById('fcp-cedula').value = p.cedula;
-        document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango];
-        document.getElementById('fcp-depto').value = p.departamento;
-      } else {
-        document.getElementById('fcp-cargo').value = '';
-        document.getElementById('fcp-depto').value = '';
-      }
+      if(p) { document.getElementById('fcp-cedula').value = p.cedula; document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango]; document.getElementById('fcp-depto').value = p.departamento; }
     }
-
     function buscarCreadorPorCedula() {
       const val = document.getElementById('fcp-cedula').value.toLowerCase();
       const p = cachePersonal.find(x => x.cedula.toLowerCase() === val);
-      if(p) {
-        document.getElementById('fcp-nombre').value = p.nombre;
-        document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango];
-        document.getElementById('fcp-depto').value = p.departamento;
-      }
+      if(p) { document.getElementById('fcp-nombre').value = p.nombre; document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango]; document.getElementById('fcp-depto').value = p.departamento; }
     }
 
-    function abrirModalProyecto() {
-      document.getElementById('fcp-cedula').value = '';
-      document.getElementById('fcp-nombre').value = '';
-      document.getElementById('fcp-cargo').value = '';
-      document.getElementById('fcp-depto').value = '';
-      document.getElementById('fcp-proyecto-nombre').value = '';
-      document.getElementById('fcp-linea').value = '';
-      document.getElementById('fcp-centro').value = '';
-      
-      const hoy = new Date();
-      document.getElementById('fcp-fecha').value = hoy.toISOString().split('T')[0];
-      let correlativo = String(cacheProyectos.length + 1).padStart(3, '0');
-      document.getElementById('fcp-codigo').value = `FCP001-${correlativo}-${hoy.getFullYear()}`;
-
-      itemsFCPData = [{ cantidad: 1, unidad: "UNIDAD", concepto: "", descripcion: "" }];
-      renderizarTablaFCP();
+    function abrirModalProyecto(codigo = null) {
       document.getElementById('ia-reasoning-box').style.display = 'none';
-
       const contenedor = document.getElementById('lista-seleccion-personal');
       contenedor.innerHTML = '';
-      const personalElegible = cachePersonal.filter(p => p.rango > currentUserRol && p.estado === 'Disponible');
+      
+      let pObj = null;
+      let preSelectedPersonalIds = [];
+
+      if (codigo) { // MODO EDICIÓN
+        editandoProyectoId = codigo;
+        pObj = cacheProyectos.find(x => x.codigo === codigo);
+        if(!pObj) return;
+
+        document.getElementById('modal-proyecto-titulo').innerText = "Editar Planilla Institucional (FCP001)";
+        document.getElementById('fcp-codigo').value = pObj.codigo;
+        document.getElementById('fcp-cedula').value = pObj.creadorCedula || '';
+        document.getElementById('fcp-nombre').value = pObj.creadorNombre || '';
+        document.getElementById('fcp-fecha').value = pObj.fecha || '';
+        document.getElementById('fcp-proyecto-nombre').value = pObj.nombre || '';
+        document.getElementById('fcp-tipo').value = pObj.tipo || 'PROYECTO';
+        document.getElementById('fcp-linea').value = pObj.linea || '';
+        document.getElementById('fcp-centro').value = pObj.centro || '';
+        document.getElementById('btn-submit-proyecto').innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios del Proyecto';
+        
+        buscarCreadorPorCedula(); // Para autocompletar cargo y depto del creador
+        itemsFCPData = JSON.parse(JSON.stringify(pObj.items || []));
+        preSelectedPersonalIds = pObj.personalIds || [];
+
+      } else { // MODO CREACIÓN
+        editandoProyectoId = null;
+        document.getElementById('modal-proyecto-titulo').innerText = "Planilla Institucional de Solicitud y Proyecto (FCP001)";
+        document.getElementById('fcp-cedula').value = '';
+        document.getElementById('fcp-nombre').value = '';
+        document.getElementById('fcp-cargo').value = '';
+        document.getElementById('fcp-depto').value = '';
+        document.getElementById('fcp-proyecto-nombre').value = '';
+        document.getElementById('fcp-linea').value = '';
+        document.getElementById('fcp-centro').value = '';
+        document.getElementById('btn-submit-proyecto').innerHTML = '<i class="fa-solid fa-save"></i> Registrar Proyecto y Solicitud';
+        
+        const hoy = new Date();
+        document.getElementById('fcp-fecha').value = hoy.toISOString().split('T')[0];
+        let correlativo = String(cacheProyectos.length + 1).padStart(3, '0');
+        document.getElementById('fcp-codigo').value = `FCP001-${correlativo}-${hoy.getFullYear()}`;
+        itemsFCPData = [{ cantidad: 1, unidad: "UNIDAD", concepto: "", descripcion: "" }];
+      }
+      
+      renderizarTablaFCP();
+
+      // Cargar personal para selección (Disponibles + Los que ya están en el proyecto si es edición)
+      const personalElegible = cachePersonal.filter(p => (p.rango > currentUserRol && p.estado === 'Disponible') || preSelectedPersonalIds.includes(p.id));
       
       if(personalElegible.length === 0) {
         contenedor.innerHTML = '<div style="color:#666; font-size:0.85rem; padding: 0.5rem; text-align:center;">No hay personal disponible de rango inferior.</div>';
       } else {
         personalElegible.forEach(p => {
+          const isChecked = preSelectedPersonalIds.includes(p.id) ? 'checked' : '';
+          const statusVisual = preSelectedPersonalIds.includes(p.id) ? '<span style="color:var(--accent); font-weight:bold;">(Actual)</span>' : '';
           contenedor.innerHTML += `
             <div class="chk-item" style="justify-content: space-between;">
               <label style="display: flex; gap: 0.5rem; align-items: center; cursor:pointer; flex: 1;">
-                <input type="checkbox" class="chk-personal" value="${p.id}" data-depto="${p.departamento}" data-estrellas="${p.estrellas}">
-                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento} | ⭐${p.estrellas})</span></span>
+                <input type="checkbox" class="chk-personal" value="${p.id}" data-depto="${p.departamento}" data-estrellas="${p.estrellas}" ${isChecked}>
+                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento} | ⭐${p.estrellas}) ${statusVisual}</span></span>
               </label>
               <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="verPerfilPersonal('${p.id}')"><i class="fa-solid fa-address-card"></i> Ficha</button>
             </div>`;
@@ -725,7 +779,6 @@
       openModal('modal-perfil-personal');
     }
 
-    // Tabla de Ítems FCP
     function renderizarTablaFCP() {
       const tbody = document.getElementById('fcp-cuerpo-items');
       tbody.innerHTML = itemsFCPData.map((item, index) => `
@@ -745,28 +798,60 @@
     document.getElementById('form-proyecto').addEventListener('submit', (e) => {
       e.preventDefault();
       const codigo = document.getElementById('fcp-codigo').value;
+      const nombreP = document.getElementById('fcp-proyecto-nombre').value;
       const creadorNombre = document.getElementById('fcp-nombre').value || "No especificado";
+      const creadorCed = document.getElementById('fcp-cedula').value || "";
+      const fecha = document.getElementById('fcp-fecha').value;
+      const tipo = document.getElementById('fcp-tipo').value;
+      const linea = document.getElementById('fcp-linea').value;
+      const centro = document.getElementById('fcp-centro').value;
       
-      // Intentar obtener el rango del creador si existe en la base, sino usar el currentUserRol
-      const cPersonal = cachePersonal.find(x => x.nombre.toLowerCase() === creadorNombre.toLowerCase());
+      const cPersonal = cachePersonal.find(x => x.cedula.toLowerCase() === creadorCed.toLowerCase());
       const rangoP = cPersonal ? cPersonal.rango : currentUserRol;
 
       const seleccionadosIds = Array.from(document.querySelectorAll('.chk-personal:checked')).map(c => c.value);
-      seleccionadosIds.forEach(id => { const persona = cachePersonal.find(p => p.id === id); if(persona) { persona.estado = 'Ocupado'; persona.proyecto = document.getElementById('fcp-proyecto-nombre').value; } });
+      
+      if (editandoProyectoId) {
+        // MODO EDICIÓN
+        let pObj = cacheProyectos.find(x => x.codigo === editandoProyectoId);
+        if(pObj) {
+          // Liberar personal antiguo que ya no está marcado
+          const oldPersonalIds = pObj.personalIds || [];
+          oldPersonalIds.forEach(id => {
+            if (!seleccionadosIds.includes(id)) {
+              let pers = cachePersonal.find(x => x.id === id);
+              if (pers) { pers.estado = 'Disponible'; pers.proyecto = 'Ninguno'; }
+            }
+          });
+          // Ocupar personal nuevo (o ya existente)
+          seleccionadosIds.forEach(id => {
+            let pers = cachePersonal.find(x => x.id === id);
+            if(pers) { pers.estado = (pers.rango === 4 || pers.rango === 6) ? 'Ocupada' : 'Ocupado'; pers.proyecto = codigo; }
+          });
 
-      cacheProyectos.push({
-        codigo: codigo, nombre: document.getElementById('fcp-proyecto-nombre').value,
-        creadorNombre: creadorNombre, rangoCreador: rangoP, personalAsignado: seleccionadosIds.length, estado: 'En Ejecución'
-      });
+          pObj.nombre = nombreP; pObj.creadorNombre = creadorNombre; pObj.creadorCedula = creadorCed;
+          pObj.fecha = fecha; pObj.tipo = tipo; pObj.linea = linea; pObj.centro = centro;
+          pObj.items = JSON.parse(JSON.stringify(itemsFCPData)); pObj.personalIds = seleccionadosIds; pObj.personalAsignado = seleccionadosIds.length;
+          alert(`¡Proyecto ${codigo} editado exitosamente!`);
+        }
+      } else {
+        // MODO CREACIÓN
+        seleccionadosIds.forEach(id => { const persona = cachePersonal.find(p => p.id === id); if(persona) { persona.estado = (persona.rango === 4 || persona.rango === 6) ? 'Ocupada' : 'Ocupado'; persona.proyecto = codigo; } });
+        cacheProyectos.push({
+          codigo: codigo, nombre: nombreP, creadorNombre: creadorNombre, creadorCedula: creadorCed, rangoCreador: rangoP, personalAsignado: seleccionadosIds.length,
+          estado: 'En Ejecución', fecha: fecha, tipo: tipo, linea: linea, centro: centro, personalIds: seleccionadosIds, items: JSON.parse(JSON.stringify(itemsFCPData))
+        });
+        alert(`¡Proyecto y Solicitud ${codigo} registrados exitosamente!`);
+      }
+
       renderizarTodo(); closeModal('modal-proyecto');
-      alert(`¡Proyecto y Solicitud ${codigo} registrados exitosamente!`);
     });
 
     function eliminarProyecto(idProy) {
       const proyecto = cacheProyectos.find(p => p.codigo === idProy);
       if (!proyecto) return;
       if (confirm(`¿Eliminar el proyecto "${proyecto.nombre}"? El personal será liberado.`)) {
-        cachePersonal.forEach(p => { if (p.proyecto === proyecto.nombre) { p.estado = 'Disponible'; p.proyecto = 'Ninguno'; } });
+        cachePersonal.forEach(p => { if (p.proyecto === idProy) { p.estado = 'Disponible'; p.proyecto = 'Ninguno'; } });
         cacheProyectos = cacheProyectos.filter(p => p.codigo !== idProy);
         renderizarTodo();
       }
@@ -804,41 +889,17 @@
         openModal('modal-sourcing-resultado');
       }, 1000);
     }
-    function confirmarYEmitirOCMultiProveedor() {
-      if (!ultimaOptimizacionSourcing) return;
-      cacheOC.unshift(ultimaOptimizacionSourcing); renderizarTodo(); closeModal('modal-sourcing-resultado'); showSection('sec-proveedores');
-    }
+    function confirmarYEmitirOCMultiProveedor() { if (!ultimaOptimizacionSourcing) return; cacheOC.unshift(ultimaOptimizacionSourcing); renderizarTodo(); closeModal('modal-sourcing-resultado'); showSection('sec-proveedores'); }
     function renderOC() { document.getElementById('oc-table').innerHTML = cacheOC.map(oc => `<tr><td><strong>${oc.id}</strong></td><td>${oc.proveedor}</td><td>${oc.insumos}</td><td><strong>${oc.costo}</strong></td><td><span class="badge badge-ai">${oc.estado}</span></td></tr>`).join(''); }
 
     // --- INVENTARIO ---
-    function renderInventario() {
-      document.getElementById('dash-table').innerHTML = cacheInventario.map(i => `<tr><td><strong>${i.nombre}</strong></td><td>${i.categoria}</td><td style="color:${i.cantidad<=20?'#dc2626; font-weight:bold;':'inherit'};">${i.cantidad} un.</td><td>${i.ubicacion}</td><td>${i.cantidad<=20?'<span class="badge badge-ai">Sugerencia Sourcing</span>':'<span class="badge badge-gray">Normal</span>'}</td></tr>`).join('');
-      document.getElementById('full-inventario-table').innerHTML = document.getElementById('dash-table').innerHTML;
-    }
-    document.getElementById('form-insumo').addEventListener('submit', (e) => {
-      e.preventDefault(); cacheInventario.push({ id: cacheInventario.length + 1, nombre: document.getElementById('ins-nombre').value, categoria: document.getElementById('ins-categoria').value, cantidad: parseInt(document.getElementById('ins-cantidad').value), ubicacion: document.getElementById('ins-ubicacion').value });
-      renderizarTodo(); closeModal('modal-insumo'); e.target.reset();
-    });
+    function renderInventario() { document.getElementById('dash-table').innerHTML = cacheInventario.map(i => `<tr><td><strong>${i.nombre}</strong></td><td>${i.categoria}</td><td style="color:${i.cantidad<=20?'#dc2626; font-weight:bold;':'inherit'};">${i.cantidad} un.</td><td>${i.ubicacion}</td><td>${i.cantidad<=20?'<span class="badge badge-ai">Sugerencia Sourcing</span>':'<span class="badge badge-gray">Normal</span>'}</td></tr>`).join(''); document.getElementById('full-inventario-table').innerHTML = document.getElementById('dash-table').innerHTML; }
+    document.getElementById('form-insumo').addEventListener('submit', (e) => { e.preventDefault(); cacheInventario.push({ id: cacheInventario.length + 1, nombre: document.getElementById('ins-nombre').value, categoria: document.getElementById('ins-categoria').value, cantidad: parseInt(document.getElementById('ins-cantidad').value), ubicacion: document.getElementById('ins-ubicacion').value }); renderizarTodo(); closeModal('modal-insumo'); e.target.reset(); });
 
     // --- BENEFICIARIOS / TRAZA-14 ---
-    function renderBeneficiarios() {
-      document.getElementById('beneficiarios-table').innerHTML = cacheBeneficiarios.map(b => {
-        const c = b.checklist14.filter(Boolean).length; const pct = Math.round((c / 14) * 100);
-        return `<tr><td>${b.documento}</td><td><strong>${b.nombre}</strong></td><td>${b.comunidad}</td><td>${b.familiares}</td><td><div class="progress-bar-bg" style="margin-bottom:0.2rem; height:6px;"><div class="h-full ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}" style="width: ${pct}%"></div></div><span style="font-size: 0.75rem;">${pct}%</span></td><td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')">Traza-14</button></td></tr>`;
-      }).join('');
-    }
-    function abrirChecklist(id) {
-      currentBeneficiarioId = id; const b = cacheBeneficiarios.find(x => x.id === id);
-      document.getElementById('chkModalSubtitulo').innerText = `Expediente: ${b.nombre}`;
-      document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach((chk, idx) => { chk.checked = b.checklist14[idx] || false; });
-      actualizarBarraChecklistModal(); openModal('modalChecklist14');
-    }
-    function actualizarBarraChecklistModal() {
-      let c = 0; document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => { if(chk.checked) c++; });
-      const pct = Math.round((c / 14) * 100); const b = document.getElementById('barraProgreso14'); b.style.width = `${pct}%`;
-      b.className = `h-full transition-all ${pct === 100 ? 'bg-emerald-600' : pct > 50 ? 'bg-blue-600' : 'bg-amber-500'}`;
-      document.getElementById('porcentajeProgresoText').innerText = `${pct}% (${c}/14)`;
-    }
+    function renderBeneficiarios() { document.getElementById('beneficiarios-table').innerHTML = cacheBeneficiarios.map(b => { const c = b.checklist14.filter(Boolean).length; const pct = Math.round((c / 14) * 100); return `<tr><td>${b.documento}</td><td><strong>${b.nombre}</strong></td><td>${b.comunidad}</td><td>${b.familiares}</td><td><div class="progress-bar-bg" style="margin-bottom:0.2rem; height:6px;"><div class="h-full ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}" style="width: ${pct}%"></div></div><span style="font-size: 0.75rem;">${pct}%</span></td><td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')">Traza-14</button></td></tr>`; }).join(''); }
+    function abrirChecklist(id) { currentBeneficiarioId = id; const b = cacheBeneficiarios.find(x => x.id === id); document.getElementById('chkModalSubtitulo').innerText = `Expediente: ${b.nombre}`; document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach((chk, idx) => { chk.checked = b.checklist14[idx] || false; }); actualizarBarraChecklistModal(); openModal('modalChecklist14'); }
+    function actualizarBarraChecklistModal() { let c = 0; document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => { if(chk.checked) c++; }); const pct = Math.round((c / 14) * 100); const b = document.getElementById('barraProgreso14'); b.style.width = `${pct}%`; b.className = `h-full transition-all ${pct === 100 ? 'bg-emerald-600' : pct > 50 ? 'bg-blue-600' : 'bg-amber-500'}`; document.getElementById('porcentajeProgresoText').innerText = `${pct}% (${c}/14)`; }
     document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(c => c.addEventListener('change', actualizarBarraChecklistModal));
     function autocompletarTraza14PorIA() { document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => chk.checked = true); actualizarBarraChecklistModal(); }
     function guardarProgresoChecklist() { cacheBeneficiarios.find(x => x.id === currentBeneficiarioId).checklist14 = Array.from(document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]')).map(c => c.checked); renderizarTodo(); closeModal('modalChecklist14'); }
