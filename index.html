@@ -242,7 +242,7 @@
         </div>
       </section>
 
-      <!-- NUEVA SECCIÓN: RECURSOS HUMANOS -->
+      <!-- SECCIÓN 3: RECURSOS HUMANOS -->
       <section id="sec-rrhh" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -251,13 +251,13 @@
             <button class="btn btn-ia" onclick="openModal('modal-nuevo-personal')"><i class="fa-solid fa-user-plus"></i> Registrar Personal</button>
           </div>
           <table>
-            <thead><tr><th>Cédula</th><th>Nombre Completo</th><th>Rango</th><th>Área / Depto</th><th>Especialidad</th><th>Estado</th><th>Proyecto Actual</th><th class="col-acciones">Eliminar</th></tr></thead>
+            <thead><tr><th>Cédula</th><th>Nombre Completo</th><th>Rango</th><th>Área / Depto</th><th>Especialidad</th><th>Estado</th><th>Proyecto Actual</th><th class="col-acciones">Acciones</th></tr></thead>
             <tbody id="personal-table"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- SECCIÓN 3: MOTOR AUTÓNOMO DE SOURCING (SALH) -->
+      <!-- SECCIÓN 4: MOTOR AUTÓNOMO DE SOURCING (SALH) -->
       <section id="sec-salh" class="view-section">
         <div class="salh-panel">
           <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo y Comparador Web por IA</h3>
@@ -281,7 +281,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 4: INVENTARIO Y ALMACÉN -->
+      <!-- SECCIÓN 5: INVENTARIO Y ALMACÉN -->
       <section id="sec-inventario" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -296,7 +296,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 5: ÓRDENES DE COMPRA (PROVEEDORES) -->
+      <!-- SECCIÓN 6: ÓRDENES DE COMPRA (PROVEEDORES) -->
       <section id="sec-proveedores" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -310,7 +310,7 @@
         </div>
       </section>
 
-      <!-- SECCIÓN 6: BENEFICIARIOS Y TRAZA-14 -->
+      <!-- SECCIÓN 7: BENEFICIARIOS Y TRAZA-14 -->
       <section id="sec-beneficiarios" class="view-section">
         <div class="table-container">
           <div class="table-header">
@@ -429,29 +429,33 @@
     </div>
   </div>
 
-  <!-- RESTO DE MODALES (Ficha Perfil, Sourcing, Insumo, Beneficiario, Traza-14) -->
+  <!-- MODAL: FICHA PERFIL PERSONAL (AHORA CON MÁS DATOS) -->
   <div id="modal-perfil-personal" class="modal-overlay hidden" style="z-index: 2500;">
-    <div class="modal-card" style="max-width: 450px; padding: 0; overflow: hidden;">
+    <div class="modal-card" style="max-width: 500px; padding: 0; overflow: hidden;">
       <div class="perfil-card">
         <div class="perfil-header">
-          <div style="display: flex; justify-content: space-between; position: absolute; top: 1rem; right: 1rem;"><i class="fa-solid fa-xmark modal-close" style="background: rgba(0,0,0,0.1); padding: 0.4rem; border-radius: 50%;" onclick="closeModal('modal-perfil-personal')"></i></div>
+          <div style="display: flex; justify-content: space-between; position: absolute; top: 1rem; right: 1rem;">
+             <i class="fa-solid fa-xmark modal-close" style="background: rgba(0,0,0,0.1); padding: 0.4rem; border-radius: 50%; color:#555;" onclick="closeModal('modal-perfil-personal')"></i>
+          </div>
           <div class="perfil-avatar" id="perf-inicial">A</div>
           <h3 id="perf-nombre" style="margin-bottom: 0.2rem;">Nombre</h3>
           <p id="perf-rango" style="color: #64748b; font-size: 0.85rem; font-weight: bold;">Rango</p>
-          <div style="margin-top: 0.5rem;" id="perf-estrellas"></div>
         </div>
         <div class="perfil-body">
           <div class="perfil-grid">
             <div><span>Cédula</span><strong id="perf-cedula">V-0</strong></div>
             <div><span>Departamento</span><strong id="perf-depto">Logística</strong></div>
-            <div style="grid-column: span 2;"><span>Especialidad</span><strong id="perf-habilidades">...</strong></div>
+            <div><span>Especialidad</span><strong id="perf-habilidades">...</strong></div>
+            <div><span>Estado actual</span><strong id="perf-estado" style="color:var(--primary);">Disponible</strong></div>
+            <div style="grid-column: span 2;"><span>Proyecto Asignado</span><strong id="perf-proyecto">Ninguno</strong></div>
           </div>
-          <button type="button" class="btn btn-block" onclick="closeModal('modal-perfil-personal')">Cerrar</button>
+          <button type="button" class="btn btn-block" style="margin-top:1rem;" onclick="closeModal('modal-perfil-personal')">Cerrar Ficha</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- RESTO DE MODALES (Sourcing, Insumo, Beneficiario, Traza-14) -->
   <div id="modal-sourcing-resultado" class="modal-overlay hidden" style="z-index: 3000;">
     <div class="modal-card" style="max-width: 900px;">
       <div class="modal-header">
@@ -520,10 +524,9 @@
     let currentBeneficiarioId = null;
     let ultimaOptimizacionSourcing = null;
     let itemsFCPData = []; 
-    let editandoProyectoId = null; // Variable para saber si estamos creando o editando un proyecto
+    let editandoProyectoId = null; // Variable CRÍTICA para que funcione la edición
 
     // --- BASES DE DATOS LOCALES ---
-    // RRHH ahora con Nombre y Apellido unidos internamente
     let cachePersonal = JSON.parse(localStorage.getItem('salh_personal')) || [
       { id: 'P1', cedula: 'V-15890234', nombre: 'Roberto Gómez', rango: 3, departamento: 'Operaciones', habilidades: 'Logística', estrellas: 5, estado: 'Disponible', proyecto: 'Ninguno' },
       { id: 'P2', cedula: 'V-22109432', nombre: 'Lucía Méndez', rango: 4, departamento: 'Salud / Médico', habilidades: 'Paramédico', estrellas: 4.8, estado: 'Ocupada', proyecto: 'FCP001-001-2026' },
@@ -532,7 +535,6 @@
       { id: 'P6', cedula: 'V-29001222', nombre: 'Elena Vásquez', rango: 6, departamento: 'Voluntariado General', habilidades: 'Esfuerzo Físico', estrellas: 4, estado: 'Disponible', proyecto: 'Ninguno' }
     ];
 
-    // Ahora cacheProyectos guarda TODOS los datos para poder editar
     let cacheProyectos = JSON.parse(localStorage.getItem('salh_proyectos')) || [
       { codigo: 'FCP001-001-2026', nombre: 'Censo Zona Norte', creadorNombre: 'Roberto Gómez', creadorCedula: 'V-15890234', rangoCreador: 3, personalAsignado: 1, estado: 'En Ejecución', fecha: '2026-09-15', tipo: 'PROYECTO', linea: 'L01', centro: '890130', personalIds: ['P2'], items: [{ cantidad: 2, unidad: "UNIDAD", concepto: "BOTIQUIN", descripcion: "PRIMEROS AUXILIOS" }] }
     ];
@@ -607,12 +609,30 @@
     function renderRRHH() {
       document.getElementById('personal-table').innerHTML = cachePersonal.map(p => {
         const badgeClass = p.estado === 'Disponible' ? 'badge-ok' : 'badge-alert';
-        let botonEliminar = '';
+        let botonesAccion = '';
         if (currentUserRol <= 3) {
-          botonEliminar = `<td class="col-acciones"><button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarPersonal('${p.id}')"><i class="fa-solid fa-trash"></i></button></td>`;
+          botonesAccion = `<td class="col-acciones" style="white-space: nowrap;">
+            <button class="btn btn-secondary" style="padding:0.4rem; font-size:0.8rem; margin-right: 0.3rem;" onclick="verPerfilPersonal('${p.id}')" title="Ver Ficha"><i class="fa-solid fa-address-card"></i> Ficha</button>
+            <button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarPersonal('${p.id}')" title="Eliminar del sistema"><i class="fa-solid fa-trash"></i></button>
+          </td>`;
         }
-        return `<tr><td style="color:#666; font-size:0.85rem;">${p.cedula}</td><td><strong>${p.nombre}</strong></td><td>${NOMBRES_RANGOS[p.rango]}</td><td><span class="badge badge-gray">${p.departamento}</span></td><td>${p.habilidades}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td>${p.proyecto}</td>${botonEliminar}</tr>`;
+        return `<tr><td style="color:#666; font-size:0.85rem;">${p.cedula}</td><td><strong>${p.nombre}</strong></td><td>${NOMBRES_RANGOS[p.rango]}</td><td><span class="badge badge-gray">${p.departamento}</span></td><td>${p.habilidades}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td>${p.proyecto}</td>${botonesAccion}</tr>`;
       }).join('');
+    }
+
+    // Función para mostrar la FICHA del empleado
+    function verPerfilPersonal(id) {
+      const p = cachePersonal.find(x => x.id === id);
+      if(!p) return;
+      document.getElementById('perf-inicial').innerText = p.nombre.charAt(0);
+      document.getElementById('perf-nombre').innerText = p.nombre;
+      document.getElementById('perf-rango').innerText = NOMBRES_RANGOS[p.rango];
+      document.getElementById('perf-cedula').innerText = p.cedula;
+      document.getElementById('perf-depto').innerText = p.departamento;
+      document.getElementById('perf-habilidades').innerText = p.habilidades || 'N/A';
+      document.getElementById('perf-estado').innerText = p.estado;
+      document.getElementById('perf-proyecto').innerText = p.proyecto;
+      openModal('modal-perfil-personal');
     }
 
     document.getElementById('form-nuevo-personal').addEventListener('submit', (e) => {
@@ -635,7 +655,7 @@
     function eliminarPersonal(id) {
       const per = cachePersonal.find(x => x.id === id);
       if (per.estado === 'Ocupada' || per.estado === 'Ocupado') {
-        alert("No puedes eliminar a un personal que está asignado a un proyecto activo. Modifica el proyecto primero.");
+        alert("No puedes eliminar a un personal que está asignado a un proyecto activo. Modifica el proyecto primero para liberarlo.");
         return;
       }
       if(confirm(`¿Estás seguro de eliminar a ${per.nombre} de la base de datos?`)){
@@ -650,9 +670,9 @@
         let botonesAccion = '';
         if (currentUserRol <= 3) {
           if (currentUserRol <= p.rangoCreador) {
-            botonesAccion = `<td class="col-acciones">
-              <button class="btn btn-secondary" style="padding:0.4rem; font-size:0.8rem; margin-right: 0.3rem;" onclick="abrirModalProyecto('${p.codigo}')"><i class="fa-solid fa-pen"></i> Editar</button>
-              <button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.codigo}')"><i class="fa-solid fa-trash"></i></button>
+            botonesAccion = `<td class="col-acciones" style="white-space: nowrap;">
+              <button class="btn btn-secondary" style="padding:0.4rem; font-size:0.8rem; margin-right: 0.3rem;" onclick="abrirModalProyecto('${p.codigo}')" title="Editar Proyecto"><i class="fa-solid fa-pen"></i> Editar</button>
+              <button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.codigo}')" title="Eliminar Proyecto"><i class="fa-solid fa-trash"></i></button>
             </td>`;
           } else {
             botonesAccion = `<td class="col-acciones"><span style="font-size:0.75rem; color:#888;"><i class="fa-solid fa-lock"></i> Bloqueado</span></td>`;
@@ -677,6 +697,7 @@
       if(p) { document.getElementById('fcp-nombre').value = p.nombre; document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango]; document.getElementById('fcp-depto').value = p.departamento; }
     }
 
+    // FUNCION PRINCIPAL DE CREACIÓN Y EDICIÓN
     function abrirModalProyecto(codigo = null) {
       document.getElementById('ia-reasoning-box').style.display = 'none';
       const contenedor = document.getElementById('lista-seleccion-personal');
@@ -685,12 +706,13 @@
       let pObj = null;
       let preSelectedPersonalIds = [];
 
-      if (codigo) { // MODO EDICIÓN
+      if (codigo && typeof codigo === 'string') { 
+        // ------------------ MODO EDICIÓN ------------------
         editandoProyectoId = codigo;
         pObj = cacheProyectos.find(x => x.codigo === codigo);
         if(!pObj) return;
 
-        document.getElementById('modal-proyecto-titulo').innerText = "Editar Planilla Institucional (FCP001)";
+        document.getElementById('modal-proyecto-titulo').innerText = `Editar Proyecto: ${pObj.codigo}`;
         document.getElementById('fcp-codigo').value = pObj.codigo;
         document.getElementById('fcp-cedula').value = pObj.creadorCedula || '';
         document.getElementById('fcp-nombre').value = pObj.creadorNombre || '';
@@ -705,7 +727,8 @@
         itemsFCPData = JSON.parse(JSON.stringify(pObj.items || []));
         preSelectedPersonalIds = pObj.personalIds || [];
 
-      } else { // MODO CREACIÓN
+      } else { 
+        // ------------------ MODO CREACIÓN ------------------
         editandoProyectoId = null;
         document.getElementById('modal-proyecto-titulo').innerText = "Planilla Institucional de Solicitud y Proyecto (FCP001)";
         document.getElementById('fcp-cedula').value = '';
@@ -734,14 +757,14 @@
       } else {
         personalElegible.forEach(p => {
           const isChecked = preSelectedPersonalIds.includes(p.id) ? 'checked' : '';
-          const statusVisual = preSelectedPersonalIds.includes(p.id) ? '<span style="color:var(--accent); font-weight:bold;">(Actual)</span>' : '';
+          const statusVisual = preSelectedPersonalIds.includes(p.id) ? '<span style="color:var(--accent); font-weight:bold;">(En este Proyecto)</span>' : '';
           contenedor.innerHTML += `
             <div class="chk-item" style="justify-content: space-between;">
               <label style="display: flex; gap: 0.5rem; align-items: center; cursor:pointer; flex: 1;">
                 <input type="checkbox" class="chk-personal" value="${p.id}" data-depto="${p.departamento}" data-estrellas="${p.estrellas}" ${isChecked}>
-                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento} | ⭐${p.estrellas}) ${statusVisual}</span></span>
+                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento} - ${p.habilidades}) ${statusVisual}</span></span>
               </label>
-              <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="verPerfilPersonal('${p.id}')"><i class="fa-solid fa-address-card"></i> Ficha</button>
+              <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="verPerfilPersonal('${p.id}')" title="Ver Perfil"><i class="fa-solid fa-address-card"></i></button>
             </div>`;
         });
       }
@@ -765,18 +788,6 @@
       const box = document.getElementById('ia-reasoning-box');
       box.style.display = 'block';
       box.innerHTML = `<strong><i class="fa-solid fa-microchip"></i> Auto-Selección IA:</strong> Se marcaron ${seleccionados} especialistas basados en perfil y rendimiento.`;
-    }
-
-    function verPerfilPersonal(id) {
-      const p = cachePersonal.find(x => x.id === id);
-      if(!p) return;
-      document.getElementById('perf-inicial').innerText = p.nombre.charAt(0);
-      document.getElementById('perf-nombre').innerText = p.nombre;
-      document.getElementById('perf-rango').innerText = NOMBRES_RANGOS[p.rango];
-      document.getElementById('perf-cedula').innerText = p.cedula;
-      document.getElementById('perf-depto').innerText = p.departamento;
-      document.getElementById('perf-habilidades').innerText = p.habilidades;
-      openModal('modal-perfil-personal');
     }
 
     function renderizarTablaFCP() {
@@ -812,7 +823,7 @@
       const seleccionadosIds = Array.from(document.querySelectorAll('.chk-personal:checked')).map(c => c.value);
       
       if (editandoProyectoId) {
-        // MODO EDICIÓN
+        // --- GUARDAR CAMBIOS: MODO EDICIÓN ---
         let pObj = cacheProyectos.find(x => x.codigo === editandoProyectoId);
         if(pObj) {
           // Liberar personal antiguo que ya no está marcado
@@ -832,10 +843,10 @@
           pObj.nombre = nombreP; pObj.creadorNombre = creadorNombre; pObj.creadorCedula = creadorCed;
           pObj.fecha = fecha; pObj.tipo = tipo; pObj.linea = linea; pObj.centro = centro;
           pObj.items = JSON.parse(JSON.stringify(itemsFCPData)); pObj.personalIds = seleccionadosIds; pObj.personalAsignado = seleccionadosIds.length;
-          alert(`¡Proyecto ${codigo} editado exitosamente!`);
+          alert(`¡Proyecto ${codigo} editado y actualizado exitosamente!`);
         }
       } else {
-        // MODO CREACIÓN
+        // --- GUARDAR NUEVO: MODO CREACIÓN ---
         seleccionadosIds.forEach(id => { const persona = cachePersonal.find(p => p.id === id); if(persona) { persona.estado = (persona.rango === 4 || persona.rango === 6) ? 'Ocupada' : 'Ocupado'; persona.proyecto = codigo; } });
         cacheProyectos.push({
           codigo: codigo, nombre: nombreP, creadorNombre: creadorNombre, creadorCedula: creadorCed, rangoCreador: rangoP, personalAsignado: seleccionadosIds.length,
@@ -844,13 +855,15 @@
         alert(`¡Proyecto y Solicitud ${codigo} registrados exitosamente!`);
       }
 
-      renderizarTodo(); closeModal('modal-proyecto');
+      editandoProyectoId = null; // Reiniciar variable de edición
+      renderizarTodo(); 
+      closeModal('modal-proyecto');
     });
 
     function eliminarProyecto(idProy) {
       const proyecto = cacheProyectos.find(p => p.codigo === idProy);
       if (!proyecto) return;
-      if (confirm(`¿Eliminar el proyecto "${proyecto.nombre}"? El personal será liberado.`)) {
+      if (confirm(`¿Eliminar el proyecto "${proyecto.nombre}"? Todo el personal será liberado.`)) {
         cachePersonal.forEach(p => { if (p.proyecto === idProy) { p.estado = 'Disponible'; p.proyecto = 'Ninguno'; } });
         cacheProyectos = cacheProyectos.filter(p => p.codigo !== idProy);
         renderizarTodo();
