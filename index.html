@@ -4,22 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ADRA - Sistema Autónomo de Logística Humanitaria (SALH v2)</title>
+  
+  <!-- Estilos e Íconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Firebase Compat Libraries (Fáciles de integrar en un solo archivo) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
-    :root {
-      --primary: #008559;
-      --primary-dark: #006040;
-      --accent: #2563eb;
-      --ai-color: #8b5cf6;
-      --bg-color: #f4f7f6;
-      --sidebar-width: 260px;
-      --text-color: #333;
-    }
+    :root { --primary: #008559; --primary-dark: #006040; --accent: #2563eb; --ai-color: #8b5cf6; --bg-color: #f4f7f6; --sidebar-width: 260px; --text-color: #333; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-    /* Login */
+    /* Login & Registration */
     #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #008559 0%, #004d33 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; }
     .login-card { background: #fff; padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 12px 32px rgba(0,0,0,0.2); text-align: center; }
     .login-card h2 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1.6rem; }
@@ -38,12 +38,11 @@
     .btn-accent:hover { background: #1d4ed8; }
     .btn-danger { background: #dc2626; color: #fff; }
     .btn-danger:hover { background: #b91c1c; }
-    .btn-ia { background: var(--ai-color); color: #fff; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
-    .btn-ia:hover { background: #7c3aed; }
-    .btn-excel { background: #059669; color: #fff; }
-    .btn-excel:hover { background: #047857; }
-
-    /* Sidebar y Main */
+    .btn-google { background: #fff; color: #333; border: 1px solid #ccc; font-weight: bold; }
+    .btn-google:hover { background: #f1f5f9; }
+    .btn-google img { width: 18px; margin-right: 8px; }
+    
+    /* Layout */
     #app-screen { display: flex; width: 100%; }
     sidebar { width: var(--sidebar-width); background: #1b2a26; color: #fff; min-height: 100vh; padding: 1.5rem 1rem; display: flex; flex-direction: column; justify-content: space-between; }
     sidebar .brand { font-size: 1.3rem; font-weight: bold; color: #4caf50; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -51,25 +50,22 @@
     sidebar nav li { margin-bottom: 0.5rem; }
     sidebar nav a { color: #b0bec5; text-decoration: none; padding: 0.75rem 1rem; border-radius: 6px; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; cursor: pointer; font-size: 0.9rem; }
     sidebar nav a:hover, sidebar nav a.active { background: var(--primary); color: #fff; }
-    .offline-badge { background: rgba(255,255,255,0.1); padding: 0.6rem; border-radius: 6px; font-size: 0.75rem; text-align: center; color: #a5d6a7; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
     
     main { flex: 1; padding: 2rem; overflow-y: auto; max-height: 100vh; }
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 1rem; }
     .user-profile { font-weight: 600; color: #555; display: flex; align-items: center; gap: 0.5rem; }
 
-    /* Dashboard & Cards */
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
     .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
     .card.blue { border-left-color: var(--accent); }
     .card.orange { border-left-color: #f59e0b; }
-    .card.purple { border-left-color: #7c3aed; }
     .card .title { font-size: 0.85rem; color: #777; margin-bottom: 0.5rem; font-weight: 600; }
     .card .value { font-size: 1.8rem; font-weight: bold; color: var(--text-color); }
 
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* Tablas */
+    /* Tables */
     .table-container { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
     .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem; }
     .search-box { display: flex; align-items: center; background: #f0f4f2; border: 1px solid #dcdcdc; border-radius: 6px; padding: 0.5rem 0.8rem; width: 100%; max-width: 320px; }
@@ -84,19 +80,7 @@
     .badge-alert { background: #ffebee; color: #c62828; }
     .badge-blue { background: #e0f2fe; color: #0369a1; }
     .badge-gray { background: #f1f5f9; color: #64748b; }
-    .badge-ai { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
-
-    /* SALH Panel Inteligente */
-    .salh-panel { background: linear-gradient(135deg, #004d33 0%, #008559 100%); color: #fff; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-    .salh-panel h3 { font-size: 1.4rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.7rem; }
-    .salh-panel p { font-size: 0.95rem; opacity: 0.9; margin-bottom: 1.5rem; max-width: 750px; }
-    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; background: rgba(0,0,0,0.15); padding: 1.2rem; border-radius: 8px; }
-    .config-grid label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.3rem; color: #e2e8f0; }
-    .config-grid select, .config-grid input { width: 100%; padding: 0.6rem; border-radius: 6px; border: none; outline: none; }
-    .crisis-triggers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-    .crisis-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 1.2rem; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; text-align: left; transition: 0.2s; }
-    .crisis-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
-    .crisis-btn i { font-size: 1.3rem; margin-bottom: 0.5rem; display: block; color: #a5d6a7; }
+    .badge-warning { background: #fef3c7; color: #d97706; }
 
     /* Modales */
     .hidden { display: none !important; }
@@ -105,71 +89,43 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
     .modal-close { cursor: pointer; font-size: 1.2rem; color: #888; transition: 0.2s; }
     .modal-close:hover { color: #dc2626; }
-    
-    .chk-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; background: #fff; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.25rem; }
-    
-    /* Ficha Perfil Personal */
-    .perfil-card { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
-    .perfil-header { background: #f8fafc; padding: 1.5rem; text-align: center; border-bottom: 1px solid #e2e8f0; }
-    .perfil-avatar { width: 80px; height: 80px; background: var(--primary); color: white; font-size: 2rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 1rem auto; }
-    .perfil-body { padding: 1.5rem; }
-    .perfil-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .perfil-grid div { background: #f1f5f9; padding: 0.8rem; border-radius: 6px; }
-    .perfil-grid div span { display: block; font-size: 0.75rem; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 0.2rem; }
-    .perfil-grid div strong { color: #334155; font-size: 0.95rem; }
-    .stars { color: #f59e0b; font-size: 0.9rem; }
 
-    /* Barra Traza-14 */
-    .progress-bar-bg { background-color: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 1rem; }
-    .bg-amber-500 { background-color: #f59e0b; }
-    .bg-blue-600 { background-color: #2563eb; }
-    .bg-emerald-600 { background-color: #059669; }
-    .transition-all { transition: all 0.3s ease; }
-    .h-full { height: 100%; }
-    .log-terminal { background: #0f172a; color: #38bdf8; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 220px; overflow-y: auto; margin-top: 1rem; line-height: 1.4; }
-    .ia-reasoning-box { background: #ede9fe; border: 1px solid #c4b5fd; padding: 1rem; border-radius: 8px; color: #4c1d95; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
-    .checklist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0; }
-
-    /* Estilos Planilla FCP001 integrada */
-    .fcp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
-    .fcp-box { border: 2px solid #1e293b; padding: 1rem; border-radius: 6px; background: #f8fafc; margin-bottom: 1.5rem; }
-    .fcp-table-container { border: 2px solid #1e293b; border-radius: 6px; overflow: hidden; margin-bottom: 1.5rem; }
-    .fcp-table { width: 100%; border-collapse: collapse; }
-    .fcp-table th { background: #1e293b; color: #fff; padding: 0.5rem; font-size: 0.8rem; text-align: center; }
-    .fcp-table td { padding: 0.5rem; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; }
-    .fcp-table input { width: 100%; border: none; background: transparent; outline: none; text-align: center; font-size: 0.85rem; }
-    .fcp-title { font-size: 1.1rem; font-weight: bold; text-transform: uppercase; text-align: center; color: #1e293b; margin-bottom: 1rem; }
+    /* Loader */
+    .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <!-- LOGIN -->
+  <!-- PANTALLA DE LOGIN Y REGISTRO (CONECTADA A FIREBASE) -->
   <div id="login-screen">
     <div class="login-card">
-      <h2><i class="fa-solid fa-brain"></i> SALH v2 - ADRA</h2>
-      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;">Gestión de RRHH, Logística IA y Sourcing</p>
-      <form id="login-form">
-        <div class="form-group">
-          <label>Credencial de Acceso</label>
-          <input type="email" id="correo" value="admin@adra.org" required>
+      <h2><i class="fa-solid fa-network-wired"></i> SALH Core v2</h2>
+      <p style="color:#666; font-size: 0.85rem; margin-bottom: 1.5rem;" id="login-subtitle">Control de Acceso Institucional</p>
+      
+      <!-- Panel 1: Botón Google -->
+      <div id="panel-auth">
+        <button type="button" class="btn btn-block btn-google" onclick="iniciarSesionGoogle()">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G"> Continuar con Google
+        </button>
+        <div class="loader" id="login-loader" style="margin-top: 1rem;"></div>
+      </div>
+
+      <!-- Panel 2: Formulario Registro RRHH -->
+      <div id="panel-registro" class="hidden">
+        <div style="background: #e0f2fe; border: 1px solid #bae6fd; padding: 0.8rem; border-radius: 6px; font-size: 0.85rem; color: #0369a1; margin-bottom: 1rem;">
+          <i class="fa-solid fa-circle-info"></i> Tu correo no está registrado en el directorio. Completa el formulario para solicitar acceso.
         </div>
-        <div class="form-group">
-          <label>Nivel de Jerarquía (Rango)</label>
-          <select id="login-rango" required>
-            <option value="1">1. Director País</option>
-            <option value="2">2. Gerente de RRHH</option>
-            <option value="3">3. Gerente</option>
-            <option value="4">4. Oficial / Coordinador</option>
-            <option value="5">5. Asistente</option>
-            <option value="6" selected>6. Voluntario</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Clave de Seguridad</label>
-          <input type="password" id="password" value="adra2026" required>
-        </div>
-        <button type="submit" class="btn btn-block">Ingresar al Sistema</button>
-      </form>
+        <form id="form-registro">
+          <div class="form-group"><label>Correo Autenticado</label><input type="email" id="reg-email" readonly></div>
+          <div class="form-group"><label>Nombre(s)</label><input type="text" id="reg-nombre" required></div>
+          <div class="form-group"><label>Apellido(s)</label><input type="text" id="reg-apellido" required></div>
+          <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="reg-cedula" placeholder="V-12345678" required></div>
+          <div class="form-group"><label>Código PIN de Verificación</label><input type="password" id="reg-pin" placeholder="Código de la Organización" required></div>
+          <button type="submit" class="btn btn-block btn-accent">Enviar Solicitud a RRHH</button>
+          <button type="button" class="btn btn-block btn-secondary" style="margin-top:0.5rem;" onclick="cancelarRegistro()">Cancelar</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -184,238 +140,94 @@
             <li><a onclick="showSection('sec-proyectos')" id="nav-proyectos"><i class="fa-solid fa-diagram-project"></i> Gestión Proyectos</a></li>
             <li><a onclick="showSection('sec-rrhh')" id="nav-rrhh"><i class="fa-solid fa-users-gear"></i> Recursos Humanos</a></li>
             <li><a onclick="showSection('sec-salh')" id="nav-salh"><i class="fa-solid fa-robot"></i> Sourcing Autónomo</a></li>
-            <li><a onclick="showSection('sec-inventario')" id="nav-inventario"><i class="fa-solid fa-boxes-stacked"></i> Almacén e Inventario</a></li>
-            <li><a onclick="showSection('sec-proveedores')" id="nav-proveedores"><i class="fa-solid fa-truck-ramp-box"></i> Órdenes de Compra</a></li>
-            <li><a onclick="showSection('sec-beneficiarios')" id="nav-beneficiarios"><i class="fa-solid fa-users-rectangle"></i> Padrón y Traza-14</a></li>
           </ul>
         </nav>
       </div>
-      <div class="offline-badge"><i class="fa-solid fa-microchip"></i> <span>Motor IA Optimizado</span></div>
+      <div>
+        <div class="offline-badge" style="margin-bottom:0.5rem;"><i class="fa-solid fa-cloud"></i> <span>Firebase Online</span></div>
+        <button class="btn btn-danger btn-block" style="padding:0.5rem; font-size:0.8rem;" onclick="cerrarSesion()">Cerrar Sesión</button>
+      </div>
     </sidebar>
 
     <main>
       <header>
         <h2 id="section-title">Centro de Mando Logístico y RRHH</h2>
-        <div class="user-profile" id="user-display"><i class="fa-solid fa-user-shield"></i> Operador</div>
+        <div class="user-profile" id="user-display"><i class="fa-solid fa-user-shield"></i> Cargando...</div>
       </header>
 
       <!-- SECCIÓN 1: DASHBOARD -->
       <section id="sec-dashboard" class="view-section active">
         <div class="metrics-grid">
-          <div class="card"><div class="title">Personal Disponible</div><div class="value" id="m-personal-disp">0</div></div>
+          <div class="card"><div class="title">Personal Aprobado</div><div class="value" id="m-personal-disp">0</div></div>
           <div class="card blue"><div class="title">Proyectos Activos</div><div class="value" style="color: #2563eb;" id="m-proyectos">0</div></div>
-          <div class="card orange"><div class="title">Alertas Stock Crítico</div><div class="value" style="color: #d97706;" id="m-criticos">0</div></div>
-          <div class="card purple"><div class="title">Beneficiarios Traza-14</div><div class="value" style="color: #7c3aed;" id="m-beneficiarios">0</div></div>
-        </div>
-        <div class="table-container">
-          <div class="table-header">
-            <h3>Estado del Inventario Global</h3>
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Filtrar inventario..." onkeyup="filterTable(this, 'dash-table')">
-            </div>
-          </div>
-          <table>
-            <thead><tr><th>Insumo / Ítem</th><th>Categoría</th><th>Stock Actual</th><th>Almacén</th><th>Estado IA</th></tr></thead>
-            <tbody id="dash-table"></tbody>
-          </table>
         </div>
       </section>
 
-      <!-- SECCIÓN 2: GESTIÓN DE PROYECTOS -->
+      <!-- SECCIÓN 2: PROYECTOS (Versión Simplificada para el demo) -->
       <section id="sec-proyectos" class="view-section">
         <div class="table-container">
           <div class="table-header">
-            <h3>Gestión de Proyectos Operativos</h3>
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Buscar proyecto..." onkeyup="filterTable(this, 'proyectos-table')">
-            </div>
-            <button class="btn btn-accent" id="btn-crear-proyecto" onclick="abrirModalProyecto()" style="display:none;">
-              <i class="fa-solid fa-plus"></i> Nuevo Proyecto
-            </button>
+            <h3>Gestión de Proyectos</h3>
           </div>
-          <table>
-            <thead><tr><th>Código</th><th>Nombre del Proyecto</th><th>Creador (Rango)</th><th>Personal</th><th>Estado</th><th class="col-acciones">Acciones</th></tr></thead>
-            <tbody id="proyectos-table"></tbody>
-          </table>
+          <div style="padding:2rem; text-align:center; color:#666;">
+            <i class="fa-solid fa-diagram-project" style="font-size:2rem; color:#ccc; margin-bottom:1rem;"></i>
+            <p>Módulo de Planillas FCP001 conectado a Firebase en desarrollo.</p>
+          </div>
         </div>
       </section>
 
-      <!-- SECCIÓN 3: RECURSOS HUMANOS -->
+      <!-- SECCIÓN 3: RECURSOS HUMANOS (AQUÍ ESTÁ LA NUEVA BANDEJA) -->
       <section id="sec-rrhh" class="view-section">
-        <div class="table-container">
+        
+        <!-- PANEL DE APROBACIÓN (SOLO PARA RANGO 1 Y 2) -->
+        <div id="panel-aprobaciones-rrhh" class="table-container hidden" style="border: 2px solid #f59e0b;">
           <div class="table-header">
-            <h3>Directorio Central de Recursos Humanos</h3>
-            <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Filtrar personal..." onkeyup="filterTable(this, 'personal-table')"></div>
-            <button class="btn btn-ia" onclick="openModal('modal-nuevo-personal')"><i class="fa-solid fa-user-plus"></i> Registrar Personal</button>
+            <h3><i class="fa-solid fa-user-clock" style="color:#d97706;"></i> Solicitudes de Ingreso Pendientes</h3>
           </div>
           <table>
-            <thead><tr><th>Cédula</th><th>Nombre Completo</th><th>Rango</th><th>Área / Depto</th><th>Especialidad</th><th>Estado</th><th>Proyecto Actual</th><th class="col-acciones">Acciones</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Nombre</th><th>Cédula</th><th>Correo</th><th>Acciones</th></tr></thead>
+            <tbody id="pendientes-table"></tbody>
+          </table>
+        </div>
+
+        <!-- DIRECTORIO GENERAL -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Directorio Oficial de Personal</h3>
+            <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Filtrar personal..." onkeyup="filterTable(this, 'personal-table')"></div>
+          </div>
+          <table>
+            <thead><tr><th>Cédula</th><th>Nombre Completo</th><th>Rango</th><th>Área / Depto</th><th>Especialidad</th><th>Estado</th></tr></thead>
             <tbody id="personal-table"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- SECCIÓN 4: MOTOR AUTÓNOMO DE SOURCING (SALH) -->
+      <!-- SECCIÓN 4: SOURCING -->
       <section id="sec-salh" class="view-section">
-        <div class="salh-panel">
-          <h3><i class="fa-solid fa-brain"></i> Sourcing Autónomo y Comparador Web por IA</h3>
-          <p>La IA desglosará ítems, rastreará webs de proveedores y optimizará el presupuesto en tiempo real para armar las mejores órdenes de suministro.</p>
-          <div class="config-grid">
-            <div><label>Presupuesto Máximo Disponible ($)</label><input type="number" id="input-presupuesto" value="5000" min="100" step="50"></div>
-            <div>
-              <label>Criterio de Negociación IA</label>
-              <select id="select-criterio"><option value="precio">Optimizar Estricto por Menor Precio</option><option value="mixto">Balanceado (Precio + Rapidez de Entrega)</option></select>
-            </div>
-          </div>
-          <div class="crisis-triggers">
-            <button class="crisis-btn" onclick="ejecutarSourcingIA('Inundación Severa en Zona Alta')"><i class="fa-solid fa-house-flood-water"></i> Inundación Severa</button>
-            <button class="crisis-btn" onclick="ejecutarSourcingIA('Crisis Alimentaria Comunitaria')"><i class="fa-solid fa-bowl-food"></i> Crisis Alimentaria</button>
-            <button class="crisis-btn" onclick="ejecutarSourcingIA('Apoyo Médico de Urgencia')"><i class="fa-solid fa-kit-medical"></i> Emergencia Médica</button>
-          </div>
-        </div>
-        <div class="table-container">
-          <h3>Consola de Web Scraping y Negociación</h3>
-          <div class="log-terminal" id="salh-terminal">[SALH_SOURCING] Motor IA en línea y a la espera de instrucciones...</div>
-        </div>
-      </section>
-
-      <!-- SECCIÓN 5: INVENTARIO Y ALMACÉN -->
-      <section id="sec-inventario" class="view-section">
-        <div class="table-container">
-          <div class="table-header">
-            <h3>Gestión de Almacén e Insumos</h3>
-            <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Buscar insumos..." onkeyup="filterTable(this, 'full-inventario-table')"></div>
-            <button class="btn btn-ia" onclick="openModal('modal-insumo')"><i class="fa-solid fa-plus"></i> Ingresar Ítem Manual</button>
-          </div>
-          <table>
-            <thead><tr><th>Insumo</th><th>Categoría</th><th>Cantidad</th><th>Ubicación</th><th>Automatización IA</th></tr></thead>
-            <tbody id="full-inventario-table"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- SECCIÓN 6: ÓRDENES DE COMPRA (PROVEEDORES) -->
-      <section id="sec-proveedores" class="view-section">
-        <div class="table-container">
-          <div class="table-header">
-            <h3>Órdenes de Compra Generadas</h3>
-            <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Buscar orden..." onkeyup="filterTable(this, 'oc-table')"></div>
-          </div>
-          <table>
-            <thead><tr><th>N° OC</th><th>Proveedor(es)</th><th>Ítems Comprados</th><th>Costo Total</th><th>Estado Sistema</th></tr></thead>
-            <tbody id="oc-table"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- SECCIÓN 7: BENEFICIARIOS Y TRAZA-14 -->
-      <section id="sec-beneficiarios" class="view-section">
-        <div class="table-container">
-          <div class="table-header">
-            <h3>Padrón de Beneficiarios (Motor Traza-14)</h3>
-            <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Buscar beneficiario..." onkeyup="filterTable(this, 'beneficiarios-table')"></div>
-            <button class="btn btn-ia" onclick="openModal('modal-beneficiario')"><i class="fa-solid fa-wand-magic-sparkles"></i> Nuevo Beneficiario (OCR)</button>
-          </div>
-          <table>
-            <thead><tr><th>Cédula</th><th>Nombre</th><th>Comunidad</th><th>Familiar</th><th>Progreso Traza-14</th><th>Auditoría</th></tr></thead>
-            <tbody id="beneficiarios-table"></tbody>
-          </table>
-        </div>
+         <div class="table-container"><p>Consola SALH IA Activa...</p></div>
       </section>
     </main>
   </div>
 
-  <!-- MODAL: CREAR O EDITAR PROYECTO (FCP001) -->
-  <div id="modal-proyecto" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="modal-proyecto-titulo">Planilla Institucional de Solicitud y Proyecto (FCP001)</h3>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-proyecto')"></i>
-      </div>
-      
-      <form id="form-proyecto">
-        <div class="fcp-box">
-          <div class="fcp-title">Datos del Solicitante / Creador</div>
-          <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; text-align: center;">Escribe tu Nombre o Cédula y el sistema autocompletará el cargo y departamento si estás registrado.</div>
-          <datalist id="lista-creadores"></datalist>
-          <div class="fcp-grid">
-            <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="fcp-cedula" oninput="buscarCreadorPorCedula()" placeholder="Escribe para buscar..." required></div>
-            <div class="form-group"><label>Nombre Completo</label><input type="text" id="fcp-nombre" list="lista-creadores" oninput="buscarCreadorPorNombre()" placeholder="Selecciona tu nombre..." required></div>
-            <div class="form-group"><label>Cargo / Rango</label><input type="text" id="fcp-cargo" readonly></div>
-            <div class="form-group"><label>Departamento</label><input type="text" id="fcp-depto" readonly></div>
-          </div>
-        </div>
-
-        <div class="fcp-box">
-          <div class="fcp-title">Datos del Proyecto y Solicitud</div>
-          <div class="fcp-grid">
-            <div class="form-group"><label>Planilla # / Código</label><input type="text" id="fcp-codigo" readonly style="color: #2563eb; font-weight: bold;"></div>
-            <div class="form-group"><label>Fecha de Solicitud</label><input type="date" id="fcp-fecha" required></div>
-            <div class="form-group">
-              <label>Nombre del Proyecto / Solicitud</label>
-              <div style="display: flex; gap: 0.5rem;">
-                <input type="text" id="fcp-proyecto-nombre" placeholder="Ej. Operación Médica" required style="flex: 1;">
-                <button type="button" class="btn btn-ia" onclick="ejecutarAutoSeleccionIA()" title="Auto-Selección IA de RRHH" style="padding: 0 0.8rem;"><i class="fa-solid fa-robot"></i> IA</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Tipo de Solicitud</label>
-              <select id="fcp-tipo"><option value="PROYECTO">PROYECTO</option><option value="COMPRA">COMPRA</option><option value="SERVICIO">SERVICIO</option></select>
-            </div>
-          </div>
-          <div id="ia-reasoning-box" class="ia-reasoning-box"></div>
-          <div class="fcp-grid">
-             <div class="form-group"><label>Línea Presupuestaria</label><input type="text" id="fcp-linea" placeholder="Ej. LINEA-01" required></div>
-             <div class="form-group"><label>Centro de Costo</label><input type="text" id="fcp-centro" placeholder="Ej. 890130" required></div>
-          </div>
-        </div>
-
-        <div class="fcp-table-container">
-          <div style="background: #1e293b; color: white; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">Relación Detallada (Bienes o Servicios)</span>
-            <button type="button" class="btn" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" onclick="agregarFilaFCP()">+ Agregar Ítem</button>
-          </div>
-          <table class="fcp-table" id="tabla-fcp-items">
-            <thead>
-              <tr><th style="width: 50px;">Ítem</th><th style="width: 80px;">Cant.</th><th style="width: 100px;">Unidad</th><th>Concepto / Nombre</th><th>Descripción / Detalles</th><th style="width: 60px;">Acción</th></tr>
-            </thead>
-            <tbody id="fcp-cuerpo-items"></tbody>
-          </table>
-        </div>
-
-        <div class="form-group">
-          <label>Gestión de Personal (Puedes desmarcar para liberar, o marcar para agregar)</label>
-          <div id="lista-seleccion-personal" style="max-height: 200px; overflow-y: auto; background: #f8fafc; padding: 1rem; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5rem;">
-            <!-- Renderizado dinámico -->
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-          <button type="submit" id="btn-submit-proyecto" class="btn btn-block btn-accent"><i class="fa-solid fa-save"></i> Registrar Proyecto y Solicitud</button>
-          <button type="button" class="btn btn-block btn-excel" onclick="descargarExcelFormatoExacto()"><i class="fa-solid fa-file-excel"></i> Descargar Excel Exacto</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: REGISTRAR NUEVO PERSONAL EN RRHH -->
-  <div id="modal-nuevo-personal" class="modal-overlay hidden">
+  <!-- MODAL: APROBAR USUARIO (ASIGNAR ROLES) -->
+  <div id="modal-aprobar" class="modal-overlay hidden">
     <div class="modal-card" style="max-width: 500px;">
       <div class="modal-header">
-        <h3>Registrar Nuevo Personal (RRHH)</h3>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-nuevo-personal')"></i>
+        <h3>Completar Ficha de Ingreso</h3>
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-aprobar')"></i>
       </div>
-      <form id="form-nuevo-personal">
-        <div class="form-group"><label>Nombre(s)</label><input type="text" id="rrhh-nombre" required></div>
-        <div class="form-group"><label>Apellido(s)</label><input type="text" id="rrhh-apellido" required></div>
-        <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="rrhh-cedula" placeholder="Ej. V-12345678" required></div>
-        <div class="form-group"><label>Área / Departamento de Trabajo</label><input type="text" id="rrhh-area" placeholder="Ej. Logística, Salud, Seguridad..." required></div>
-        <div class="form-group"><label>Especialidad / Habilidades</label><input type="text" id="rrhh-habilidades" placeholder="Ej. Chofer, Paramédico, Inventario..."></div>
+      <form id="form-aprobar">
+        <div style="background:#f1f5f9; padding:1rem; border-radius:6px; margin-bottom:1rem;">
+          <strong id="aprob-nombre" style="display:block; font-size:1.1rem; color:var(--primary);"></strong>
+          <span id="aprob-cedula" style="font-size:0.85rem; color:#666;"></span> | <span id="aprob-email" style="font-size:0.85rem; color:#666;"></span>
+        </div>
+        
+        <input type="hidden" id="aprob-id-pendiente">
+        
         <div class="form-group">
           <label>Nivel de Jerarquía (Rango)</label>
-          <select id="rrhh-rango" required>
+          <select id="aprob-rango" required>
             <option value="1">1. Director País</option>
             <option value="2">2. Gerente de RRHH</option>
             <option value="3">3. Gerente</option>
@@ -424,503 +236,274 @@
             <option value="6" selected>6. Voluntario</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-block btn-accent"><i class="fa-solid fa-user-plus"></i> Guardar en Base de Datos</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: FICHA PERFIL PERSONAL (AHORA CON MÁS DATOS) -->
-  <div id="modal-perfil-personal" class="modal-overlay hidden" style="z-index: 2500;">
-    <div class="modal-card" style="max-width: 500px; padding: 0; overflow: hidden;">
-      <div class="perfil-card">
-        <div class="perfil-header">
-          <div style="display: flex; justify-content: space-between; position: absolute; top: 1rem; right: 1rem;">
-             <i class="fa-solid fa-xmark modal-close" style="background: rgba(0,0,0,0.1); padding: 0.4rem; border-radius: 50%; color:#555;" onclick="closeModal('modal-perfil-personal')"></i>
-          </div>
-          <div class="perfil-avatar" id="perf-inicial">A</div>
-          <h3 id="perf-nombre" style="margin-bottom: 0.2rem;">Nombre</h3>
-          <p id="perf-rango" style="color: #64748b; font-size: 0.85rem; font-weight: bold;">Rango</p>
+        <div class="form-group"><label>Departamento / Área</label><input type="text" id="aprob-depto" placeholder="Ej. Logística, Salud, Operaciones..." required></div>
+        <div class="form-group"><label>Especialidad</label><input type="text" id="aprob-habilidades" placeholder="Ej. Chofer, Paramédico..." required></div>
+        
+        <div style="display: flex; gap:1rem; margin-top:1.5rem;">
+          <button type="button" class="btn btn-secondary btn-block" onclick="rechazarUsuarioActual()">Rechazar / Eliminar</button>
+          <button type="submit" class="btn btn-accent btn-block"><i class="fa-solid fa-check"></i> Aprobar Ingreso</button>
         </div>
-        <div class="perfil-body">
-          <div class="perfil-grid">
-            <div><span>Cédula</span><strong id="perf-cedula">V-0</strong></div>
-            <div><span>Departamento</span><strong id="perf-depto">Logística</strong></div>
-            <div><span>Especialidad</span><strong id="perf-habilidades">...</strong></div>
-            <div><span>Estado actual</span><strong id="perf-estado" style="color:var(--primary);">Disponible</strong></div>
-            <div style="grid-column: span 2;"><span>Proyecto Asignado</span><strong id="perf-proyecto">Ninguno</strong></div>
-          </div>
-          <button type="button" class="btn btn-block" style="margin-top:1rem;" onclick="closeModal('modal-perfil-personal')">Cerrar Ficha</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RESTO DE MODALES (Sourcing, Insumo, Beneficiario, Traza-14) -->
-  <div id="modal-sourcing-resultado" class="modal-overlay hidden" style="z-index: 3000;">
-    <div class="modal-card" style="max-width: 900px;">
-      <div class="modal-header">
-        <div><h3 id="modal-sourcing-title">Optimización Multivendedor Finalizada</h3><p style="font-size: 0.85rem; color: #666;" id="modal-sourcing-subtitle"></p></div>
-        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-sourcing-resultado')"></i>
-      </div>
-      <div id="modal-sourcing-content" style="margin-bottom: 1.5rem; overflow-x: auto;"></div>
-      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-sourcing-resultado')">Descartar</button>
-        <button type="button" class="btn btn-ia" onclick="confirmarYEmitirOCMultiProveedor()"><i class="fa-solid fa-file-signature"></i> Emitir Órdenes Automáticas</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal-insumo" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header"><h3>Registrar Insumo Manual</h3><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-insumo')"></i></div>
-      <form id="form-insumo">
-        <div class="form-group"><label>Nombre del Insumo</label><input type="text" id="ins-nombre" required></div>
-        <div class="form-group"><label>Categoría</label><input type="text" id="ins-categoria" required></div>
-        <div class="form-group"><label>Cantidad Inicial</label><input type="number" id="ins-cantidad" required></div>
-        <div class="form-group"><label>Almacén / Ubicación</label><input type="text" id="ins-ubicacion" required></div>
-        <button type="submit" class="btn btn-block">Registrar Insumo</button>
       </form>
-    </div>
-  </div>
-
-  <div id="modal-beneficiario" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header"><h3>Ingesta Inteligente de Beneficiario</h3><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modal-beneficiario')"></i></div>
-      <div style="margin-bottom: 1rem;"><button type="button" class="btn btn-ia btn-block" onclick="simularLecturaOCR()"><i class="fa-solid fa-camera-viewfinder"></i> Escanear Documento (Extracción IA)</button></div>
-      <form id="form-beneficiario">
-        <div class="form-group"><label>Cédula</label><input type="text" id="ben-doc" required></div>
-        <div class="form-group"><label>Nombre Completo</label><input type="text" id="ben-nombre" required></div>
-        <div class="form-group"><label>Comunidad</label><input type="text" id="ben-comunidad" required></div>
-        <div class="form-group"><label>Carga Familiar</label><input type="number" id="ben-familiares" value="1" min="1" required></div>
-        <button type="submit" class="btn btn-block">Guardar e Iniciar Traza-14</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="modalChecklist14" class="modal-overlay hidden">
-    <div class="modal-card" style="max-width: 650px;">
-      <div class="modal-header"><div><h3>Gestor Documental Traza-14</h3><p id="chkModalSubtitulo" style="font-size: 0.8rem; color: #666;"></p></div><i class="fa-solid fa-xmark modal-close" onclick="closeModal('modalChecklist14')"></i></div>
-      <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;"><span>Integridad Expediente:</span><strong id="porcentajeProgresoText">0% (0/14)</strong></div>
-        <div class="progress-bar-bg"><div id="barraProgreso14" class="h-full bg-amber-500 transition-all" style="width: 0%;"></div></div>
-        <button type="button" class="btn btn-ia btn-block" style="margin-top: 0.5rem; font-size: 0.85rem;" onclick="autocompletarTraza14PorIA()"><i class="fa-solid fa-bolt-lightning"></i> Validación IA Contextual</button>
-      </div>
-      <div class="checklist-grid" id="contenedorHitos14">
-        <label class="chk-item"><input type="checkbox"> 1. Documento Identidad</label><label class="chk-item"><input type="checkbox"> 2. RIF Vigente</label>
-        <label class="chk-item"><input type="checkbox"> 3. Constancia Residencial</label><label class="chk-item"><input type="checkbox"> 4. Carta de Solicitud</label>
-        <label class="chk-item"><input type="checkbox"> 5. Certificado Médico</label><label class="chk-item"><input type="checkbox"> 6. Informe Social</label>
-        <label class="chk-item"><input type="checkbox"> 7. Presupuesto Formal</label><label class="chk-item"><input type="checkbox"> 8. Fotos de Soporte</label>
-        <label class="chk-item"><input type="checkbox"> 9. Planilla de Registro</label><label class="chk-item"><input type="checkbox"> 10. Carta Compromiso</label>
-        <label class="chk-item"><input type="checkbox"> 11. Referencia Personal</label><label class="chk-item"><input type="checkbox"> 12. Inspección Técnica</label>
-        <label class="chk-item"><input type="checkbox"> 13. Aprobación Comité</label><label class="chk-item"><input type="checkbox"> 14. Acta Entregable</label>
-      </div>
-      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;"><button type="button" class="btn btn-secondary" onclick="closeModal('modalChecklist14')">Cerrar</button><button type="button" class="btn" onclick="guardarProgresoChecklist()">Sincronizar Cambios</button></div>
     </div>
   </div>
 
   <script>
-    const NOMBRES_RANGOS = { 1: 'Director País', 2: 'Gerente de RRHH', 3: 'Gerente', 4: 'Oficial / Coordinador', 5: 'Asistente', 6: 'Voluntario' };
-    let currentUserRol = 6; 
-    let currentBeneficiarioId = null;
-    let ultimaOptimizacionSourcing = null;
-    let itemsFCPData = []; 
-    let editandoProyectoId = null; // Variable CRÍTICA para que funcione la edición
-
-    // --- BASES DE DATOS LOCALES ---
-    let cachePersonal = JSON.parse(localStorage.getItem('salh_personal')) || [
-      { id: 'P1', cedula: 'V-15890234', nombre: 'Roberto Gómez', rango: 3, departamento: 'Operaciones', habilidades: 'Logística', estrellas: 5, estado: 'Disponible', proyecto: 'Ninguno' },
-      { id: 'P2', cedula: 'V-22109432', nombre: 'Lucía Méndez', rango: 4, departamento: 'Salud / Médico', habilidades: 'Paramédico', estrellas: 4.8, estado: 'Ocupada', proyecto: 'FCP001-001-2026' },
-      { id: 'P3', cedula: 'V-19882312', nombre: 'Carlos Ruiz', rango: 4, departamento: 'Logística', habilidades: 'Manejo', estrellas: 4.2, estado: 'Disponible', proyecto: 'Ninguno' },
-      { id: 'P4', cedula: 'V-26001239', nombre: 'Ana Torroja', rango: 5, departamento: 'Comunicaciones', habilidades: 'Redes', estrellas: 4.9, estado: 'Disponible', proyecto: 'Ninguno' },
-      { id: 'P6', cedula: 'V-29001222', nombre: 'Elena Vásquez', rango: 6, departamento: 'Voluntariado General', habilidades: 'Esfuerzo Físico', estrellas: 4, estado: 'Disponible', proyecto: 'Ninguno' }
-    ];
-
-    let cacheProyectos = JSON.parse(localStorage.getItem('salh_proyectos')) || [
-      { codigo: 'FCP001-001-2026', nombre: 'Censo Zona Norte', creadorNombre: 'Roberto Gómez', creadorCedula: 'V-15890234', rangoCreador: 3, personalAsignado: 1, estado: 'En Ejecución', fecha: '2026-09-15', tipo: 'PROYECTO', linea: 'L01', centro: '890130', personalIds: ['P2'], items: [{ cantidad: 2, unidad: "UNIDAD", concepto: "BOTIQUIN", descripcion: "PRIMEROS AUXILIOS" }] }
-    ];
-    let cacheInventario = JSON.parse(localStorage.getItem('salh_inventario')) || [
-      { id: 1, nombre: 'Kit de Alimentos', categoria: 'Alimentos', cantidad: 45, ubicacion: 'Central' },
-      { id: 2, nombre: 'Filtros de Agua', categoria: 'Implementación', cantidad: 8, ubicacion: 'Regional' }
-    ];
-    let cacheBeneficiarios = JSON.parse(localStorage.getItem('salh_beneficiarios')) || [
-      { id: '1', documento: 'V-15489210', nombre: 'Carmen Rosa', comunidad: 'Las Marías', familiares: 4, checklist14: Array(14).fill(true) }
-    ];
-    let cacheOC = JSON.parse(localStorage.getItem('salh_oc')) || [];
-    
-    const crisisItemsCatalogo = {
-      'Inundación Severa en Zona Alta': [{ nombre: 'Filtros de Agua', cantidad: 120, categoria: 'Saneamiento', webCatalogo: [ { proveedor: 'AquaWeb', precioUnit: 14.50, tiempoEntrega: '24h' } ] }],
-      'Crisis Alimentaria Comunitaria': [{ nombre: 'Sacos de Arroz 20Kg', cantidad: 80, categoria: 'Alimentos', webCatalogo: [ { proveedor: 'Cereales Sur', precioUnit: 22.00, tiempoEntrega: '24h' } ] }],
-      'Apoyo Médico de Urgencia': [{ nombre: 'Botiquines', cantidad: 40, categoria: 'Medicina', webCatalogo: [ { proveedor: 'Droguería Médica', precioUnit: 45.00, tiempoEntrega: '12h' } ] }]
+    // --- 1. CONFIGURACIÓN EXACTA DE FIREBASE EXTRAÍDA DE TU IMAGEN ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBsjYfy4fD7jm0lqjWBGff4YQUUv1CjPU4",
+      authDomain: "salh-adra-app.firebaseapp.com",
+      projectId: "salh-adra-app",
+      storageBucket: "salh-adra-app.firebasestorage.app",
+      messagingSenderId: "422432374011",
+      appId: "1:422432374011:web:94bc32d201a5d78506445e"
     };
 
-    // --- INICIALIZACIÓN ---
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      currentUserRol = parseInt(document.getElementById('login-rango').value);
-      document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-shield"></i> ${NOMBRES_RANGOS[currentUserRol]}`;
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Variables Globales
+    let currentUserData = null; 
+    const NOMBRES_RANGOS = { 1: 'Director País', 2: 'Gerente de RRHH', 3: 'Gerente', 4: 'Oficial / Coordinador', 5: 'Asistente', 6: 'Voluntario' };
+
+    // --- 2. LÓGICA DE AUTENTICACIÓN (LOGIN) ---
+    function iniciarSesionGoogle() {
+      document.getElementById('login-loader').style.display = 'block';
+      const provider = new firebase.auth.GoogleAuthProvider();
       
-      if (currentUserRol <= 3) {
-        document.getElementById('btn-crear-proyecto').style.display = 'inline-flex';
-        document.querySelectorAll('.col-acciones').forEach(el => el.style.display = 'table-cell');
-      } else {
-        document.getElementById('btn-crear-proyecto').style.display = 'none';
-        document.querySelectorAll('.col-acciones').forEach(el => el.style.display = 'none');
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          verificarEstadoUsuario(result.user);
+        }).catch((error) => {
+          document.getElementById('login-loader').style.display = 'none';
+          alert("Error de autenticación: " + error.message);
+        });
+    }
+
+    async function verificarEstadoUsuario(user) {
+      try {
+        // 1. ¿Está en el personal aprobado?
+        const personalRef = await db.collection('personal_rrhh').where('email', '==', user.email).get();
+        
+        if (!personalRef.empty) {
+          // Usuario Aprobado: Entrar al sistema
+          currentUserData = personalRef.docs[0].data();
+          currentUserData.id = personalRef.docs[0].id; // Guardar ID del doc
+          entrarAlSistema();
+        } else {
+          // 2. Si no está aprobado, verificar si está en la cola de pendientes
+          const pendientesRef = await db.collection('usuarios_pendientes').where('email', '==', user.email).get();
+          
+          if (!pendientesRef.empty) {
+            alert("Tu solicitud fue enviada y se encuentra en revisión por Recursos Humanos. Te notificaremos cuando seas aprobado.");
+            auth.signOut();
+            document.getElementById('login-loader').style.display = 'none';
+          } else {
+            // 3. No existe en ningún lado. Mostrar formulario de registro.
+            document.getElementById('panel-auth').style.display = 'none';
+            document.getElementById('panel-registro').style.display = 'block';
+            document.getElementById('reg-email').value = user.email;
+          }
+        }
+      } catch (error) {
+        console.error("Error validando usuario:", error);
+        alert("Ocurrió un error consultando la base de datos.");
+      }
+    }
+
+    // --- 3. LÓGICA DE REGISTRO DE NUEVO USUARIO ---
+    document.getElementById('form-registro').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pin = document.getElementById('reg-pin').value;
+      
+      // Validación de Seguridad PIN
+      if (pin !== "ADRA2026") {
+        alert("Código de verificación institucional incorrecto.");
+        return;
       }
 
-      actualizarDatalistCreadores();
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app-screen').style.display = 'flex';
-      renderizarTodo();
+      const nombre = document.getElementById('reg-nombre').value;
+      const apellido = document.getElementById('reg-apellido').value;
+      const cedula = document.getElementById('reg-cedula').value;
+      const email = document.getElementById('reg-email').value;
+
+      try {
+        // Guardar en colección temporal (Pendientes)
+        await db.collection('usuarios_pendientes').add({
+          nombre: `${nombre} ${apellido}`,
+          cedula: cedula,
+          email: email,
+          fecha_solicitud: new Date().toISOString(),
+          estado: 'Pendiente'
+        });
+
+        alert("¡Solicitud enviada con éxito! El Gerente de RRHH evaluará tu ingreso.");
+        cancelarRegistro(); // Reinicia la pantalla de login
+      } catch (error) {
+        console.error("Error en registro:", error);
+        alert("Hubo un error al enviar la solicitud.");
+      }
     });
 
+    function cancelarRegistro() {
+      auth.signOut();
+      document.getElementById('panel-auth').style.display = 'block';
+      document.getElementById('panel-registro').style.display = 'none';
+      document.getElementById('login-loader').style.display = 'none';
+      document.getElementById('form-registro').reset();
+    }
+
+    function cerrarSesion() {
+      auth.signOut().then(() => { location.reload(); });
+    }
+
+    // --- 4. INGRESO Y CARGA DEL SISTEMA ---
+    function entrarAlSistema() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'flex';
+      
+      // Actualizar UI del usuario
+      document.getElementById('user-display').innerHTML = `<i class="fa-solid fa-user-shield"></i> ${currentUserData.nombre} (${NOMBRES_RANGOS[currentUserData.rango]})`;
+
+      // Si es Gerente de RRHH (2) o Director (1), activar panel de aprobaciones
+      if (currentUserData.rango <= 2) {
+        document.getElementById('panel-aprobaciones-rrhh').classList.remove('hidden');
+        escucharSolicitudesPendientes();
+      }
+
+      // Cargar los datos globales (Directorio Oficial)
+      escucharPersonalRRHH();
+    }
+
+    // --- 5. FUNCIONES RRHH (CONEXIÓN EN TIEMPO REAL CON FIRESTORE) ---
+    
+    // Leer el directorio oficial en tiempo real
+    function escucharPersonalRRHH() {
+      db.collection('personal_rrhh').onSnapshot((snapshot) => {
+        let tablaHtml = '';
+        let count = 0;
+        snapshot.forEach((doc) => {
+          const p = doc.data();
+          count++;
+          const badgeClass = p.estado === 'Disponible' ? 'badge-ok' : 'badge-alert';
+          tablaHtml += `<tr>
+            <td style="color:#666; font-size:0.85rem;">${p.cedula}</td>
+            <td><strong>${p.nombre}</strong></td>
+            <td>${NOMBRES_RANGOS[p.rango]}</td>
+            <td><span class="badge badge-gray">${p.departamento}</span></td>
+            <td>${p.habilidades || 'N/A'}</td>
+            <td><span class="badge ${badgeClass}">${p.estado}</span></td>
+          </tr>`;
+        });
+        document.getElementById('personal-table').innerHTML = tablaHtml;
+        document.getElementById('m-personal-disp').innerText = count; // Métrica
+      });
+    }
+
+    // Leer las solicitudes pendientes en tiempo real (SOLO GERENTES)
+    let pendienteSeleccionado = null; // Para guardar temporalmente los datos a aprobar
+
+    function escucharSolicitudesPendientes() {
+      db.collection('usuarios_pendientes').onSnapshot((snapshot) => {
+        let tablaHtml = '';
+        snapshot.forEach((doc) => {
+          const p = doc.data();
+          const fechaFormateada = new Date(p.fecha_solicitud).toLocaleDateString();
+          
+          // Guardamos un JSON encriptado en un atributo data para usarlo al hacer clic
+          const objData = encodeURIComponent(JSON.stringify({...p, id: doc.id}));
+
+          tablaHtml += `<tr>
+            <td><span class="badge badge-warning">${fechaFormateada}</span></td>
+            <td><strong>${p.nombre}</strong></td>
+            <td>${p.cedula}</td>
+            <td style="color:#666;">${p.email}</td>
+            <td>
+              <button class="btn btn-ia" style="padding:0.4rem; font-size:0.8rem;" onclick="abrirModalAprobacion('${objData}')">Revisar</button>
+            </td>
+          </tr>`;
+        });
+        document.getElementById('pendientes-table').innerHTML = tablaHtml || `<tr><td colspan="5" style="text-align:center; color:#888;">No hay solicitudes pendientes.</td></tr>`;
+      });
+    }
+
+    function abrirModalAprobacion(dataString) {
+      pendienteSeleccionado = JSON.parse(decodeURIComponent(dataString));
+      
+      document.getElementById('aprob-nombre').innerText = pendienteSeleccionado.nombre;
+      document.getElementById('aprob-cedula').innerText = pendienteSeleccionado.cedula;
+      document.getElementById('aprob-email').innerText = pendienteSeleccionado.email;
+      
+      // Limpiar campos
+      document.getElementById('aprob-rango').value = "6";
+      document.getElementById('aprob-depto').value = "";
+      document.getElementById('aprob-habilidades').value = "";
+      
+      openModal('modal-aprobar');
+    }
+
+    // APROBAR USUARIO Y MOVER A COLECCIÓN FINAL
+    document.getElementById('form-aprobar').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const nuevoRango = parseInt(document.getElementById('aprob-rango').value);
+      const nuevoDepto = document.getElementById('aprob-depto').value;
+      const nuevasHab = document.getElementById('aprob-habilidades').value;
+
+      try {
+        // 1. Agregar a la colección definitiva
+        await db.collection('personal_rrhh').add({
+          nombre: pendienteSeleccionado.nombre,
+          cedula: pendienteSeleccionado.cedula,
+          email: pendienteSeleccionado.email,
+          rango: nuevoRango,
+          departamento: nuevoDepto,
+          habilidades: nuevasHab,
+          estado: 'Disponible',
+          fecha_ingreso: new Date().toISOString(),
+          proyecto: 'Ninguno'
+        });
+
+        // 2. Eliminar de la colección de pendientes
+        await db.collection('usuarios_pendientes').doc(pendienteSeleccionado.id).delete();
+
+        closeModal('modal-aprobar');
+        alert(`¡${pendienteSeleccionado.nombre} ha sido aprobado e ingresado al directorio oficial!`);
+      } catch (error) {
+        console.error("Error al aprobar:", error);
+        alert("Ocurrió un error al procesar la aprobación.");
+      }
+    });
+
+    // RECHAZAR USUARIO (ELIMINAR DE LA COLA)
+    async function rechazarUsuarioActual() {
+      if(confirm(`¿Estás seguro de rechazar la solicitud de ${pendienteSeleccionado.nombre}? Se eliminará permanentemente.`)) {
+        try {
+          await db.collection('usuarios_pendientes').doc(pendienteSeleccionado.id).delete();
+          closeModal('modal-aprobar');
+        } catch(error) {
+           alert("Error al eliminar la solicitud.");
+        }
+      }
+    }
+
+    // --- UTILIDADES BÁSICAS UI ---
     function showSection(secId) {
       document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('sidebar nav a').forEach(a => a.classList.remove('active'));
       document.getElementById(secId).classList.add('active');
       document.getElementById('nav-' + secId.replace('sec-', '')).classList.add('active');
     }
-
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    function guardarEstado() {
-      localStorage.setItem('salh_personal', JSON.stringify(cachePersonal));
-      localStorage.setItem('salh_proyectos', JSON.stringify(cacheProyectos));
-      localStorage.setItem('salh_inventario', JSON.stringify(cacheInventario));
-      localStorage.setItem('salh_beneficiarios', JSON.stringify(cacheBeneficiarios));
-      localStorage.setItem('salh_oc', JSON.stringify(cacheOC));
-    }
-
-    function renderizarTodo() {
-      renderProyectos();
-      renderRRHH();
-      renderInventario();
-      renderBeneficiarios();
-      renderOC();
-      
-      document.getElementById('m-proyectos').innerText = cacheProyectos.length;
-      document.getElementById('m-personal-disp').innerText = cachePersonal.filter(p => p.estado === 'Disponible').length;
-      document.getElementById('m-criticos').innerText = cacheInventario.filter(i => i.cantidad <= 20).length;
-      document.getElementById('m-beneficiarios').innerText = cacheBeneficiarios.length;
-      guardarEstado();
-    }
-
-    // --- MÓDULO RRHH ---
-    function renderRRHH() {
-      document.getElementById('personal-table').innerHTML = cachePersonal.map(p => {
-        const badgeClass = p.estado === 'Disponible' ? 'badge-ok' : 'badge-alert';
-        let botonesAccion = '';
-        if (currentUserRol <= 3) {
-          botonesAccion = `<td class="col-acciones" style="white-space: nowrap;">
-            <button class="btn btn-secondary" style="padding:0.4rem; font-size:0.8rem; margin-right: 0.3rem;" onclick="verPerfilPersonal('${p.id}')" title="Ver Ficha"><i class="fa-solid fa-address-card"></i> Ficha</button>
-            <button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarPersonal('${p.id}')" title="Eliminar del sistema"><i class="fa-solid fa-trash"></i></button>
-          </td>`;
-        }
-        return `<tr><td style="color:#666; font-size:0.85rem;">${p.cedula}</td><td><strong>${p.nombre}</strong></td><td>${NOMBRES_RANGOS[p.rango]}</td><td><span class="badge badge-gray">${p.departamento}</span></td><td>${p.habilidades}</td><td><span class="badge ${badgeClass}">${p.estado}</span></td><td>${p.proyecto}</td>${botonesAccion}</tr>`;
-      }).join('');
-    }
-
-    // Función para mostrar la FICHA del empleado
-    function verPerfilPersonal(id) {
-      const p = cachePersonal.find(x => x.id === id);
-      if(!p) return;
-      document.getElementById('perf-inicial').innerText = p.nombre.charAt(0);
-      document.getElementById('perf-nombre').innerText = p.nombre;
-      document.getElementById('perf-rango').innerText = NOMBRES_RANGOS[p.rango];
-      document.getElementById('perf-cedula').innerText = p.cedula;
-      document.getElementById('perf-depto').innerText = p.departamento;
-      document.getElementById('perf-habilidades').innerText = p.habilidades || 'N/A';
-      document.getElementById('perf-estado').innerText = p.estado;
-      document.getElementById('perf-proyecto').innerText = p.proyecto;
-      openModal('modal-perfil-personal');
-    }
-
-    document.getElementById('form-nuevo-personal').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const n = document.getElementById('rrhh-nombre').value;
-      const a = document.getElementById('rrhh-apellido').value;
-      const ced = document.getElementById('rrhh-cedula').value;
-      const depto = document.getElementById('rrhh-area').value;
-      const hab = document.getElementById('rrhh-habilidades').value;
-      const ran = parseInt(document.getElementById('rrhh-rango').value);
-
-      cachePersonal.push({
-        id: 'P' + Date.now(), cedula: ced, nombre: `${n} ${a}`, rango: ran, departamento: depto,
-        habilidades: hab, estrellas: 0, estado: 'Disponible', proyecto: 'Ninguno'
-      });
-      renderizarTodo(); closeModal('modal-nuevo-personal'); e.target.reset(); actualizarDatalistCreadores();
-      alert("Personal registrado exitosamente en la base de datos.");
-    });
-
-    function eliminarPersonal(id) {
-      const per = cachePersonal.find(x => x.id === id);
-      if (per.estado === 'Ocupada' || per.estado === 'Ocupado') {
-        alert("No puedes eliminar a un personal que está asignado a un proyecto activo. Modifica el proyecto primero para liberarlo.");
-        return;
-      }
-      if(confirm(`¿Estás seguro de eliminar a ${per.nombre} de la base de datos?`)){
-        cachePersonal = cachePersonal.filter(x => x.id !== id);
-        renderizarTodo(); actualizarDatalistCreadores();
+    function filterTable(input, tableId) {
+      const filter = input.value.toLowerCase();
+      const rows = document.getElementById(tableId).getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) {
+        rows[i].style.display = (rows[i].innerText.toLowerCase().indexOf(filter) > -1) ? "" : "none";
       }
     }
-
-    // --- PROYECTOS ---
-    function renderProyectos() {
-      document.getElementById('proyectos-table').innerHTML = cacheProyectos.map(p => {
-        let botonesAccion = '';
-        if (currentUserRol <= 3) {
-          if (currentUserRol <= p.rangoCreador) {
-            botonesAccion = `<td class="col-acciones" style="white-space: nowrap;">
-              <button class="btn btn-secondary" style="padding:0.4rem; font-size:0.8rem; margin-right: 0.3rem;" onclick="abrirModalProyecto('${p.codigo}')" title="Editar Proyecto"><i class="fa-solid fa-pen"></i> Editar</button>
-              <button class="btn btn-danger" style="padding:0.4rem; font-size:0.8rem;" onclick="eliminarProyecto('${p.codigo}')" title="Eliminar Proyecto"><i class="fa-solid fa-trash"></i></button>
-            </td>`;
-          } else {
-            botonesAccion = `<td class="col-acciones"><span style="font-size:0.75rem; color:#888;"><i class="fa-solid fa-lock"></i> Bloqueado</span></td>`;
-          }
-        }
-        return `<tr><td><strong>${p.codigo}</strong></td><td><strong>${p.nombre}</strong></td><td>${p.creadorNombre}</td><td>${p.personalAsignado} Col.</td><td><span class="badge badge-ok">${p.estado}</span></td>${botonesAccion}</tr>`;
-      }).join('');
-    }
-
-    function actualizarDatalistCreadores() {
-      const dl = document.getElementById('lista-creadores');
-      dl.innerHTML = cachePersonal.map(p => `<option value="${p.nombre}">${p.cedula} - ${p.departamento}</option>`).join('');
-    }
-    function buscarCreadorPorNombre() {
-      const val = document.getElementById('fcp-nombre').value.toLowerCase();
-      const p = cachePersonal.find(x => x.nombre.toLowerCase() === val);
-      if(p) { document.getElementById('fcp-cedula').value = p.cedula; document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango]; document.getElementById('fcp-depto').value = p.departamento; }
-    }
-    function buscarCreadorPorCedula() {
-      const val = document.getElementById('fcp-cedula').value.toLowerCase();
-      const p = cachePersonal.find(x => x.cedula.toLowerCase() === val);
-      if(p) { document.getElementById('fcp-nombre').value = p.nombre; document.getElementById('fcp-cargo').value = NOMBRES_RANGOS[p.rango]; document.getElementById('fcp-depto').value = p.departamento; }
-    }
-
-    // FUNCION PRINCIPAL DE CREACIÓN Y EDICIÓN
-    function abrirModalProyecto(codigo = null) {
-      document.getElementById('ia-reasoning-box').style.display = 'none';
-      const contenedor = document.getElementById('lista-seleccion-personal');
-      contenedor.innerHTML = '';
-      
-      let pObj = null;
-      let preSelectedPersonalIds = [];
-
-      if (codigo && typeof codigo === 'string') { 
-        // ------------------ MODO EDICIÓN ------------------
-        editandoProyectoId = codigo;
-        pObj = cacheProyectos.find(x => x.codigo === codigo);
-        if(!pObj) return;
-
-        document.getElementById('modal-proyecto-titulo').innerText = `Editar Proyecto: ${pObj.codigo}`;
-        document.getElementById('fcp-codigo').value = pObj.codigo;
-        document.getElementById('fcp-cedula').value = pObj.creadorCedula || '';
-        document.getElementById('fcp-nombre').value = pObj.creadorNombre || '';
-        document.getElementById('fcp-fecha').value = pObj.fecha || '';
-        document.getElementById('fcp-proyecto-nombre').value = pObj.nombre || '';
-        document.getElementById('fcp-tipo').value = pObj.tipo || 'PROYECTO';
-        document.getElementById('fcp-linea').value = pObj.linea || '';
-        document.getElementById('fcp-centro').value = pObj.centro || '';
-        document.getElementById('btn-submit-proyecto').innerHTML = '<i class="fa-solid fa-save"></i> Guardar Cambios del Proyecto';
-        
-        buscarCreadorPorCedula(); // Para autocompletar cargo y depto del creador
-        itemsFCPData = JSON.parse(JSON.stringify(pObj.items || []));
-        preSelectedPersonalIds = pObj.personalIds || [];
-
-      } else { 
-        // ------------------ MODO CREACIÓN ------------------
-        editandoProyectoId = null;
-        document.getElementById('modal-proyecto-titulo').innerText = "Planilla Institucional de Solicitud y Proyecto (FCP001)";
-        document.getElementById('fcp-cedula').value = '';
-        document.getElementById('fcp-nombre').value = '';
-        document.getElementById('fcp-cargo').value = '';
-        document.getElementById('fcp-depto').value = '';
-        document.getElementById('fcp-proyecto-nombre').value = '';
-        document.getElementById('fcp-linea').value = '';
-        document.getElementById('fcp-centro').value = '';
-        document.getElementById('btn-submit-proyecto').innerHTML = '<i class="fa-solid fa-save"></i> Registrar Proyecto y Solicitud';
-        
-        const hoy = new Date();
-        document.getElementById('fcp-fecha').value = hoy.toISOString().split('T')[0];
-        let correlativo = String(cacheProyectos.length + 1).padStart(3, '0');
-        document.getElementById('fcp-codigo').value = `FCP001-${correlativo}-${hoy.getFullYear()}`;
-        itemsFCPData = [{ cantidad: 1, unidad: "UNIDAD", concepto: "", descripcion: "" }];
-      }
-      
-      renderizarTablaFCP();
-
-      // Cargar personal para selección (Disponibles + Los que ya están en el proyecto si es edición)
-      const personalElegible = cachePersonal.filter(p => (p.rango > currentUserRol && p.estado === 'Disponible') || preSelectedPersonalIds.includes(p.id));
-      
-      if(personalElegible.length === 0) {
-        contenedor.innerHTML = '<div style="color:#666; font-size:0.85rem; padding: 0.5rem; text-align:center;">No hay personal disponible de rango inferior.</div>';
-      } else {
-        personalElegible.forEach(p => {
-          const isChecked = preSelectedPersonalIds.includes(p.id) ? 'checked' : '';
-          const statusVisual = preSelectedPersonalIds.includes(p.id) ? '<span style="color:var(--accent); font-weight:bold;">(En este Proyecto)</span>' : '';
-          contenedor.innerHTML += `
-            <div class="chk-item" style="justify-content: space-between;">
-              <label style="display: flex; gap: 0.5rem; align-items: center; cursor:pointer; flex: 1;">
-                <input type="checkbox" class="chk-personal" value="${p.id}" data-depto="${p.departamento}" data-estrellas="${p.estrellas}" ${isChecked}>
-                <span><strong>${p.nombre}</strong> <span style="color:#64748b; font-size:0.8rem;">(${p.departamento} - ${p.habilidades}) ${statusVisual}</span></span>
-              </label>
-              <button type="button" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="verPerfilPersonal('${p.id}')" title="Ver Perfil"><i class="fa-solid fa-address-card"></i></button>
-            </div>`;
-        });
-      }
-      openModal('modal-proyecto');
-    }
-
-    function ejecutarAutoSeleccionIA() {
-      const nombreProy = document.getElementById('fcp-proyecto-nombre').value.toLowerCase();
-      if (!nombreProy) { alert("Escribe primero el nombre del proyecto para que la IA entienda el contexto."); return; }
-      
-      let deptosIdeales = (nombreProy.includes('médic') || nombreProy.includes('salud')) ? ['Salud / Médico', 'Operaciones'] : 
-                          (nombreProy.includes('rescate')) ? ['Seguridad', 'Operaciones'] : ['Logística', 'Voluntariado General'];
-      
-      let seleccionados = 0;
-      document.querySelectorAll('.chk-personal').forEach(chk => {
-        chk.checked = false;
-        if (deptosIdeales.includes(chk.getAttribute('data-depto')) || parseFloat(chk.getAttribute('data-estrellas')) >= 4.5) {
-          chk.checked = true; seleccionados++;
-        }
-      });
-      const box = document.getElementById('ia-reasoning-box');
-      box.style.display = 'block';
-      box.innerHTML = `<strong><i class="fa-solid fa-microchip"></i> Auto-Selección IA:</strong> Se marcaron ${seleccionados} especialistas basados en perfil y rendimiento.`;
-    }
-
-    function renderizarTablaFCP() {
-      const tbody = document.getElementById('fcp-cuerpo-items');
-      tbody.innerHTML = itemsFCPData.map((item, index) => `
-        <tr style="background: #fff;">
-            <td style="font-weight: bold; text-align: center;">${index + 1}</td>
-            <td><input type="number" value="${item.cantidad}" oninput="actualizarItemFCP(${index}, 'cantidad', this.value)"></td>
-            <td><input type="text" value="${item.unidad}" oninput="actualizarItemFCP(${index}, 'unidad', this.value)" style="text-transform: uppercase;"></td>
-            <td><input type="text" value="${item.concepto}" oninput="actualizarItemFCP(${index}, 'concepto', this.value)" placeholder="Concepto..."></td>
-            <td><input type="text" value="${item.descripcion}" oninput="actualizarItemFCP(${index}, 'descripcion', this.value)" placeholder="Descripción..."></td>
-            <td style="text-align: center;"><button type="button" onclick="eliminarFilaFCP(${index})" style="color: #dc2626; font-weight: bold; background: none; border: none; cursor: pointer;">×</button></td>
-        </tr>`).join('');
-    }
-    function agregarFilaFCP() { itemsFCPData.push({ cantidad: 1, unidad: "UNIDAD", concepto: "", descripcion: "" }); renderizarTablaFCP(); }
-    function eliminarFilaFCP(index) { if(itemsFCPData.length > 1) { itemsFCPData.splice(index, 1); renderizarTablaFCP(); } else alert("Debe mantener al menos un ítem."); }
-    function actualizarItemFCP(index, campo, valor) { itemsFCPData[index][campo] = valor; }
-
-    document.getElementById('form-proyecto').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const codigo = document.getElementById('fcp-codigo').value;
-      const nombreP = document.getElementById('fcp-proyecto-nombre').value;
-      const creadorNombre = document.getElementById('fcp-nombre').value || "No especificado";
-      const creadorCed = document.getElementById('fcp-cedula').value || "";
-      const fecha = document.getElementById('fcp-fecha').value;
-      const tipo = document.getElementById('fcp-tipo').value;
-      const linea = document.getElementById('fcp-linea').value;
-      const centro = document.getElementById('fcp-centro').value;
-      
-      const cPersonal = cachePersonal.find(x => x.cedula.toLowerCase() === creadorCed.toLowerCase());
-      const rangoP = cPersonal ? cPersonal.rango : currentUserRol;
-
-      const seleccionadosIds = Array.from(document.querySelectorAll('.chk-personal:checked')).map(c => c.value);
-      
-      if (editandoProyectoId) {
-        // --- GUARDAR CAMBIOS: MODO EDICIÓN ---
-        let pObj = cacheProyectos.find(x => x.codigo === editandoProyectoId);
-        if(pObj) {
-          // Liberar personal antiguo que ya no está marcado
-          const oldPersonalIds = pObj.personalIds || [];
-          oldPersonalIds.forEach(id => {
-            if (!seleccionadosIds.includes(id)) {
-              let pers = cachePersonal.find(x => x.id === id);
-              if (pers) { pers.estado = 'Disponible'; pers.proyecto = 'Ninguno'; }
-            }
-          });
-          // Ocupar personal nuevo (o ya existente)
-          seleccionadosIds.forEach(id => {
-            let pers = cachePersonal.find(x => x.id === id);
-            if(pers) { pers.estado = (pers.rango === 4 || pers.rango === 6) ? 'Ocupada' : 'Ocupado'; pers.proyecto = codigo; }
-          });
-
-          pObj.nombre = nombreP; pObj.creadorNombre = creadorNombre; pObj.creadorCedula = creadorCed;
-          pObj.fecha = fecha; pObj.tipo = tipo; pObj.linea = linea; pObj.centro = centro;
-          pObj.items = JSON.parse(JSON.stringify(itemsFCPData)); pObj.personalIds = seleccionadosIds; pObj.personalAsignado = seleccionadosIds.length;
-          alert(`¡Proyecto ${codigo} editado y actualizado exitosamente!`);
-        }
-      } else {
-        // --- GUARDAR NUEVO: MODO CREACIÓN ---
-        seleccionadosIds.forEach(id => { const persona = cachePersonal.find(p => p.id === id); if(persona) { persona.estado = (persona.rango === 4 || persona.rango === 6) ? 'Ocupada' : 'Ocupado'; persona.proyecto = codigo; } });
-        cacheProyectos.push({
-          codigo: codigo, nombre: nombreP, creadorNombre: creadorNombre, creadorCedula: creadorCed, rangoCreador: rangoP, personalAsignado: seleccionadosIds.length,
-          estado: 'En Ejecución', fecha: fecha, tipo: tipo, linea: linea, centro: centro, personalIds: seleccionadosIds, items: JSON.parse(JSON.stringify(itemsFCPData))
-        });
-        alert(`¡Proyecto y Solicitud ${codigo} registrados exitosamente!`);
-      }
-
-      editandoProyectoId = null; // Reiniciar variable de edición
-      renderizarTodo(); 
-      closeModal('modal-proyecto');
-    });
-
-    function eliminarProyecto(idProy) {
-      const proyecto = cacheProyectos.find(p => p.codigo === idProy);
-      if (!proyecto) return;
-      if (confirm(`¿Eliminar el proyecto "${proyecto.nombre}"? Todo el personal será liberado.`)) {
-        cachePersonal.forEach(p => { if (p.proyecto === idProy) { p.estado = 'Disponible'; p.proyecto = 'Ninguno'; } });
-        cacheProyectos = cacheProyectos.filter(p => p.codigo !== idProy);
-        renderizarTodo();
-      }
-    }
-
-    function descargarExcelFormatoExacto() {
-      let tablaHtml = `<table border="1">
-          <tr><td colspan="5" style="font-weight:bold; text-align:center;">PLANILLA DE SOLICITUD (COMPRAS, SERVICIOS U OPERACIONES)</td><td colspan="2" style="font-weight:bold;">Código: FC001<br>Planilla #: ${document.getElementById('fcp-codigo').value}</td></tr>
-          <tr><td colspan="4"><b>Fecha:</b> ${document.getElementById('fcp-fecha').value}</td><td colspan="3"><b>Proyecto:</b> ${document.getElementById('fcp-proyecto-nombre').value}</td></tr>
-          <tr><td colspan="5"><b>Solicitante:</b> ${document.getElementById('fcp-nombre').value} (${document.getElementById('fcp-cargo').value})</td><td colspan="2"><b>C.I.:</b> ${document.getElementById('fcp-cedula').value}</td></tr>
-          <tr><td colspan="7"><b>Tipo de Solicitud:</b> ${document.getElementById('fcp-tipo').value}</td></tr>
-          <tr><td style="font-weight:bold; background-color:#dcdcdc;">Ítem</td><td style="font-weight:bold; background-color:#dcdcdc;">Cant.</td><td style="font-weight:bold; background-color:#dcdcdc;">Unidad</td><td colspan="2" style="font-weight:bold; background-color:#dcdcdc;">Concepto</td><td colspan="2" style="font-weight:bold; background-color:#dcdcdc;">Descripción</td></tr>`;
-      itemsFCPData.forEach((item, idx) => { tablaHtml += `<tr><td>${idx + 1}</td><td>${item.cantidad}</td><td>${item.unidad}</td><td colspan="2">${item.concepto}</td><td colspan="2">${item.descripcion}</td></tr>`; });
-      tablaHtml += `<tr><td colspan="4"><b>Línea Presupuestaria:</b> ${document.getElementById('fcp-linea').value}</td><td colspan="3"><b>Centro de Costo:</b> ${document.getElementById('fcp-centro').value}</td></tr></table>`;
-      
-      let element = document.createElement('div'); element.innerHTML = tablaHtml;
-      let wb = XLSX.utils.table_to_book(element, {raw: true});
-      XLSX.writeFile(wb, `Solicitud_${document.getElementById('fcp-codigo').value}.xlsx`);
-    }
-
-    // --- SOURCING IA ---
-    function ejecutarSourcingIA(crisisNombre) {
-      document.getElementById('salh-terminal').innerHTML = `[SALH_SOURCING] Configurando red neuronal multivendedor para: "${crisisNombre}"...\n`;
-      setTimeout(() => {
-        const items = crisisItemsCatalogo[crisisNombre] || [];
-        let htmlResultado = `<table style="width:100%; border-collapse:collapse;"><tr style="background:#f1f5f9; text-align:left;"><th>Ítem</th><th>Cant.</th><th>Mejor Opción IA</th></tr>`;
-        let total = 0; let resumen = [];
-        items.forEach(item => {
-          let gan = item.webCatalogo[0]; let sub = gan.precioUnit * item.cantidad; total += sub; resumen.push(`${item.nombre}`);
-          htmlResultado += `<tr style="border-bottom:1px solid #e2e8f0;"><td><strong>${item.nombre}</strong></td><td>${item.cantidad}</td><td style="background:#f0fdf4;"><strong>${gan.proveedor}</strong><br><span style="color:#059669; font-weight:bold;">$${sub.toFixed(2)}</span></td></tr>`;
-        });
-        htmlResultado += `</table><div style="margin-top:1rem; padding:1rem; background:#f8fafc; border-radius:6px;"><strong>Costo Total Generado: $${total.toFixed(2)}</strong></div>`;
-        document.getElementById('modal-sourcing-content').innerHTML = htmlResultado;
-        ultimaOptimizacionSourcing = { id: 'OC-' + Math.floor(1000 + Math.random() * 9000), proveedor: 'Motor Sourcing (IA)', insumos: resumen.join(', '), costo: `$${total.toFixed(2)}`, estado: 'Procesada' };
-        openModal('modal-sourcing-resultado');
-      }, 1000);
-    }
-    function confirmarYEmitirOCMultiProveedor() { if (!ultimaOptimizacionSourcing) return; cacheOC.unshift(ultimaOptimizacionSourcing); renderizarTodo(); closeModal('modal-sourcing-resultado'); showSection('sec-proveedores'); }
-    function renderOC() { document.getElementById('oc-table').innerHTML = cacheOC.map(oc => `<tr><td><strong>${oc.id}</strong></td><td>${oc.proveedor}</td><td>${oc.insumos}</td><td><strong>${oc.costo}</strong></td><td><span class="badge badge-ai">${oc.estado}</span></td></tr>`).join(''); }
-
-    // --- INVENTARIO ---
-    function renderInventario() { document.getElementById('dash-table').innerHTML = cacheInventario.map(i => `<tr><td><strong>${i.nombre}</strong></td><td>${i.categoria}</td><td style="color:${i.cantidad<=20?'#dc2626; font-weight:bold;':'inherit'};">${i.cantidad} un.</td><td>${i.ubicacion}</td><td>${i.cantidad<=20?'<span class="badge badge-ai">Sugerencia Sourcing</span>':'<span class="badge badge-gray">Normal</span>'}</td></tr>`).join(''); document.getElementById('full-inventario-table').innerHTML = document.getElementById('dash-table').innerHTML; }
-    document.getElementById('form-insumo').addEventListener('submit', (e) => { e.preventDefault(); cacheInventario.push({ id: cacheInventario.length + 1, nombre: document.getElementById('ins-nombre').value, categoria: document.getElementById('ins-categoria').value, cantidad: parseInt(document.getElementById('ins-cantidad').value), ubicacion: document.getElementById('ins-ubicacion').value }); renderizarTodo(); closeModal('modal-insumo'); e.target.reset(); });
-
-    // --- BENEFICIARIOS / TRAZA-14 ---
-    function renderBeneficiarios() { document.getElementById('beneficiarios-table').innerHTML = cacheBeneficiarios.map(b => { const c = b.checklist14.filter(Boolean).length; const pct = Math.round((c / 14) * 100); return `<tr><td>${b.documento}</td><td><strong>${b.nombre}</strong></td><td>${b.comunidad}</td><td>${b.familiares}</td><td><div class="progress-bar-bg" style="margin-bottom:0.2rem; height:6px;"><div class="h-full ${pct === 100 ? 'bg-emerald-600' : 'bg-blue-600'}" style="width: ${pct}%"></div></div><span style="font-size: 0.75rem;">${pct}%</span></td><td><button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="abrirChecklist('${b.id}')">Traza-14</button></td></tr>`; }).join(''); }
-    function abrirChecklist(id) { currentBeneficiarioId = id; const b = cacheBeneficiarios.find(x => x.id === id); document.getElementById('chkModalSubtitulo').innerText = `Expediente: ${b.nombre}`; document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach((chk, idx) => { chk.checked = b.checklist14[idx] || false; }); actualizarBarraChecklistModal(); openModal('modalChecklist14'); }
-    function actualizarBarraChecklistModal() { let c = 0; document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => { if(chk.checked) c++; }); const pct = Math.round((c / 14) * 100); const b = document.getElementById('barraProgreso14'); b.style.width = `${pct}%`; b.className = `h-full transition-all ${pct === 100 ? 'bg-emerald-600' : pct > 50 ? 'bg-blue-600' : 'bg-amber-500'}`; document.getElementById('porcentajeProgresoText').innerText = `${pct}% (${c}/14)`; }
-    document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(c => c.addEventListener('change', actualizarBarraChecklistModal));
-    function autocompletarTraza14PorIA() { document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]').forEach(chk => chk.checked = true); actualizarBarraChecklistModal(); }
-    function guardarProgresoChecklist() { cacheBeneficiarios.find(x => x.id === currentBeneficiarioId).checklist14 = Array.from(document.querySelectorAll('#contenedorHitos14 input[type="checkbox"]')).map(c => c.checked); renderizarTodo(); closeModal('modalChecklist14'); }
-    function simularLecturaOCR() { document.getElementById('ben-doc').value = 'V-12345678'; document.getElementById('ben-nombre').value = 'Carlos Gómez (OCR)'; document.getElementById('ben-comunidad').value = 'Sector Sur 2'; }
-    document.getElementById('form-beneficiario').addEventListener('submit', (e) => { e.preventDefault(); cacheBeneficiarios.push({ id: Date.now().toString(), documento: document.getElementById('ben-doc').value, nombre: document.getElementById('ben-nombre').value, comunidad: document.getElementById('ben-comunidad').value, familiares: parseInt(document.getElementById('ben-familiares').value), checklist14: [true,true,true,false,false,false,false,false,false,false,false,false,false,false] }); renderizarTodo(); closeModal('modal-beneficiario'); e.target.reset(); });
-
-    // --- FILTROS GLOBALES ---
-    function filterTable(input, tableId) { const filter = input.value.toLowerCase(); const rows = document.getElementById(tableId).getElementsByTagName('tr'); for (let i = 0; i < rows.length; i++) { rows[i].style.display = (rows[i].innerText.toLowerCase().indexOf(filter) > -1) ? "" : "none"; } }
   </script>
 </body>
 </html>
